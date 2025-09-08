@@ -1,0 +1,6 @@
+@PetLink_BackEnd_HostAddress = http://localhost:5078
+
+GET {{PetLink_BackEnd_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

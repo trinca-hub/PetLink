@@ -1,0 +1,173 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink\\petlink-backend\\petlink-backend\\data\\builders\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\data\\builders\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink\\petlink-backend\\petlink-backend\\data\\builders\\produtobuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\data\\builders\\produtobuilder.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink\\petlink-backend\\petlink-backend\\objects\\contracts\\response.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\objects\\contracts\\response.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink\\petlink-backend\\petlink-backend\\objects\\models\\produto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\objects\\models\\produto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink\\petlink-backend\\petlink-backend\\objects\\contracts\\responseenum.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\objects\\contracts\\responseenum.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink\\petlink-backend\\petlink-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink\\petlink-backend\\petlink-backend\\objects\\dtos\\mappings\\mappingprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\objects\\dtos\\mappings\\mappingprofile.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink\\petlink-backend\\petlink-backend\\objects\\dtos\\entities\\produtodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\objects\\dtos\\entities\\produtodto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink\\petlink-backend\\petlink-backend\\petlink-backend.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\petlink-backend.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Data\\Builders\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\Data\\Builders\\AppDbContext.cs",
+              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Data\\Builders\\AppDbContext.cs",
+              "RelativeToolTip": "PetLink-BackEnd\\Data\\Builders\\AppDbContext.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T17:13:22.381Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "ProdutoBuilder.cs",
+              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Data\\Builders\\ProdutoBuilder.cs",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\Data\\Builders\\ProdutoBuilder.cs",
+              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Data\\Builders\\ProdutoBuilder.cs",
+              "RelativeToolTip": "PetLink-BackEnd\\Data\\Builders\\ProdutoBuilder.cs",
+              "ViewState": "AgIAAAMAAAAAAAAAAAAAABcAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T16:53:58.666Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Response.cs",
+              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Contracts\\Response.cs",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\Objects\\Contracts\\Response.cs",
+              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Contracts\\Response.cs",
+              "RelativeToolTip": "PetLink-BackEnd\\Objects\\Contracts\\Response.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T16:52:12.13Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Produto.cs",
+              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Models\\Produto.cs",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\Objects\\Models\\Produto.cs",
+              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Models\\Produto.cs",
+              "RelativeToolTip": "PetLink-BackEnd\\Objects\\Models\\Produto.cs",
+              "ViewState": "AgIAAAQAAAAAAAAAAAAUwBsAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T16:32:06.229Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ResponseEnum.cs",
+              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Contracts\\ResponseEnum.cs",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\Objects\\Contracts\\ResponseEnum.cs",
+              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Contracts\\ResponseEnum.cs",
+              "RelativeToolTip": "PetLink-BackEnd\\Objects\\Contracts\\ResponseEnum.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T16:52:21.368Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Program.cs",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\Program.cs",
+              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Program.cs",
+              "RelativeToolTip": "PetLink-BackEnd\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T16:50:03.558Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "MappingProfile.cs",
+              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Dtos\\Mappings\\MappingProfile.cs",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\Objects\\Dtos\\Mappings\\MappingProfile.cs",
+              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Dtos\\Mappings\\MappingProfile.cs",
+              "RelativeToolTip": "PetLink-BackEnd\\Objects\\Dtos\\Mappings\\MappingProfile.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAApAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T16:49:06.735Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ProdutoDTO.cs",
+              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Dtos\\Entities\\ProdutoDTO.cs",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\Objects\\Dtos\\Entities\\ProdutoDTO.cs",
+              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Dtos\\Entities\\ProdutoDTO.cs",
+              "RelativeToolTip": "PetLink-BackEnd\\Objects\\Dtos\\Entities\\ProdutoDTO.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-08T16:37:17.443Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "PetLink-BackEnd",
+              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\PetLink-BackEnd.csproj",
+              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
+              "RelativeToolTip": "PetLink-BackEnd\\PetLink-BackEnd.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2025-09-08T16:31:18.827Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
