@@ -1,8 +1,8 @@
-﻿namespace PetLink_BackEnd.Objects.Contracts
+﻿namespace PetLink_BackEnd.Objects.Contracts;
+
+public class Response
 {
-    public class Response
-    {
-        public string? Message { get; set; }
-        public object? Data { get; set; }
-    }
+    public ResponseEnum Code { get; set; }
+    public string? Message { get; set; }
+    public object? Data { get; set; }
 }

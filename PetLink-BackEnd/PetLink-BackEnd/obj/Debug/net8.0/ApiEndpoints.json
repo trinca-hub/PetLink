@@ -1,0 +1,81 @@
+[
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ProdutoController",
+    "Method": "GetAll",
+    "RelativePath": "api/v1/Produto",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ProdutoController",
+    "Method": "Post",
+    "RelativePath": "api/v1/Produto",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "produtoDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ProdutoDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ProdutoController",
+    "Method": "GetById",
+    "RelativePath": "api/v1/Produto/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ProdutoController",
+    "Method": "Put",
+    "RelativePath": "api/v1/Produto/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "produtoDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ProdutoDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ProdutoController",
+    "Method": "Delete",
+    "RelativePath": "api/v1/Produto/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]
