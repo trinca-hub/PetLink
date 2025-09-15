@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj": {}
+    "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj": {
+    "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
+        "projectUniqueName": "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
         "projectName": "PetLink-BackEnd",
-        "projectPath": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
+        "projectPath": "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
         "packagesPath": "C:\\Users\\Aluno\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Aluno\\Documents\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\obj\\",
+        "outputPath": "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
