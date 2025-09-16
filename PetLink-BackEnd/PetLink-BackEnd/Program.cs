@@ -5,6 +5,7 @@ using PetLink_BackEnd.Data.Builders;
 using PetLink_BackEnd.Services.Interfaces;
 using PetLink_BackEnd.Services.Entities;
 using PetLink_BackEnd.Data;
+using PetLink_BackEnd.Data.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,9 +33,11 @@ builder.Services.AddCors(o => o.AddPolicy("DefaultPolicy", builder =>
 
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<IAdministradorRepository, AdministradorRepository>();
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
+builder.Services.AddScoped<IAdministradorService, AdministradorService>();
 
 var app = builder.Build();
 

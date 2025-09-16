@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Usuario\\Documents\\Repositórios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj": {}
+    "C:\\Users\\Aluno\\Downloads\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Usuario\\Documents\\Repositórios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj": {
+    "C:\\Users\\Aluno\\Downloads\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Usuario\\Documents\\Repositórios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
+        "projectUniqueName": "C:\\Users\\Aluno\\Downloads\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
         "projectName": "PetLink-BackEnd",
-        "projectPath": "C:\\Users\\Usuario\\Documents\\Repositórios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
-        "packagesPath": "C:\\Users\\Usuario\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Usuario\\Documents\\Repositórios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\obj\\",
+        "projectPath": "C:\\Users\\Aluno\\Downloads\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
+        "packagesPath": "C:\\Users\\Aluno\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Aluno\\Downloads\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\Usuario\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Aluno\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,7 +26,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -45,7 +44,7 @@
           "auditLevel": "low",
           "auditMode": "direct"
         },
-        "SdkAnalysisLevel": "9.0.200"
+        "SdkAnalysisLevel": "9.0.300"
       },
       "frameworks": {
         "net8.0": {
@@ -99,7 +98,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.301/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

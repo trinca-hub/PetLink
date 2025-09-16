@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("PetLink-BackEnd")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7c08a2e5cb2b9dcf52c4f884eb44ada5d06d57c8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fc5b2a6ba9d0defb8b0e9dc8f94172669d1a05ff")]
 [assembly: System.Reflection.AssemblyProductAttribute("PetLink-BackEnd")]
 [assembly: System.Reflection.AssemblyTitleAttribute("PetLink-BackEnd")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

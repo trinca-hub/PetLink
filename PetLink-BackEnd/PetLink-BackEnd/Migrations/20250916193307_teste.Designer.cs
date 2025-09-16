@@ -11,8 +11,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250916020827_Initial")]
-    partial class Initial
+    [Migration("20250916193307_teste")]
+    partial class teste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,6 +23,68 @@ namespace PetLink_BackEnd.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Administrador", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nome");
+
+                    b.Property<string>("Senha")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("senha");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("administrador");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "miguelsilva@gmail.com",
+                            Nome = "Miguel Silva",
+                            Senha = "123456",
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "gabrieloliveira@gmail.com",
+                            Nome = "Gabriel Oliveira",
+                            Senha = "abcdefg",
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Email = "marcobrito@gmail.com",
+                            Nome = "Marco Brito",
+                            Senha = "aaaaaaa",
+                            Status = 2
+                        });
+                });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Produto", b =>
                 {

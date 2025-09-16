@@ -8,11 +8,27 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class teste : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "administrador",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    senha = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    status = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_administrador", x => x.id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "produto",
                 columns: table => new
@@ -52,6 +68,16 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "administrador",
+                columns: new[] { "id", "email", "nome", "senha", "status" },
+                values: new object[,]
+                {
+                    { 1, "miguelsilva@gmail.com", "Miguel Silva", "123456", 1 },
+                    { 2, "gabrieloliveira@gmail.com", "Gabriel Oliveira", "abcdefg", 1 },
+                    { 3, "marcobrito@gmail.com", "Marco Brito", "aaaaaaa", 2 }
+                });
+
+            migrationBuilder.InsertData(
                 table: "produto",
                 columns: new[] { "id", "descricao", "nome", "preco", "quantidade" },
                 values: new object[,]
@@ -74,6 +100,9 @@ namespace PetLink_BackEnd.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.DropTable(
+                name: "administrador");
+
             migrationBuilder.DropTable(
                 name: "produto");
 

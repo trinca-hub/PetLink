@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Produto> Produtos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<Administrador> Administradores { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -16,5 +17,6 @@ public class AppDbContext : DbContext
 
         ProdutoBuilder.Build(modelBuilder);
         UsuarioBuilder.Build(modelBuilder);
+        AdministradorBuilder.Build(modelBuilder);
     }
 }
