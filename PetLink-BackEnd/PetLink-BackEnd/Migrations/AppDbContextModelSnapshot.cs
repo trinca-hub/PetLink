@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using PetLink_BackEnd.Data.Builders;
+using PetLink_BackEnd.Data;
 
 #nullable disable
 
@@ -16,7 +16,7 @@ namespace PetLink_BackEnd.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.8")
+                .HasAnnotation("ProductVersion", "9.0.9")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -70,6 +70,118 @@ namespace PetLink_BackEnd.Migrations
                             Nome = "Petisco de Bacon",
                             Preco = 11f,
                             Quantidade = 15
+                        });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Usuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Bairro")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("bairro");
+
+                    b.Property<string>("Cep")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)")
+                        .HasColumnName("cep");
+
+                    b.Property<string>("Cidade")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("cidade");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nome");
+
+                    b.Property<int>("Numero")
+                        .HasColumnType("integer")
+                        .HasColumnName("numero");
+
+                    b.Property<string>("Rua")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("rua");
+
+                    b.Property<string>("Senha")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("senha");
+
+                    b.Property<string>("Telefone")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("character varying(11)")
+                        .HasColumnName("telefone");
+
+                    b.Property<string>("Uf")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("uf");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("usuario");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Bairro = "Clone",
+                            Cep = "15790000",
+                            Cidade = "Rubineia",
+                            Email = "gabriel@gmail.com",
+                            Nome = "Gabriel",
+                            Numero = 1,
+                            Rua = "Rua dos Guerreiros",
+                            Senha = "pokemon12",
+                            Telefone = "179999999",
+                            Uf = "São Paulo"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Bairro = "NSF",
+                            Cep = "15761006",
+                            Cidade = "Urânia",
+                            Email = "enzo@gmail.com",
+                            Nome = "Enzo",
+                            Numero = 69,
+                            Rua = "Travessia dos nóia",
+                            Senha = "123456",
+                            Telefone = "17997938925",
+                            Uf = "São Paulo"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Bairro = "Centro",
+                            Cep = "15761396",
+                            Cidade = "Dolcinópolis",
+                            Email = "yasmin@gmail.com",
+                            Nome = "Yasmin",
+                            Numero = 777,
+                            Rua = "Aquela rua lá",
+                            Senha = "fatecjales",
+                            Telefone = "17997921343",
+                            Uf = "São Paulo"
                         });
                 });
 #pragma warning restore 612, 618

@@ -1,17 +1,17 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\",
+  "WorkspaceRootPath": "C:\\Users\\Usuario\\Documents\\Reposit\u00F3rios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink-enzo\\petlink-backend\\petlink-backend\\objects\\models\\produto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\objects\\models\\produto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\usuario\\documents\\reposit\u00F3rios do github\\petlink-enzo\\petlink-backend\\petlink-backend\\controllers\\usuariocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\controllers\\usuariocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink-enzo\\petlink-backend\\petlink-backend\\objects\\models\\usuario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\objects\\models\\usuario.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\usuario\\documents\\reposit\u00F3rios do github\\petlink-enzo\\petlink-backend\\petlink-backend\\controllers\\produtocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\controllers\\produtocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\aluno\\documents\\petlink-enzo\\petlink-backend\\petlink-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|c:\\users\\usuario\\documents\\reposit\u00F3rios do github\\petlink-enzo\\petlink-backend\\petlink-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{CE008AEA-2205-4DF1-91DD-4B37B64D0210}|PetLink-BackEnd\\PetLink-BackEnd.csproj|solutionrelative:petlink-backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -27,38 +27,38 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "Usuario.cs",
-              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Models\\Usuario.cs",
-              "RelativeDocumentMoniker": "PetLink-BackEnd\\Objects\\Models\\Usuario.cs",
-              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Models\\Usuario.cs",
-              "RelativeToolTip": "PetLink-BackEnd\\Objects\\Models\\Usuario.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAATAAAAAAAAAA==",
+              "Title": "ProdutoController.cs",
+              "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\Reposit\u00F3rios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Controllers\\ProdutoController.cs",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\Controllers\\ProdutoController.cs",
+              "ToolTip": "C:\\Users\\Usuario\\Documents\\Reposit\u00F3rios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Controllers\\ProdutoController.cs",
+              "RelativeToolTip": "PetLink-BackEnd\\Controllers\\ProdutoController.cs",
+              "ViewState": "AgIAAH8AAAAAAAAAAAAkwKkAAAABAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T17:01:04.922Z",
+              "WhenOpened": "2025-09-16T02:27:48.743Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Produto.cs",
-              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Models\\Produto.cs",
-              "RelativeDocumentMoniker": "PetLink-BackEnd\\Objects\\Models\\Produto.cs",
-              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Objects\\Models\\Produto.cs",
-              "RelativeToolTip": "PetLink-BackEnd\\Objects\\Models\\Produto.cs",
-              "ViewState": "AgIAACoAAAAAAAAAAAAowDUAAAASAAAAAAAAAA==",
+              "Title": "UsuarioController.cs",
+              "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\Reposit\u00F3rios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Controllers\\UsuarioController.cs",
+              "RelativeDocumentMoniker": "PetLink-BackEnd\\Controllers\\UsuarioController.cs",
+              "ToolTip": "C:\\Users\\Usuario\\Documents\\Reposit\u00F3rios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Controllers\\UsuarioController.cs",
+              "RelativeToolTip": "PetLink-BackEnd\\Controllers\\UsuarioController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T16:46:03.225Z",
+              "WhenOpened": "2025-09-16T02:27:46.694Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 2,
               "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Program.cs",
+              "DocumentMoniker": "C:\\Users\\Usuario\\Documents\\Reposit\u00F3rios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Program.cs",
               "RelativeDocumentMoniker": "PetLink-BackEnd\\Program.cs",
-              "ToolTip": "C:\\Users\\Aluno\\Documents\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Program.cs",
+              "ToolTip": "C:\\Users\\Usuario\\Documents\\Reposit\u00F3rios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\Program.cs",
               "RelativeToolTip": "PetLink-BackEnd\\Program.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAACQAAAAzAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-08T16:50:03.558Z",
               "EditorCaption": ""
