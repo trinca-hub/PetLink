@@ -34,10 +34,12 @@ builder.Services.AddCors(o => o.AddPolicy("DefaultPolicy", builder =>
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IAdministradorRepository, AdministradorRepository>();
+builder.Services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
 builder.Services.AddScoped<IAdministradorService, AdministradorService>();
+builder.Services.AddScoped<IVeterinarioService, VeterinarioService>();
 
 var app = builder.Build();
 
