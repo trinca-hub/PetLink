@@ -246,6 +246,75 @@ namespace PetLink_BackEnd.Migrations
                             Uf = "São Paulo"
                         });
                 });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Veterinario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Crmv")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("crmv");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nome");
+
+                    b.Property<float>("Salario")
+                        .HasColumnType("real")
+                        .HasColumnName("salario");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("veterinario");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Crmv = "4750",
+                            Email = "gabriel@gmail.com",
+                            Nome = "Gabriel",
+                            Salario = 100000f,
+                            Status = 2
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Crmv = "7452",
+                            Email = "enzo@gmail.com",
+                            Nome = "Enzo",
+                            Salario = 100000f,
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Crmv = "0001",
+                            Email = "yasmin@gmail.com",
+                            Nome = "Yasmin",
+                            Salario = 100000f,
+                            Status = 1
+                        });
+                });
 #pragma warning restore 612, 618
         }
     }

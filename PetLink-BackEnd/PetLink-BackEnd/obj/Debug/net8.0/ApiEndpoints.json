@@ -235,5 +235,84 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.VeterinarioController",
+    "Method": "GetAll",
+    "RelativePath": "api/v1/Veterinario",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.VeterinarioController",
+    "Method": "Post",
+    "RelativePath": "api/v1/Veterinario",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "veterinarioDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.VeterinarioDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.VeterinarioController",
+    "Method": "GetById",
+    "RelativePath": "api/v1/Veterinario/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.VeterinarioController",
+    "Method": "Put",
+    "RelativePath": "api/v1/Veterinario/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "veterinarioDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.VeterinarioDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.VeterinarioController",
+    "Method": "Delete",
+    "RelativePath": "api/v1/Veterinario/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
   }
 ]
