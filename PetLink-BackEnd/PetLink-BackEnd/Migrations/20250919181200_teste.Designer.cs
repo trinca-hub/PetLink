@@ -12,8 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250919002500_pedido_itempedido_teste")]
-    partial class pedido_itempedido_teste
+    [Migration("20250919181200_teste")]
+    partial class teste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -168,6 +168,107 @@ namespace PetLink_BackEnd.Migrations
                             Id = 2,
                             DataPedido = new DateTime(2025, 9, 18, 10, 20, 32, 0, DateTimeKind.Utc),
                             UsuarioId = 2
+                        });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Pet", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("Castrado")
+                        .HasColumnType("boolean")
+                        .HasColumnName("castrado");
+
+                    b.Property<int>("Idade")
+                        .HasColumnType("integer")
+                        .HasColumnName("Idade");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nome");
+
+                    b.Property<float>("Peso")
+                        .HasColumnType("real")
+                        .HasColumnName("peso");
+
+                    b.Property<string>("Raca")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("raca");
+
+                    b.Property<string>("Rga")
+                        .IsRequired()
+                        .HasMaxLength(7)
+                        .HasColumnType("character varying(7)")
+                        .HasColumnName("rga");
+
+                    b.Property<string>("Sexo")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("sexo");
+
+                    b.Property<int>("TipoPet")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipopet");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("professorid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("pet");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Castrado = false,
+                            Idade = 12,
+                            Nome = "Peroba",
+                            Peso = 35.3f,
+                            Raca = "Pit Bull",
+                            Rga = "22992",
+                            Sexo = "Masculino",
+                            TipoPet = 2,
+                            UsuarioId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Castrado = true,
+                            Idade = 5,
+                            Nome = "Felipina",
+                            Peso = 5.5f,
+                            Raca = "Siâmes",
+                            Rga = "22992",
+                            Sexo = "Fêmea",
+                            TipoPet = 1,
+                            UsuarioId = 2
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Castrado = false,
+                            Idade = 24,
+                            Nome = "Neguin",
+                            Peso = 30.9f,
+                            Raca = "Pastor Alemão",
+                            Rga = "22992",
+                            Sexo = "Masculino",
+                            TipoPet = 2,
+                            UsuarioId = 3
                         });
                 });
 
@@ -424,6 +525,17 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Pedido", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Pet", b =>
                 {
                     b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
                         .WithMany()

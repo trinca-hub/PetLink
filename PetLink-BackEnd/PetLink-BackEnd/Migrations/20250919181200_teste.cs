@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class pedido_itempedido_teste : Migration
+    public partial class teste : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -106,6 +106,33 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "pet",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    raca = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    sexo = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    rga = table.Column<string>(type: "character varying(7)", maxLength: 7, nullable: false),
+                    Idade = table.Column<int>(type: "integer", nullable: false),
+                    peso = table.Column<float>(type: "real", nullable: false),
+                    castrado = table.Column<bool>(type: "boolean", nullable: false),
+                    tipopet = table.Column<int>(type: "integer", nullable: false),
+                    professorid = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_pet", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_pet_usuario_professorid",
+                        column: x => x.professorid,
+                        principalTable: "usuario",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "itempedido",
                 columns: table => new
                 {
@@ -181,6 +208,16 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "pet",
+                columns: new[] { "id", "castrado", "Idade", "nome", "peso", "raca", "rga", "sexo", "tipopet", "professorid" },
+                values: new object[,]
+                {
+                    { 1, false, 12, "Peroba", 35.3f, "Pit Bull", "22992", "Masculino", 2, 1 },
+                    { 2, true, 5, "Felipina", 5.5f, "Siâmes", "22992", "Fêmea", 1, 2 },
+                    { 3, false, 24, "Neguin", 30.9f, "Pastor Alemão", "22992", "Masculino", 2, 3 }
+                });
+
+            migrationBuilder.InsertData(
                 table: "itempedido",
                 columns: new[] { "id", "pedidoid", "produtoid", "quantidade" },
                 values: new object[,]
@@ -203,6 +240,11 @@ namespace PetLink_BackEnd.Migrations
                 name: "IX_pedido_usuarioid",
                 table: "pedido",
                 column: "usuarioid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_pet_professorid",
+                table: "pet",
+                column: "professorid");
         }
 
         /// <inheritdoc />
@@ -213,6 +255,9 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.DropTable(
                 name: "itempedido");
+
+            migrationBuilder.DropTable(
+                name: "pet");
 
             migrationBuilder.DropTable(
                 name: "veterinario");
