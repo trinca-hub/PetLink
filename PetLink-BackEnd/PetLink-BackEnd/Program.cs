@@ -6,6 +6,7 @@ using PetLink_BackEnd.Services.Interfaces;
 using PetLink_BackEnd.Services.Entities;
 using PetLink_BackEnd.Data;
 using PetLink_BackEnd.Data.Interfaces;
+using StudentManager.WebAPI.Data.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,6 +38,7 @@ builder.Services.AddScoped<IAdministradorRepository, AdministradorRepository>();
 builder.Services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
 builder.Services.AddScoped<IItemPedidoRepository, ItemPedidoRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
+builder.Services.AddScoped<IPetRepository, PetRepository>();
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -44,6 +46,8 @@ builder.Services.AddScoped<IAdministradorService, AdministradorService>();
 builder.Services.AddScoped<IVeterinarioService, VeterinarioService>();
 builder.Services.AddScoped<IItemPedidoService, ItemPedidoService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
+builder.Services.AddScoped<IPetService, PetService>();
+
 
 var app = builder.Build();
 
