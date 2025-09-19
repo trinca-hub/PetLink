@@ -11,6 +11,8 @@ public class AppDbContext : DbContext
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<Administrador> Administradores { get; set; }
     public DbSet<Veterinario> Veterinarios { get; set; }
+    public DbSet<Pedido> Pedidos { get; set; }
+    public DbSet<ItemPedido> ItemPedidos { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -20,5 +22,7 @@ public class AppDbContext : DbContext
         UsuarioBuilder.Build(modelBuilder);
         AdministradorBuilder.Build(modelBuilder);
         VeterinarioBuilder.Build(modelBuilder);
+        PedidoBuilder.Build(modelBuilder);
+        ItemPedidoBuilder.Build(modelBuilder);
     }
 }
