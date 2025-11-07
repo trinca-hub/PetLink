@@ -37,6 +37,7 @@ builder.Services.AddScoped<IAdministradorRepository, AdministradorRepository>();
 builder.Services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
 builder.Services.AddScoped<IItemPedidoRepository, ItemPedidoRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
+builder.Services.AddScoped<IServicoRepository, ServicoRepository>();
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -44,6 +45,7 @@ builder.Services.AddScoped<IAdministradorService, AdministradorService>();
 builder.Services.AddScoped<IVeterinarioService, VeterinarioService>();
 builder.Services.AddScoped<IItemPedidoService, ItemPedidoService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
+builder.Services.AddScoped<IServicoService, ServicoService>();
 
 var app = builder.Build();
 

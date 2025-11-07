@@ -12,8 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250919002500_pedido_itempedido_teste")]
-    partial class pedido_itempedido_teste
+    [Migration("20251031203259_teste")]
+    partial class teste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -220,6 +220,75 @@ namespace PetLink_BackEnd.Migrations
                             Nome = "Petisco de Bacon",
                             Preco = 11f,
                             Quantidade = 15
+                        });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Servico", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("data");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("descricao");
+
+                    b.Property<string>("Hora")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("character varying(11)")
+                        .HasColumnName("hora");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipo");
+
+                    b.Property<float>("Valor")
+                        .HasColumnType("real")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("servico");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Data = "10/10/2010",
+                            Descricao = "Consulta do Joquinha",
+                            Hora = "10h 10m 10s",
+                            Tipo = 1,
+                            Valor = 100f
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Data = "20/12/2020",
+                            Descricao = "Banho da Macoca",
+                            Hora = "20h 20m 20s",
+                            Tipo = 2,
+                            Valor = 60f
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Data = "20/05/2025",
+                            Descricao = "Tosa da Penelope",
+                            Hora = "15h 25m 25s",
+                            Tipo = 3,
+                            Valor = 80f
                         });
                 });
 

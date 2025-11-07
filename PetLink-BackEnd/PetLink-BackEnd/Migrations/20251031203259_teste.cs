@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class pedido_itempedido_teste : Migration
+    public partial class teste : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -44,6 +44,23 @@ namespace PetLink_BackEnd.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_produto", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "servico",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    data = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
+                    hora = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: false),
+                    descricao = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    tipo = table.Column<int>(type: "integer", nullable: false),
+                    valor = table.Column<float>(type: "real", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_servico", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -152,6 +169,16 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.InsertData(
+                table: "servico",
+                columns: new[] { "id", "data", "descricao", "hora", "tipo", "valor" },
+                values: new object[,]
+                {
+                    { 1, "10/10/2010", "Consulta do Joquinha", "10h 10m 10s", 1, 100f },
+                    { 2, "20/12/2020", "Banho da Macoca", "20h 20m 20s", 2, 60f },
+                    { 3, "20/05/2025", "Tosa da Penelope", "15h 25m 25s", 3, 80f }
+                });
+
+            migrationBuilder.InsertData(
                 table: "usuario",
                 columns: new[] { "id", "bairro", "cep", "cidade", "email", "nome", "numero", "rua", "senha", "telefone", "uf" },
                 values: new object[,]
@@ -213,6 +240,9 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.DropTable(
                 name: "itempedido");
+
+            migrationBuilder.DropTable(
+                name: "servico");
 
             migrationBuilder.DropTable(
                 name: "veterinario");
