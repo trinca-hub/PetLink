@@ -12,13 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:PetLink-BackEnd/PetLink-BackEnd/Migrations/20250919181200_teste.Designer.cs
-    [Migration("20250919181200_teste")]
+    [Migration("20251031203259_teste")]
     partial class teste
-========
-    [Migration("20251107191939_correcaoServico")]
-    partial class correcaoServico
->>>>>>>> 7abe2be1335e96785d2685e693d1252d28fe6abd:PetLink-BackEnd/PetLink-BackEnd/Migrations/20251107191939_correcaoServico.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -176,107 +171,6 @@ namespace PetLink_BackEnd.Migrations
                         });
                 });
 
-            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Pet", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer")
-                        .HasColumnName("id");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Castrado")
-                        .HasColumnType("boolean")
-                        .HasColumnName("castrado");
-
-                    b.Property<int>("Idade")
-                        .HasColumnType("integer")
-                        .HasColumnName("Idade");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("nome");
-
-                    b.Property<float>("Peso")
-                        .HasColumnType("real")
-                        .HasColumnName("peso");
-
-                    b.Property<string>("Raca")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("character varying(100)")
-                        .HasColumnName("raca");
-
-                    b.Property<string>("Rga")
-                        .IsRequired()
-                        .HasMaxLength(7)
-                        .HasColumnType("character varying(7)")
-                        .HasColumnName("rga");
-
-                    b.Property<string>("Sexo")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)")
-                        .HasColumnName("sexo");
-
-                    b.Property<int>("TipoPet")
-                        .HasColumnType("integer")
-                        .HasColumnName("tipopet");
-
-                    b.Property<int>("UsuarioId")
-                        .HasColumnType("integer")
-                        .HasColumnName("professorid");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UsuarioId");
-
-                    b.ToTable("pet");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Castrado = false,
-                            Idade = 12,
-                            Nome = "Peroba",
-                            Peso = 35.3f,
-                            Raca = "Pit Bull",
-                            Rga = "22992",
-                            Sexo = "Masculino",
-                            TipoPet = 2,
-                            UsuarioId = 1
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Castrado = true,
-                            Idade = 5,
-                            Nome = "Felipina",
-                            Peso = 5.5f,
-                            Raca = "Siâmes",
-                            Rga = "22992",
-                            Sexo = "Fêmea",
-                            TipoPet = 1,
-                            UsuarioId = 2
-                        },
-                        new
-                        {
-                            Id = 3,
-                            Castrado = false,
-                            Idade = 24,
-                            Nome = "Neguin",
-                            Peso = 30.9f,
-                            Raca = "Pastor Alemão",
-                            Rga = "22992",
-                            Sexo = "Masculino",
-                            TipoPet = 2,
-                            UsuarioId = 3
-                        });
-                });
-
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Produto", b =>
                 {
                     b.Property<int>("Id")
@@ -338,15 +232,23 @@ namespace PetLink_BackEnd.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime>("DataServico")
-                        .HasColumnType("timestamp with time zone")
-                        .HasColumnName("dataServico");
+                    b.Property<string>("Data")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("data");
 
                     b.Property<string>("Descricao")
                         .IsRequired()
                         .HasMaxLength(250)
                         .HasColumnType("character varying(250)")
                         .HasColumnName("descricao");
+
+                    b.Property<string>("Hora")
+                        .IsRequired()
+                        .HasMaxLength(11)
+                        .HasColumnType("character varying(11)")
+                        .HasColumnName("hora");
 
                     b.Property<int>("Tipo")
                         .HasColumnType("integer")
@@ -364,24 +266,27 @@ namespace PetLink_BackEnd.Migrations
                         new
                         {
                             Id = 1,
-                            DataServico = new DateTime(2025, 10, 15, 0, 28, 32, 0, DateTimeKind.Utc),
+                            Data = "10/10/2010",
                             Descricao = "Consulta do Joquinha",
+                            Hora = "10h 10m 10s",
                             Tipo = 1,
                             Valor = 100f
                         },
                         new
                         {
                             Id = 2,
-                            DataServico = new DateTime(2025, 9, 18, 15, 20, 22, 0, DateTimeKind.Utc),
+                            Data = "20/12/2020",
                             Descricao = "Banho da Macoca",
+                            Hora = "20h 20m 20s",
                             Tipo = 2,
                             Valor = 60f
                         },
                         new
                         {
                             Id = 3,
-                            DataServico = new DateTime(2025, 6, 27, 10, 47, 2, 0, DateTimeKind.Utc),
+                            Data = "20/05/2025",
                             Descricao = "Tosa da Penelope",
+                            Hora = "15h 25m 25s",
                             Tipo = 3,
                             Valor = 80f
                         });
@@ -588,17 +493,6 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Pedido", b =>
-                {
-                    b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
-                        .WithMany()
-                        .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Usuario");
-                });
-
-            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Pet", b =>
                 {
                     b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
                         .WithMany()

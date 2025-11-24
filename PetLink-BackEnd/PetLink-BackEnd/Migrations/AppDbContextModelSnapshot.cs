@@ -321,6 +321,64 @@ namespace PetLink_BackEnd.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Servico", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataServico")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("dataServico");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("character varying(250)")
+                        .HasColumnName("descricao");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipo");
+
+                    b.Property<float>("Valor")
+                        .HasColumnType("real")
+                        .HasColumnName("valor");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("servico");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            DataServico = new DateTime(2025, 10, 15, 0, 28, 32, 0, DateTimeKind.Utc),
+                            Descricao = "Consulta do Joquinha",
+                            Tipo = 1,
+                            Valor = 100f
+                        },
+                        new
+                        {
+                            Id = 2,
+                            DataServico = new DateTime(2025, 9, 18, 15, 20, 22, 0, DateTimeKind.Utc),
+                            Descricao = "Banho da Macoca",
+                            Tipo = 2,
+                            Valor = 60f
+                        },
+                        new
+                        {
+                            Id = 3,
+                            DataServico = new DateTime(2025, 6, 27, 10, 47, 2, 0, DateTimeKind.Utc),
+                            Descricao = "Tosa da Penelope",
+                            Tipo = 3,
+                            Valor = 80f
+                        });
+                });
+
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Usuario", b =>
                 {
                     b.Property<int>("Id")

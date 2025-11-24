@@ -13,7 +13,11 @@ public class AppDbContext : DbContext
     public DbSet<Veterinario> Veterinarios { get; set; }
     public DbSet<Pedido> Pedidos { get; set; }
     public DbSet<ItemPedido> ItemPedidos { get; set; }
+<<<<<<< HEAD
     public DbSet<Pet> Pet { get; set; }
+=======
+    public DbSet<Servico> Servicos { get; set; }
+>>>>>>> 7abe2be1335e96785d2685e693d1252d28fe6abd
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -25,6 +29,10 @@ public class AppDbContext : DbContext
         VeterinarioBuilder.Build(modelBuilder);
         PedidoBuilder.Build(modelBuilder);
         ItemPedidoBuilder.Build(modelBuilder);
+<<<<<<< HEAD
         PetBuilder.Build(modelBuilder);
+=======
+        ServicoBuilder.Build(modelBuilder);
+>>>>>>> 7abe2be1335e96785d2685e693d1252d28fe6abd
     }
 }
