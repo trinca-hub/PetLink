@@ -1,5 +1,84 @@
 [
   {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "GetAll",
+    "RelativePath": "api/Servico",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "Post",
+    "RelativePath": "api/Servico",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "servicoDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ServicoDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "GetById",
+    "RelativePath": "api/Servico/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "Put",
+    "RelativePath": "api/Servico/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "servicoDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ServicoDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "Delete",
+    "RelativePath": "api/Servico/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "PetLink_BackEnd.Controllers.AdministradorController",
     "Method": "GetAll",
     "RelativePath": "api/v1/Administrador",
@@ -468,6 +547,22 @@
       {
         "Name": "id",
         "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.UsuarioController",
+    "Method": "Login",
+    "RelativePath": "api/v1/Usuario/Login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "login",
+        "Type": "PetLink_BackEnd.Objects.Contracts.Login",
         "IsRequired": true
       }
     ],

@@ -21,7 +21,7 @@ namespace PetLink_BackEnd.Objects.Models
         [Column("rga")]
         public string Rga { get; set; }
 
-        [Column("Idade")]
+        [Column("idade")]
         public int Idade { get; set; }
 
         [Column("peso")]
@@ -33,13 +33,13 @@ namespace PetLink_BackEnd.Objects.Models
         [Column("tipopet")]
         public TipoPet TipoPet { get; set; }
 
-        [Column("professorid")]
+        [Column("usuarioid")]
         public int UsuarioId { get; set; }
         public Usuario Usuario { get; set; } = null!;
 
         public Pet() { }
 
-        public Pet(int id, string nome, string raca, string sexo, string rga, int idade, float peso, bool castrado, TipoPet tipoPet, int usuarioId)
+        public Pet(int id, string nome, string raca, string sexo, string rga, int idade, float peso, bool castrado, TipoPet tipoPet, int usuarioid)
         {
             Id = id;
             Nome = nome;
@@ -50,7 +50,7 @@ namespace PetLink_BackEnd.Objects.Models
             Peso = peso;
             Castrado = castrado;
             TipoPet = tipoPet;
-            UsuarioId = usuarioId;
+            UsuarioId = usuarioid;
         }
     }
 }

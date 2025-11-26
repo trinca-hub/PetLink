@@ -12,13 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:PetLink-BackEnd/PetLink-BackEnd/Migrations/20250919181200_teste.Designer.cs
-    [Migration("20250919181200_teste")]
-    partial class teste
-========
-    [Migration("20251107191939_correcaoServico")]
-    partial class correcaoServico
->>>>>>>> 7abe2be1335e96785d2685e693d1252d28fe6abd:PetLink-BackEnd/PetLink-BackEnd/Migrations/20251107191939_correcaoServico.Designer.cs
+    [Migration("20251126032234_testando-login")]
+    partial class testandologin
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -191,7 +186,7 @@ namespace PetLink_BackEnd.Migrations
 
                     b.Property<int>("Idade")
                         .HasColumnType("integer")
-                        .HasColumnName("Idade");
+                        .HasColumnName("idade");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -227,7 +222,7 @@ namespace PetLink_BackEnd.Migrations
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer")
-                        .HasColumnName("professorid");
+                        .HasColumnName("usuarioid");
 
                     b.HasKey("Id");
 

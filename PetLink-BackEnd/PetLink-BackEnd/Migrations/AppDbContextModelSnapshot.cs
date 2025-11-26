@@ -183,7 +183,7 @@ namespace PetLink_BackEnd.Migrations
 
                     b.Property<int>("Idade")
                         .HasColumnType("integer")
-                        .HasColumnName("Idade");
+                        .HasColumnName("idade");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -219,7 +219,7 @@ namespace PetLink_BackEnd.Migrations
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer")
-                        .HasColumnName("professorid");
+                        .HasColumnName("usuarioid");
 
                     b.HasKey("Id");
 

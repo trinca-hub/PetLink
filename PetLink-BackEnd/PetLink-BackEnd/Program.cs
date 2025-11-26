@@ -6,7 +6,12 @@ using PetLink_BackEnd.Services.Interfaces;
 using PetLink_BackEnd.Services.Entities;
 using PetLink_BackEnd.Data;
 using PetLink_BackEnd.Data.Interfaces;
-using StudentManager.WebAPI.Data.Repositories;
+using PetLink_BackEnd.Data.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
+using PetLink_BackEnd.WebAPI.Data.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,17 +37,61 @@ builder.Services.AddCors(o => o.AddPolicy("DefaultPolicy", builder =>
         .AllowCredentials();
 }));
 
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme."
+    });
+
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<IAdministradorRepository, AdministradorRepository>();
 builder.Services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
 builder.Services.AddScoped<IItemPedidoRepository, ItemPedidoRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
-<<<<<<< HEAD
+
 builder.Services.AddScoped<IPetRepository, PetRepository>();
-=======
+
 builder.Services.AddScoped<IServicoRepository, ServicoRepository>();
->>>>>>> 7abe2be1335e96785d2685e693d1252d28fe6abd
+
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -50,12 +99,12 @@ builder.Services.AddScoped<IAdministradorService, AdministradorService>();
 builder.Services.AddScoped<IVeterinarioService, VeterinarioService>();
 builder.Services.AddScoped<IItemPedidoService, ItemPedidoService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
-<<<<<<< HEAD
+
 builder.Services.AddScoped<IPetService, PetService>();
 
-=======
+
 builder.Services.AddScoped<IServicoService, ServicoService>();
->>>>>>> 7abe2be1335e96785d2685e693d1252d28fe6abd
+
 
 var app = builder.Build();
 
@@ -70,6 +119,8 @@ app.UseHttpsRedirection();
 
 //Aplica politica criada acima
 app.UseCors("DefaultPolicy");
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 
