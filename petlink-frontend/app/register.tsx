@@ -1,51 +1,58 @@
 import { useState } from "react";
-import { View, Text, TextInput, Button } from "react-native";
+import { View, Text, TextInput, Button, ScrollView } from "react-native";
 import { registerService } from "../src/api/authService";
 import { useRouter } from "expo-router";
 
 export default function Register() {
   const router = useRouter();
 
-  const [nome, setNome] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
+  const [form, setForm] = useState({
+    nome: "",
+    telefone: "",
+    cep: "",
+    uf: "",
+    cidade: "",
+    bairro: "",
+    rua: "",
+    numero: "",
+    email: "",
+    senha: "",
+  });
+
+  function handleChange(key: string, value: string) {
+    setForm({ ...form, [key]: value });
+  }
 
   async function handleRegister() {
-    const result = await registerService(nome, email, senha);
+    const payload = {
+      ...form,
+      numero: Number(form.numero),
+    };
 
-    if (result.sucesso) {
+    const result = await registerService(payload);
+
+    if (result.code === 1) {
       alert("Conta criada!");
-      router.push("../login");
+      router.push("/login");
     } else {
-      alert("Erro ao cadastrar!");
+      alert(result.message || "Erro ao cadastrar!");
     }
   }
 
   return (
-    <View style={{ padding: 20 }}>
-      <Text>Nome</Text>
-      <TextInput
-        value={nome}
-        onChangeText={setNome}
-        style={{ borderWidth: 1, marginBottom: 10 }}
-      />
-
-      <Text>Email</Text>
-      <TextInput
-        value={email}
-        onChangeText={setEmail}
-        style={{ borderWidth: 1, marginBottom: 10 }}
-      />
-
-      <Text>Senha</Text>
-      <TextInput
-        value={senha}
-        onChangeText={setSenha}
-        secureTextEntry
-        style={{ borderWidth: 1, marginBottom: 10 }}
-      />
+    <ScrollView style={{ padding: 20 }}>
+      {Object.keys(form).map((key) => (
+        <View key={key} style={{ marginBottom: 10 }}>
+          <Text>{key.toUpperCase()}</Text>
+          <TextInput
+            value={form[key as keyof typeof form]}
+            onChangeText={(v) => handleChange(key, v)}
+            style={{ borderWidth: 1 }}
+          />
+        </View>
+      ))}
 
       <Button title="Cadastrar" onPress={handleRegister} />
-    </View>
+    </ScrollView>
   );
 }

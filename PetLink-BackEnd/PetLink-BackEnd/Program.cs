@@ -16,26 +16,26 @@ using PetLink_BackEnd.WebAPI.Data.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddAutoMapper(opt => { }, AppDomain.CurrentDomain.GetAssemblies());
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Criamos uma nova política para o CORS para permitir que ele aceite as requisições do nosso frontend
-builder.Services.AddCors(o => o.AddPolicy("DefaultPolicy", builder =>
+// CORS liberado para React Native (qualquer origem)
+builder.Services.AddCors(options =>
 {
-    builder.WithOrigins("http://localhost:3000", "http://localhost:5173")
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials();
-}));
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -53,33 +53,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddSwaggerGen(c =>
-{
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme()
-    {
-        Name = "Authorization",
-        Type = SecuritySchemeType.ApiKey,
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Description = "JWT Authorization header using the Bearer scheme."
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement()
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
-});
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -89,9 +63,7 @@ builder.Services.AddScoped<IItemPedidoRepository, ItemPedidoRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
 
 builder.Services.AddScoped<IPetRepository, PetRepository>();
-
 builder.Services.AddScoped<IServicoRepository, ServicoRepository>();
-
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -101,14 +73,10 @@ builder.Services.AddScoped<IItemPedidoService, ItemPedidoService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
 
 builder.Services.AddScoped<IPetService, PetService>();
-
-
 builder.Services.AddScoped<IServicoService, ServicoService>();
-
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -117,11 +85,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//Aplica politica criada acima
-app.UseCors("DefaultPolicy");
+// <<< AQUI troca sua policy por esta >>>
+app.UseCors("AllowAll");
 
 app.UseAuthentication();
-
 app.UseAuthorization();
 
 app.MapControllers();

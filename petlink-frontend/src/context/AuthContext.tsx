@@ -1,9 +1,9 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { loginService } from "../api/authService";
 
 type AuthContextType = {
-  user: any;
+  token: string | null;
   login: (email: string, senha: string) => Promise<any>;
   logout: () => void;
 };
@@ -11,24 +11,27 @@ type AuthContextType = {
 export const AuthContext = createContext<AuthContextType>(null!);
 
 export function AuthProvider({ children }: any) {
-  const [user, setUser] = useState(null);
+  const [token, setToken] = useState<string | null>(null);
 
-  async function login(email: string, senha: string) {
-    const result = await loginService(email, senha);
-    if (result.sucesso) {
-      setUser(result.usuario);
-      await AsyncStorage.setItem("user", JSON.stringify(result.usuario));
-    }
-    return result;
-  }
+ async function login(email: string, senha: string) {
+  console.log("Chamou login()", email, senha);
+
+  const result = await loginService(email, senha).catch((err) => {
+    console.log("ERRO NO FETCH:", err);
+  });
+
+  console.log("Resultado da API:", result);
+
+  return result;
+}
 
   function logout() {
-    setUser(null);
-    AsyncStorage.removeItem("user");
+    setToken(null);
+    AsyncStorage.removeItem("token");
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider value={{ token, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

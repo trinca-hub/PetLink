@@ -13,10 +13,10 @@ export default function Login() {
   async function handleLogin() {
     const result = await login(email, senha);
 
-    if (result.sucesso) {
+    if (result.code === 1) {
       router.push("/(tabs)");
     } else {
-      alert("Credenciais inválidas");
+      alert(result.message || "Credenciais inválidas");
     }
   }
 
