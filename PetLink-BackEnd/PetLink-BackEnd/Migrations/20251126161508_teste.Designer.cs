@@ -12,8 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251126032234_testando-login")]
-    partial class testandologin
+    [Migration("20251126161508_teste")]
+    partial class teste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -474,7 +474,7 @@ namespace PetLink_BackEnd.Migrations
                             Nome = "Enzo",
                             Numero = 69,
                             Rua = "Travessia dos nóia",
-                            Senha = "123456",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Telefone = "17997938925",
                             Uf = "São Paulo"
                         },

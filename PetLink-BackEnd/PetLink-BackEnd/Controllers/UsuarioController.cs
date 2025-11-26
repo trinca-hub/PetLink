@@ -257,7 +257,7 @@ public class UsuarioController : Controller
         };
 
         var token = new JwtSecurityToken(
-            issuer: _configuration["Jwt: Issuer"],
+            issuer: _configuration["Jwt:Issuer"],
             audience: _configuration["Jwt:Audience"],
             claims: claims,
             expires: DateTime.Now.AddHours(2), // Define que o token expira em 2 horas
