@@ -93,4 +93,6 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+app.Urls.Add("http://0.0.0.0:5078");
+
 app.Run();

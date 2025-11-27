@@ -13,7 +13,7 @@ export const AuthContext = createContext<AuthContextType>(null!);
 export function AuthProvider({ children }: any) {
   const [token, setToken] = useState<string | null>(null);
 
- async function login(email: string, senha: string) {
+  async function login(email: string, senha: string) {
   console.log("Chamou login()", email, senha);
 
   const result = await loginService(email, senha).catch((err) => {
@@ -22,7 +22,16 @@ export function AuthProvider({ children }: any) {
 
   console.log("Resultado da API:", result);
 
-  return result;
+  if (result && result.code === 1) {
+    const tokenRecebido = result.data;
+
+    setToken(tokenRecebido);
+    await AsyncStorage.setItem("token", tokenRecebido);
+
+    return result;
+  }
+
+  return { code: 0, message: "Erro ao fazer login" };
 }
 
   function logout() {

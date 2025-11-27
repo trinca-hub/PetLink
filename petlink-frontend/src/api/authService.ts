@@ -7,7 +7,6 @@ export function loginService(email: string, senha: string) {
   });
 }
 
-
 export function registerService(data: any) {
   return api("Usuario", "POST", data);
 }

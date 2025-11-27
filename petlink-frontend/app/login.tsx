@@ -12,13 +12,15 @@ export default function Login() {
 
   async function handleLogin() {
     const result = await login(email, senha);
+    console.log("RESULTADO NO LOGIN:", result);
 
-    if (result.code === 1) {
+    if (result?.code === 1) {
       router.push("/(tabs)");
     } else {
-      alert(result.message || "Credenciais inválidas");
+      alert(result?.message || "Credenciais inválidas");
     }
   }
+
 
   return (
     <View style={{ padding: 20 }}>

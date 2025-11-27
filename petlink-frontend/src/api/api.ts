@@ -16,6 +16,8 @@ export async function api(
     config.body = JSON.stringify(body);
   }
 
+  console.log("➡️ Fetch:", `${API_URL}/${endpoint}`);
+
   const response = await fetch(`${API_URL}/${endpoint}`, config);
   return await response.json();
 }
