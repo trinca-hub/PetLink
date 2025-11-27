@@ -1,4 +1,4 @@
-const API_URL = "http://192.168.18.74:5078/api/v1";
+const BASE_URL = "http://192.168.18.74:5078/api/v1";
 
 export async function api(
   endpoint: string,
@@ -12,12 +12,11 @@ export async function api(
     },
   };
 
-  if (body) {
-    config.body = JSON.stringify(body);
-  }
+  if (body) config.body = JSON.stringify(body);
 
-  console.log("➡️ Fetch:", `${API_URL}/${endpoint}`);
+  console.log("➡️ Fetch:", `${BASE_URL}/${endpoint}`);
 
-  const response = await fetch(`${API_URL}/${endpoint}`, config);
+  const response = await fetch(`${BASE_URL}/${endpoint}`, config);
+
   return await response.json();
 }

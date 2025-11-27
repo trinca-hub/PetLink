@@ -62,6 +62,7 @@ public class UsuarioController : Controller
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public async Task<IActionResult> Post(UsuarioDTO usuarioDTO)
     {
         if (usuarioDTO is null)

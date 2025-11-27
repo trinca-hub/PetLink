@@ -20,16 +20,28 @@ export default function Register() {
   });
 
   function handleChange(key: string, value: string) {
-    setForm({ ...form, [key]: value });
+    setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   async function handleRegister() {
     const payload = {
-      ...form,
+      nome: form.nome,
+      telefone: form.telefone,
+      cep: form.cep,
+      uf: form.uf,
+      cidade: form.cidade,
+      bairro: form.bairro,
+      rua: form.rua,
       numero: Number(form.numero),
+      email: form.email,
+      senha: form.senha,
     };
 
+    console.log("➡️ Payload enviado:", payload);
+
     const result = await registerService(payload);
+
+    console.log("➡️ Resposta da API:", result);
 
     if (result.code === 1) {
       alert("Conta criada!");
