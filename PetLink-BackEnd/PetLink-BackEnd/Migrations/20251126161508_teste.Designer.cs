@@ -12,13 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-<<<<<<<< HEAD:PetLink-BackEnd/PetLink-BackEnd/Migrations/20250919181200_teste.Designer.cs
-    [Migration("20250919181200_teste")]
+    [Migration("20251126161508_teste")]
     partial class teste
-========
-    [Migration("20251107191939_correcaoServico")]
-    partial class correcaoServico
->>>>>>>> 7abe2be1335e96785d2685e693d1252d28fe6abd:PetLink-BackEnd/PetLink-BackEnd/Migrations/20251107191939_correcaoServico.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -191,7 +186,7 @@ namespace PetLink_BackEnd.Migrations
 
                     b.Property<int>("Idade")
                         .HasColumnType("integer")
-                        .HasColumnName("Idade");
+                        .HasColumnName("idade");
 
                     b.Property<string>("Nome")
                         .IsRequired()
@@ -227,7 +222,7 @@ namespace PetLink_BackEnd.Migrations
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer")
-                        .HasColumnName("professorid");
+                        .HasColumnName("usuarioid");
 
                     b.HasKey("Id");
 
@@ -479,7 +474,7 @@ namespace PetLink_BackEnd.Migrations
                             Nome = "Enzo",
                             Numero = 69,
                             Rua = "Travessia dos nóia",
-                            Senha = "123456",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Telefone = "17997938925",
                             Uf = "São Paulo"
                         },

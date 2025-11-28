@@ -52,8 +52,7 @@ namespace PetLink_BackEnd.Migrations
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    data = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: false),
-                    hora = table.Column<string>(type: "character varying(11)", maxLength: 11, nullable: false),
+                    dataServico = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     descricao = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
                     tipo = table.Column<int>(type: "integer", nullable: false),
                     valor = table.Column<float>(type: "real", nullable: false)
@@ -132,18 +131,18 @@ namespace PetLink_BackEnd.Migrations
                     raca = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     sexo = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     rga = table.Column<string>(type: "character varying(7)", maxLength: 7, nullable: false),
-                    Idade = table.Column<int>(type: "integer", nullable: false),
+                    idade = table.Column<int>(type: "integer", nullable: false),
                     peso = table.Column<float>(type: "real", nullable: false),
                     castrado = table.Column<bool>(type: "boolean", nullable: false),
                     tipopet = table.Column<int>(type: "integer", nullable: false),
-                    professorid = table.Column<int>(type: "integer", nullable: false)
+                    usuarioid = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_pet", x => x.id);
                     table.ForeignKey(
-                        name: "FK_pet_usuario_professorid",
-                        column: x => x.professorid,
+                        name: "FK_pet_usuario_usuarioid",
+                        column: x => x.usuarioid,
                         principalTable: "usuario",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
@@ -197,12 +196,12 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.InsertData(
                 table: "servico",
-                columns: new[] { "id", "data", "descricao", "hora", "tipo", "valor" },
+                columns: new[] { "id", "dataServico", "descricao", "tipo", "valor" },
                 values: new object[,]
                 {
-                    { 1, "10/10/2010", "Consulta do Joquinha", "10h 10m 10s", 1, 100f },
-                    { 2, "20/12/2020", "Banho da Macoca", "20h 20m 20s", 2, 60f },
-                    { 3, "20/05/2025", "Tosa da Penelope", "15h 25m 25s", 3, 80f }
+                    { 1, new DateTime(2025, 10, 15, 0, 28, 32, 0, DateTimeKind.Utc), "Consulta do Joquinha", 1, 100f },
+                    { 2, new DateTime(2025, 9, 18, 15, 20, 22, 0, DateTimeKind.Utc), "Banho da Macoca", 2, 60f },
+                    { 3, new DateTime(2025, 6, 27, 10, 47, 2, 0, DateTimeKind.Utc), "Tosa da Penelope", 3, 80f }
                 });
 
             migrationBuilder.InsertData(
@@ -211,7 +210,7 @@ namespace PetLink_BackEnd.Migrations
                 values: new object[,]
                 {
                     { 1, "Clone", "15790000", "Rubineia", "gabriel@gmail.com", "Gabriel", 1, "Rua dos Guerreiros", "pokemon12", "179999999", "São Paulo" },
-                    { 2, "NSF", "15761006", "Urânia", "enzo@gmail.com", "Enzo", 69, "Travessia dos nóia", "123456", "17997938925", "São Paulo" },
+                    { 2, "NSF", "15761006", "Urânia", "enzo@gmail.com", "Enzo", 69, "Travessia dos nóia", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "17997938925", "São Paulo" },
                     { 3, "Centro", "15761396", "Dolcinópolis", "yasmin@gmail.com", "Yasmin", 777, "Aquela rua lá", "fatecjales", "17997921343", "São Paulo" }
                 });
 
@@ -236,7 +235,7 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.InsertData(
                 table: "pet",
-                columns: new[] { "id", "castrado", "Idade", "nome", "peso", "raca", "rga", "sexo", "tipopet", "professorid" },
+                columns: new[] { "id", "castrado", "idade", "nome", "peso", "raca", "rga", "sexo", "tipopet", "usuarioid" },
                 values: new object[,]
                 {
                     { 1, false, 12, "Peroba", 35.3f, "Pit Bull", "22992", "Masculino", 2, 1 },
@@ -269,9 +268,9 @@ namespace PetLink_BackEnd.Migrations
                 column: "usuarioid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_pet_professorid",
+                name: "IX_pet_usuarioid",
                 table: "pet",
-                column: "professorid");
+                column: "usuarioid");
         }
 
         /// <inheritdoc />
@@ -284,11 +283,10 @@ namespace PetLink_BackEnd.Migrations
                 name: "itempedido");
 
             migrationBuilder.DropTable(
-<<<<<<<< HEAD:PetLink-BackEnd/PetLink-BackEnd/Migrations/20250919181200_teste.cs
                 name: "pet");
-========
+
+            migrationBuilder.DropTable(
                 name: "servico");
->>>>>>>> 7abe2be1335e96785d2685e693d1252d28fe6abd:PetLink-BackEnd/PetLink-BackEnd/Migrations/20251031203259_teste.cs
 
             migrationBuilder.DropTable(
                 name: "veterinario");
