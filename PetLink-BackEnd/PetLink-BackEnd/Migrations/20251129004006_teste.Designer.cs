@@ -12,7 +12,7 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251126161508_teste")]
+    [Migration("20251129004006_teste")]
     partial class teste
     {
         /// <inheritdoc />

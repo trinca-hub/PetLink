@@ -11,3 +11,6 @@ export function registerService(data: any) {
   return api("Usuario", "POST", data);
 }
 
+export function getPets() {
+  return api("Pet", "GET"); 
+}

@@ -22,9 +22,9 @@ namespace PetLink_BackEnd.Data.Builders
             modelBuilder.Entity<Usuario>()
                 .HasData(new List<Usuario>
                 {
-                    new Usuario(1, "Gabriel", "179999999", "15790000", "São Paulo", "Rubineia", "Clone", "Rua dos Guerreiros", 1, "gabriel@gmail.com", "pokemon12"),
+                    new Usuario(1, "Gabriel", "179999999", "15790000", "São Paulo", "Rubineia", "Clone", "Rua dos Guerreiros", 1, "gabriel@gmail.com", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"),
                     new Usuario(2, "Enzo", "17997938925", "15761006", "São Paulo", "Urânia", "NSF", "Travessia dos nóia", 69, "enzo@gmail.com", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"),
-                    new Usuario(3, "Yasmin", "17997921343", "15761396", "São Paulo", "Dolcinópolis", "Centro", "Aquela rua lá",777, "yasmin@gmail.com", "fatecjales"),
+                    new Usuario(3, "Yasmin", "17997921343", "15761396", "São Paulo", "Dolcinópolis", "Centro", "Aquela rua lá",777, "yasmin@gmail.com", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"),
                 });
 
         }
