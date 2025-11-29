@@ -14,7 +14,7 @@ namespace PetLink_BackEnd.Objects.Dtos.Entities
             public bool Castrado { get; set; }
             public TipoPet TipoPet { get; set; }
             public int UsuarioId { get; set; }
+            public string ImagemUrl { get; set; }
 
-        
     }
 }

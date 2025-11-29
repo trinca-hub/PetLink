@@ -395,6 +395,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "PetLink_BackEnd.Controllers.PetController",
+    "Method": "GetByUsuarioId",
+    "RelativePath": "api/v1/Pet/usuario/{usuarioId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "usuarioId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "PetLink_BackEnd.Controllers.ProdutoController",
     "Method": "GetAll",
     "RelativePath": "api/v1/Produto",

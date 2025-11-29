@@ -131,8 +131,16 @@ public class UsuarioController : Controller
             }
 
             var token = GenerateJwtToken(usuarioDTO);
+
             _response.Code = ResponseEnum.SUCCESS;
-            _response.Data = token;
+
+            // 🔥 AGORA RETORNA TOKEN + USUÁRIO
+            _response.Data = new
+            {
+                token = token,
+                usuario = usuarioDTO
+            };
+
             _response.Message = "Login realizado com sucesso";
 
             return Ok(_response);
@@ -150,6 +158,7 @@ public class UsuarioController : Controller
             return StatusCode(StatusCodes.Status500InternalServerError, _response);
         }
     }
+
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, UsuarioDTO usuarioDTO)

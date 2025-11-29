@@ -185,6 +185,11 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("integer")
                         .HasColumnName("idade");
 
+                    b.Property<string>("ImagemUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("imagemurl");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -233,6 +238,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 1,
                             Castrado = false,
                             Idade = 12,
+                            ImagemUrl = "https://www.prodograw.com/wp-content/uploads/2025/09/American-Pitbull-1-800x800.jpg",
                             Nome = "Peroba",
                             Peso = 35.3f,
                             Raca = "Pit Bull",
@@ -246,10 +252,11 @@ namespace PetLink_BackEnd.Migrations
                             Id = 2,
                             Castrado = true,
                             Idade = 5,
+                            ImagemUrl = "https://images.tcdn.com.br/img/img_prod/1087789/noticia_619419434679a87734bc0e.png",
                             Nome = "Felipina",
                             Peso = 5.5f,
-                            Raca = "Siâmes",
-                            Rga = "22992",
+                            Raca = "Yorkshire",
+                            Rga = "22392",
                             Sexo = "Fêmea",
                             TipoPet = 1,
                             UsuarioId = 2
@@ -259,10 +266,11 @@ namespace PetLink_BackEnd.Migrations
                             Id = 3,
                             Castrado = false,
                             Idade = 24,
+                            ImagemUrl = "https://objectstorage.sa-vinhedo-1.oraclecloud.com/n/axuh3s32sabm/b/cobasi-institutional-cms-bucket/o/prod/Pastor%202.jpg",
                             Nome = "Neguin",
                             Peso = 30.9f,
                             Raca = "Pastor Alemão",
-                            Rga = "22992",
+                            Rga = "22192",
                             Sexo = "Masculino",
                             TipoPet = 2,
                             UsuarioId = 3
@@ -457,7 +465,7 @@ namespace PetLink_BackEnd.Migrations
                             Nome = "Gabriel",
                             Numero = 1,
                             Rua = "Rua dos Guerreiros",
-                            Senha = "pokemon12",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Telefone = "179999999",
                             Uf = "São Paulo"
                         },
@@ -485,7 +493,7 @@ namespace PetLink_BackEnd.Migrations
                             Nome = "Yasmin",
                             Numero = 777,
                             Rua = "Aquela rua lá",
-                            Senha = "fatecjales",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Telefone = "17997921343",
                             Uf = "São Paulo"
                         });

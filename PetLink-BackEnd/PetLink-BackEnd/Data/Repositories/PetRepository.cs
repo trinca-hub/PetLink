@@ -2,6 +2,7 @@
 using PetLink_BackEnd.Data.Repositories;
 using PetLink_BackEnd.Data.Interfaces;
 using PetLink_BackEnd.Objects.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace PetLink_BackEnd.WebAPI.Data.Repositories;
 
@@ -13,4 +14,12 @@ public class PetRepository : GenericRepository<Pet>, IPetRepository
     {
         _context = context;
     }
+
+    public async Task<IEnumerable<Pet>> GetByUsuarioId(int usuarioId)
+    {
+        return await _context.Pet
+            .Where(p => p.UsuarioId == usuarioId)
+            .ToListAsync();
+    }
 }
+
