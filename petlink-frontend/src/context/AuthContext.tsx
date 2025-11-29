@@ -14,29 +14,37 @@ export function AuthProvider({ children }: any) {
   const [token, setToken] = useState<string | null>(null);
 
   async function login(email: string, senha: string) {
-  console.log("Chamou login()", email, senha);
+    console.log("Chamou login()", email, senha);
 
-  const result = await loginService(email, senha).catch((err) => {
-    console.log("ERRO NO FETCH:", err);
-  });
+    const result = await loginService(email, senha).catch((err) => {
+      console.log("ERRO NO FETCH:", err);
+    });
 
-  console.log("Resultado da API:", result);
+    console.log("Resultado da API:", result);
 
-  if (result && result.code === 1) {
-    const tokenRecebido = result.data;
+    if (result && result.code === 1) {
 
-    setToken(tokenRecebido);
-    await AsyncStorage.setItem("token", tokenRecebido);
+      const tokenRecebido = result.data.token;     // ✔ token correto
+      const usuarioRecebido = result.data.usuario; // ✔ dados do usuário logado
 
-    return result;
+      // salva no state
+      setToken(tokenRecebido);
+
+      // salva no armazenamento interno
+      await AsyncStorage.setItem("token", tokenRecebido);
+      await AsyncStorage.setItem("usuario", JSON.stringify(usuarioRecebido));
+
+      return result;
+    }
+
+    return { code: 0, message: "Erro ao fazer login" };
   }
 
-  return { code: 0, message: "Erro ao fazer login" };
-}
 
   function logout() {
     setToken(null);
     AsyncStorage.removeItem("token");
+    AsyncStorage.removeItem("usuario");
   }
 
   return (

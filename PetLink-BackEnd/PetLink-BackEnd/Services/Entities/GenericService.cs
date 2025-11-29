@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using PetLink_BackEnd.Data.Interafces;
+using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
 
 namespace PetLink_BackEnd.Services.Entities
@@ -55,6 +56,11 @@ namespace PetLink_BackEnd.Services.Entities
             }
 
             await _repository.Remove(entity);
+        }
+
+        public Task<IEnumerable<PetDTO>> GetByUsuarioId(int usuarioId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

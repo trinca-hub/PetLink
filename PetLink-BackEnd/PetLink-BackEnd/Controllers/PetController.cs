@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
@@ -50,6 +51,27 @@ public class PetController : Controller
 
         return Ok(_response);
     }
+
+    [HttpGet("usuario/{usuarioId}")]
+    public async Task<IActionResult> GetByUsuarioId(int usuarioId)
+    {
+        var petsDTO = await _petService.GetByUsuarioId(usuarioId);
+
+        if (petsDTO == null || !petsDTO.Any())
+        {
+            _response.Code = ResponseEnum.NOT_FOUND;
+            _response.Data = null;
+            _response.Message = "Nenhum pet encontrado para este usuário";
+            return NotFound(_response);
+        }
+
+        _response.Code = ResponseEnum.SUCCESS;
+        _response.Data = petsDTO;
+        _response.Message = "Pets listados com sucesso";
+
+        return Ok(_response);
+    }
+
 
     [HttpPost]
     public async Task<IActionResult> Post(PetDTO petDTO)

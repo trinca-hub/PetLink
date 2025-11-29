@@ -135,7 +135,8 @@ namespace PetLink_BackEnd.Migrations
                     peso = table.Column<float>(type: "real", nullable: false),
                     castrado = table.Column<bool>(type: "boolean", nullable: false),
                     tipopet = table.Column<int>(type: "integer", nullable: false),
-                    usuarioid = table.Column<int>(type: "integer", nullable: false)
+                    usuarioid = table.Column<int>(type: "integer", nullable: false),
+                    imagemurl = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true)
                 },
                 constraints: table =>
                 {
@@ -209,9 +210,9 @@ namespace PetLink_BackEnd.Migrations
                 columns: new[] { "id", "bairro", "cep", "cidade", "email", "nome", "numero", "rua", "senha", "telefone", "uf" },
                 values: new object[,]
                 {
-                    { 1, "Clone", "15790000", "Rubineia", "gabriel@gmail.com", "Gabriel", 1, "Rua dos Guerreiros", "pokemon12", "179999999", "São Paulo" },
+                    { 1, "Clone", "15790000", "Rubineia", "gabriel@gmail.com", "Gabriel", 1, "Rua dos Guerreiros", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "179999999", "São Paulo" },
                     { 2, "NSF", "15761006", "Urânia", "enzo@gmail.com", "Enzo", 69, "Travessia dos nóia", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "17997938925", "São Paulo" },
-                    { 3, "Centro", "15761396", "Dolcinópolis", "yasmin@gmail.com", "Yasmin", 777, "Aquela rua lá", "fatecjales", "17997921343", "São Paulo" }
+                    { 3, "Centro", "15761396", "Dolcinópolis", "yasmin@gmail.com", "Yasmin", 777, "Aquela rua lá", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "17997921343", "São Paulo" }
                 });
 
             migrationBuilder.InsertData(
@@ -235,12 +236,12 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.InsertData(
                 table: "pet",
-                columns: new[] { "id", "castrado", "idade", "nome", "peso", "raca", "rga", "sexo", "tipopet", "usuarioid" },
+                columns: new[] { "id", "castrado", "idade", "imagemurl", "nome", "peso", "raca", "rga", "sexo", "tipopet", "usuarioid" },
                 values: new object[,]
                 {
-                    { 1, false, 12, "Peroba", 35.3f, "Pit Bull", "22992", "Masculino", 2, 1 },
-                    { 2, true, 5, "Felipina", 5.5f, "Siâmes", "22992", "Fêmea", 1, 2 },
-                    { 3, false, 24, "Neguin", 30.9f, "Pastor Alemão", "22992", "Masculino", 2, 3 }
+                    { 1, false, 12, "https://www.prodograw.com/wp-content/uploads/2025/09/American-Pitbull-1-800x800.jpg", "Peroba", 35.3f, "Pit Bull", "22992", "Masculino", 2, 1 },
+                    { 2, true, 5, "https://images.tcdn.com.br/img/img_prod/1087789/noticia_619419434679a87734bc0e.png", "Felipina", 5.5f, "Yorkshire", "22392", "Fêmea", 1, 2 },
+                    { 3, false, 24, "https://objectstorage.sa-vinhedo-1.oraclecloud.com/n/axuh3s32sabm/b/cobasi-institutional-cms-bucket/o/prod/Pastor%202.jpg", "Neguin", 30.9f, "Pastor Alemão", "22192", "Masculino", 2, 3 }
                 });
 
             migrationBuilder.InsertData(

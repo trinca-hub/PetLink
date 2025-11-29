@@ -26,7 +26,7 @@ export default function Login() {
     console.log("RESULTADO NO LOGIN:", result);
 
     if (result?.code === 1) {
-      router.push("/(tabs)");
+      router.replace("/(tabs)");
     } else {
       alert(result?.message || "Credenciais inválidas");
     }

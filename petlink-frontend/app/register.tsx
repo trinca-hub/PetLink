@@ -59,7 +59,7 @@ export default function Register() {
 
     if (result.code === 1) {
       alert("Conta criada!");
-      router.push("/login");
+      router.replace("/login");
     } else {
       alert(result.message || "Erro ao cadastrar!");
     }
