@@ -12,7 +12,7 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251129004006_teste")]
+    [Migration("20260121215730_teste")]
     partial class teste
     {
         /// <inheritdoc />
@@ -183,6 +183,11 @@ namespace PetLink_BackEnd.Migrations
                     b.Property<bool>("Castrado")
                         .HasColumnType("boolean")
                         .HasColumnName("castrado");
+
+                    b.Property<string>("Foto")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
+                        .HasColumnName("foto");
 
                     b.Property<int>("Idade")
                         .HasColumnType("integer")
@@ -460,7 +465,7 @@ namespace PetLink_BackEnd.Migrations
                             Nome = "Gabriel",
                             Numero = 1,
                             Rua = "Rua dos Guerreiros",
-                            Senha = "pokemon12",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Telefone = "179999999",
                             Uf = "São Paulo"
                         },
@@ -488,7 +493,7 @@ namespace PetLink_BackEnd.Migrations
                             Nome = "Yasmin",
                             Numero = 777,
                             Rua = "Aquela rua lá",
-                            Senha = "fatecjales",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Telefone = "17997921343",
                             Uf = "São Paulo"
                         });

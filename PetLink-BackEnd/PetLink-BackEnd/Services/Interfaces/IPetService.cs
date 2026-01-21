@@ -5,5 +5,7 @@ namespace PetLink_BackEnd.Services.Interfaces
 {
     public interface IPetService : IGenericService<Pet, PetDTO>
     {
+        Task<IEnumerable<PetDTO>> GetByUsuarioId(int usuarioId);
+
     }
 }

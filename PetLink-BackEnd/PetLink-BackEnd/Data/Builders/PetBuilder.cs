@@ -19,6 +19,8 @@ namespace PetLink_BackEnd.Data.Builders
             modelBuilder.Entity<Pet>().Property(p => p.Castrado).IsRequired();
             modelBuilder.Entity<Pet>().Property(p => p.TipoPet).IsRequired();
             modelBuilder.Entity<Pet>().Property(p => p.UsuarioId).IsRequired();
+            modelBuilder.Entity<Pet>().Property(p => p.Foto).HasColumnName("foto").HasMaxLength(1000).IsRequired(false);
+
 
 
             modelBuilder.Entity<Pet>()

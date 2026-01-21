@@ -132,6 +132,7 @@ namespace PetLink_BackEnd.Migrations
                     sexo = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
                     rga = table.Column<string>(type: "character varying(7)", maxLength: 7, nullable: false),
                     idade = table.Column<int>(type: "integer", nullable: false),
+                    foto = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true),
                     peso = table.Column<float>(type: "real", nullable: false),
                     castrado = table.Column<bool>(type: "boolean", nullable: false),
                     tipopet = table.Column<int>(type: "integer", nullable: false),
@@ -209,9 +210,9 @@ namespace PetLink_BackEnd.Migrations
                 columns: new[] { "id", "bairro", "cep", "cidade", "email", "nome", "numero", "rua", "senha", "telefone", "uf" },
                 values: new object[,]
                 {
-                    { 1, "Clone", "15790000", "Rubineia", "gabriel@gmail.com", "Gabriel", 1, "Rua dos Guerreiros", "pokemon12", "179999999", "São Paulo" },
+                    { 1, "Clone", "15790000", "Rubineia", "gabriel@gmail.com", "Gabriel", 1, "Rua dos Guerreiros", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "179999999", "São Paulo" },
                     { 2, "NSF", "15761006", "Urânia", "enzo@gmail.com", "Enzo", 69, "Travessia dos nóia", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "17997938925", "São Paulo" },
-                    { 3, "Centro", "15761396", "Dolcinópolis", "yasmin@gmail.com", "Yasmin", 777, "Aquela rua lá", "fatecjales", "17997921343", "São Paulo" }
+                    { 3, "Centro", "15761396", "Dolcinópolis", "yasmin@gmail.com", "Yasmin", 777, "Aquela rua lá", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", "17997921343", "São Paulo" }
                 });
 
             migrationBuilder.InsertData(
@@ -235,12 +236,12 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.InsertData(
                 table: "pet",
-                columns: new[] { "id", "castrado", "idade", "nome", "peso", "raca", "rga", "sexo", "tipopet", "usuarioid" },
+                columns: new[] { "id", "castrado", "foto", "idade", "nome", "peso", "raca", "rga", "sexo", "tipopet", "usuarioid" },
                 values: new object[,]
                 {
-                    { 1, false, 12, "Peroba", 35.3f, "Pit Bull", "22992", "Masculino", 2, 1 },
-                    { 2, true, 5, "Felipina", 5.5f, "Siâmes", "22992", "Fêmea", 1, 2 },
-                    { 3, false, 24, "Neguin", 30.9f, "Pastor Alemão", "22992", "Masculino", 2, 3 }
+                    { 1, false, null, 12, "Peroba", 35.3f, "Pit Bull", "22992", "Masculino", 2, 1 },
+                    { 2, true, null, 5, "Felipina", 5.5f, "Siâmes", "22992", "Fêmea", 1, 2 },
+                    { 3, false, null, 24, "Neguin", 30.9f, "Pastor Alemão", "22992", "Masculino", 2, 3 }
                 });
 
             migrationBuilder.InsertData(

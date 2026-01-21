@@ -3,20 +3,25 @@ const BASE_URL = "http://192.168.12.61:5078/api/v1";
 export async function api(
   endpoint: string,
   method: string = "GET",
-  body?: any
+  body?: any,
+  token?: string
 ) {
-  const config: RequestInit = {
-    method,
-    headers: {
-      "Content-Type": "application/json",
-    },
+  const headers: any = {
+    "Content-Type": "application/json",
   };
 
-  if (body) config.body = JSON.stringify(body);
+  if (token) headers.Authorization = `Bearer ${token}`;
 
-  console.log("➡️ Fetch:", `${BASE_URL}/${endpoint}`);
+  const response = await fetch(`${BASE_URL}/${endpoint}`, {
+    method,
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
 
-  const response = await fetch(`${BASE_URL}/${endpoint}`, config);
+  const contentType = response.headers.get("content-type") || "";
+  const data = contentType.includes("application/json")
+    ? await response.json()
+    : await response.text();
 
-  return await response.json();
+  return { ok: response.ok, status: response.status, data };
 }

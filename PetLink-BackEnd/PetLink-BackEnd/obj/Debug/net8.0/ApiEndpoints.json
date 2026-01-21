@@ -395,6 +395,16 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "PetLink_BackEnd.Controllers.PetController",
+    "Method": "GetMeusPets",
+    "RelativePath": "api/v1/Pet/meus",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "PetLink_BackEnd.Controllers.ProdutoController",
     "Method": "GetAll",
     "RelativePath": "api/v1/Produto",
@@ -566,6 +576,16 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.UsuarioController",
+    "Method": "Me",
+    "RelativePath": "api/v1/Usuario/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   },
   {

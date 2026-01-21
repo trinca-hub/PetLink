@@ -12,7 +12,13 @@ namespace PetLink_BackEnd.Services.Entities;
         private readonly IPetRepository _petRepository;
         private readonly IMapper _mapper;
 
-        public PetService(IPetRepository petRepository, IMapper mapper) : base(petRepository, mapper)
+    public async Task<IEnumerable<PetDTO>> GetByUsuarioId(int usuarioId)
+    {
+        var pets = await _petRepository.GetByUsuarioId(usuarioId);
+        return _mapper.Map<IEnumerable<PetDTO>>(pets);
+    }
+
+    public PetService(IPetRepository petRepository, IMapper mapper) : base(petRepository, mapper)
         {
             _petRepository = petRepository;
             _mapper = mapper;

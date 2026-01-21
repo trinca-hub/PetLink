@@ -1,8 +1,8 @@
 {
   "openapi": "3.0.4",
   "info": {
-    "title": "PetLink-BackEnd",
-    "version": "1.0"
+    "title": "PetLink API",
+    "version": "v1"
   },
   "paths": {
     "/api/v1/Administrador": {
@@ -505,6 +505,18 @@
         }
       }
     },
+    "/api/v1/Pet/meus": {
+      "get": {
+        "tags": [
+          "Pet"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/Produto": {
       "get": {
         "tags": [
@@ -911,6 +923,18 @@
         }
       }
     },
+    "/api/v1/Usuario/me": {
+      "get": {
+        "tags": [
+          "Usuario"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
     "/api/v1/Veterinario": {
       "get": {
         "tags": [
@@ -1153,6 +1177,10 @@
           "castrado": {
             "type": "boolean"
           },
+          "foto": {
+            "type": "string",
+            "nullable": true
+          },
           "tipoPet": {
             "$ref": "#/components/schemas/TipoPet"
           },
@@ -1310,6 +1338,19 @@
         },
         "additionalProperties": false
       }
+    },
+    "securitySchemes": {
+      "Bearer": {
+        "type": "apiKey",
+        "description": "Digite: Bearer {seu token JWT}",
+        "name": "Authorization",
+        "in": "header"
+      }
     }
-  }
+  },
+  "security": [
+    {
+      "Bearer": [ ]
+    }
+  ]
 }

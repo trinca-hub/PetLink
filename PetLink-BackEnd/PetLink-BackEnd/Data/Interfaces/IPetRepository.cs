@@ -5,4 +5,6 @@ namespace PetLink_BackEnd.Data.Interfaces;
 
 public interface IPetRepository : IGenericRepository<Pet>
 {
+    Task<IEnumerable<Pet>> GetByUsuarioId(int usuarioId);
+
 }
