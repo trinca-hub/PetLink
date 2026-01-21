@@ -45,6 +45,7 @@ export function AuthProvider({ children }: any) {
 
   // Login
   async function login(email: string, senha: string) {
+<<<<<<< HEAD
     const result: any = await loginService(email, senha);
     console.log("🔐 Resultado login:", result);
 
@@ -67,17 +68,48 @@ export function AuthProvider({ children }: any) {
       }
 
       return { code: 1 };
+=======
+    console.log("Chamou login()", email, senha);
+
+    const result = await loginService(email, senha).catch((err) => {
+      console.log("ERRO NO FETCH:", err);
+    });
+
+    console.log("Resultado da API:", result);
+
+    if (result && result.code === 1) {
+
+      const tokenRecebido = result.data.token;     // ✔ token correto
+      const usuarioRecebido = result.data.usuario; // ✔ dados do usuário logado
+
+      // salva no state
+      setToken(tokenRecebido);
+
+      // salva no armazenamento interno
+      await AsyncStorage.setItem("token", tokenRecebido);
+      await AsyncStorage.setItem("usuario", JSON.stringify(usuarioRecebido));
+
+      return result;
+>>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
     }
 
     return { code: 0, message: "Erro ao fazer login" };
   }
 
+<<<<<<< HEAD
   // Logout
   async function logout() {
     setToken(null);
     setUser(null);
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("usuario");
+=======
+
+  function logout() {
+    setToken(null);
+    AsyncStorage.removeItem("token");
+    AsyncStorage.removeItem("usuario");
+>>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
   }
 
   return (
