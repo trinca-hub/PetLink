@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
+using System.Security.Claims;
+
 
 namespace PetLink_BackEnd.Controllers;
 
@@ -159,6 +161,58 @@ public class UsuarioController : Controller
         }
     }
 
+<<<<<<< HEAD
+    [HttpGet("me")]
+    public async Task<IActionResult> Me()
+    {
+        try
+        {
+            // Pega o email salvo no token (claim)
+            var email = User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
+                ?.Value;
+
+            if (string.IsNullOrEmpty(email))
+            {
+                _response.Code = ResponseEnum.INVALID;
+                _response.Data = null;
+                _response.Message = "Usuário não autenticado";
+                return Unauthorized(_response);
+            }
+
+            // Busca o usuário pelo email
+            var usuarioDTO = await _usuarioService.GetByEmail(email);
+
+            if (usuarioDTO == null)
+            {
+                _response.Code = ResponseEnum.NOT_FOUND;
+                _response.Data = null;
+                _response.Message = "Usuário não encontrado";
+                return NotFound(_response);
+            }
+
+            _response.Code = ResponseEnum.SUCCESS;
+            _response.Data = usuarioDTO;
+            _response.Message = "Usuário autenticado";
+
+            return Ok(_response);
+        }
+        catch (Exception ex)
+        {
+            _response.Code = ResponseEnum.ERROR;
+            _response.Message = "Erro ao buscar usuário autenticado";
+            _response.Data = new
+            {
+                ErrorMessage = ex.Message,
+                StackTrace = ex.StackTrace ?? "No stack trace available"
+            };
+
+            return StatusCode(StatusCodes.Status500InternalServerError, _response);
+        }
+    }
+
+=======
+>>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, UsuarioDTO usuarioDTO)

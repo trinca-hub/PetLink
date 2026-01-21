@@ -25,4 +25,15 @@ public class UsuarioService : GenericService<Usuario, UsuarioDTO>, IUsuarioServi
         if (usuario is not null) usuario.Senha = ""; // Oculta a senha
         return _mapper.Map<UsuarioDTO>(usuario);
     }
+
+    public async Task<UsuarioDTO> GetByEmail(string email)
+    {
+        var usuario = await _usuarioRepository.GetByEmail(email);
+
+        if (usuario == null)
+            return null;
+
+        return _mapper.Map<UsuarioDTO>(usuario);
+    }
+
 }

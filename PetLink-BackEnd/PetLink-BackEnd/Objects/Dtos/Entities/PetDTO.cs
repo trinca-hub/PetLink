@@ -12,6 +12,7 @@ namespace PetLink_BackEnd.Objects.Dtos.Entities
             public int Idade { get; set; }
             public float Peso { get; set; }
             public bool Castrado { get; set; }
+            public string? Foto { get; set; }
             public TipoPet TipoPet { get; set; }
             public int UsuarioId { get; set; }
             public string ImagemUrl { get; set; }

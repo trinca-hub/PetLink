@@ -19,5 +19,12 @@ namespace PetLink_BackEnd.Data.Repositories
         {
             return await _context.Usuarios.AsNoTracking().FirstOrDefaultAsync(p => p.Email == login.Email && p.Senha == login.Password);
         }
+
+        public async Task<Usuario> GetByEmail(string email)
+        {
+            return await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
+
     }
 }

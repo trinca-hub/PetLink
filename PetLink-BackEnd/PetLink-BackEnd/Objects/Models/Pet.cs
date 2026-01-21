@@ -24,6 +24,10 @@ namespace PetLink_BackEnd.Objects.Models
         [Column("idade")]
         public int Idade { get; set; }
 
+        [Column("foto")]
+        public string? Foto { get; set; }
+
+
         [Column("peso")]
         public float Peso { get; set; }
 
@@ -42,7 +46,11 @@ namespace PetLink_BackEnd.Objects.Models
 
         public Pet() { }
 
+<<<<<<< HEAD
+        public Pet(int id, string nome, string raca, string sexo, string rga, int idade, float peso, bool castrado, TipoPet tipoPet, int usuarioid, string? foto = null)
+=======
         public Pet(int id, string nome, string raca, string sexo, string rga, int idade, float peso, bool castrado, TipoPet tipoPet, int usuarioid, string imagemUrl)
+>>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
         {
             Id = id;
             Nome = nome;
@@ -54,7 +62,11 @@ namespace PetLink_BackEnd.Objects.Models
             Castrado = castrado;
             TipoPet = tipoPet;
             UsuarioId = usuarioid;
+<<<<<<< HEAD
+            Foto = foto;
+=======
             ImagemUrl = imagemUrl;
+>>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
         }
     }
 }

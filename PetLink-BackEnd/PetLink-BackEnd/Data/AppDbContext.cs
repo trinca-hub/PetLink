@@ -14,9 +14,10 @@ public class AppDbContext : DbContext
     public DbSet<Pedido> Pedidos { get; set; }
     public DbSet<ItemPedido> ItemPedidos { get; set; }
 
-    public DbSet<Pet> Pet { get; set; }
+    public DbSet<Pet> Pets { get; set; }
 
     public DbSet<Servico> Servicos { get; set; }
+
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
