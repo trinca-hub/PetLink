@@ -43,7 +43,7 @@ export default function Perfil() {
   }, [user]);
 
   const handleChange = (field: string, value: string) => {
-    setForm({ ...form, [field]: value });
+    setForm((prevForm) => ({ ...prevForm, [field]: value }));
   };
 
   const handleSave = async () => {
@@ -55,6 +55,9 @@ export default function Perfil() {
         ...form,
         numero: parseInt(form.numero),
       };
+
+      // Remover o campo senha se existir
+      delete updatedUser.senha;
 
       await updateUserService(user.id, updatedUser, token);
 

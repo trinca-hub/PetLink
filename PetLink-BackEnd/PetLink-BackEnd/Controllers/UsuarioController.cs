@@ -160,8 +160,6 @@ public class UsuarioController : Controller
             return StatusCode(StatusCodes.Status500InternalServerError, _response);
         }
     }
-
-<<<<<<< HEAD
     [HttpGet("me")]
     public async Task<IActionResult> Me()
     {
@@ -211,8 +209,6 @@ public class UsuarioController : Controller
         }
     }
 
-=======
->>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Put(int id, UsuarioDTO usuarioDTO)

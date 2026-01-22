@@ -505,17 +505,11 @@
         }
       }
     },
-<<<<<<< HEAD
-    "/api/v1/Pet/meus": {
-=======
     "/api/v1/Pet/usuario/{usuarioId}": {
->>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
       "get": {
         "tags": [
           "Pet"
         ],
-<<<<<<< HEAD
-=======
         "parameters": [
           {
             "name": "usuarioId",
@@ -527,7 +521,18 @@
             }
           }
         ],
->>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/Pet/meus": {
+      "get": {
+        "tags": [
+          "Pet"
+        ],
         "responses": {
           "200": {
             "description": "OK"
@@ -1205,10 +1210,6 @@
           "usuarioId": {
             "type": "integer",
             "format": "int32"
-          },
-          "imagemUrl": {
-            "type": "string",
-            "nullable": true
           }
         },
         "additionalProperties": false
