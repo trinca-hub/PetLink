@@ -15,7 +15,6 @@ namespace PetLink_BackEnd.Objects.Dtos.Entities
             public string? Foto { get; set; }
             public TipoPet TipoPet { get; set; }
             public int UsuarioId { get; set; }
-            public string ImagemUrl { get; set; }
 
     }
 }

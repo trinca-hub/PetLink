@@ -22,6 +22,7 @@ export default function Login() {
   const [senha, setSenha] = useState("");
 
   async function handleLogin() {
+  try {
     const result = await login(email, senha);
     console.log("RESULTADO NO LOGIN:", result);
 
@@ -30,7 +31,12 @@ export default function Login() {
     } else {
       alert(result?.message || "Credenciais inválidas");
     }
+  } catch (error) {
+    console.error("Erro inesperado no login:", error);
+    alert("Erro inesperado ao tentar logar.");
   }
+}
+
 
   return (
     <ImageBackground

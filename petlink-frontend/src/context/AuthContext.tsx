@@ -1,6 +1,6 @@
 import { createContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { loginService, getMeService } from "../api/authService";
+import { loginService} from "../api/authService";
 
 type User = {
   id: number;
@@ -28,7 +28,7 @@ export function AuthProvider({ children }: any) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
 
-  // Carrega usuário e token ao iniciar
+  // Carrega token e usuário do armazenamento local ao iniciar
   useEffect(() => {
     async function loadStorage() {
       const storedToken = await AsyncStorage.getItem("token");
@@ -42,76 +42,36 @@ export function AuthProvider({ children }: any) {
 
     loadStorage();
   }, []);
+async function login(email: string, senha: string) {
+  const result: any = await loginService(email, senha);
+  console.log("🔐 Resultado login:", result);
 
-  // Login
-  async function login(email: string, senha: string) {
-<<<<<<< HEAD
-    const result: any = await loginService(email, senha);
-    console.log("🔐 Resultado login:", result);
+  if (result?.ok && result?.data?.code === 1) {
+    const tokenRecebido = result.data.data.token;
+    const usuarioRecebido = result.data.data.usuario;
 
-    if (result?.data?.code === 1) {
-      const tokenRecebido = result.data.data;
+    setToken(tokenRecebido);
+    setUser(usuarioRecebido);
 
-      setToken(tokenRecebido);
-      await AsyncStorage.setItem("token", tokenRecebido);
+    await AsyncStorage.setItem("token", tokenRecebido);
+    await AsyncStorage.setItem("usuario", JSON.stringify(usuarioRecebido));
 
-      const me = await getMeService(tokenRecebido);
-      console.log("📥 Resultado getMeService:", me);
-
-      if (me?.data?.code === 1) {
-        const userData = me.data.data;
-
-        setUser(userData);
-        await AsyncStorage.setItem("usuario", JSON.stringify(userData));
-      } else {
-        console.warn("⚠️ Erro ao obter dados do usuário:", me);
-      }
-
-      return { code: 1 };
-=======
-    console.log("Chamou login()", email, senha);
-
-    const result = await loginService(email, senha).catch((err) => {
-      console.log("ERRO NO FETCH:", err);
-    });
-
-    console.log("Resultado da API:", result);
-
-    if (result && result.code === 1) {
-
-      const tokenRecebido = result.data.token;     // ✔ token correto
-      const usuarioRecebido = result.data.usuario; // ✔ dados do usuário logado
-
-      // salva no state
-      setToken(tokenRecebido);
-
-      // salva no armazenamento interno
-      await AsyncStorage.setItem("token", tokenRecebido);
-      await AsyncStorage.setItem("usuario", JSON.stringify(usuarioRecebido));
-
-      return result;
->>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
-    }
-
-    return { code: 0, message: "Erro ao fazer login" };
+    return { code: 1 };
   }
 
-<<<<<<< HEAD
-  // Logout
+  return { code: 0, message: result?.data?.message || "Erro ao fazer login" };
+}
+
+
+  // LOGOUT
   async function logout() {
     setToken(null);
     setUser(null);
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("usuario");
-=======
-
-  function logout() {
-    setToken(null);
-    AsyncStorage.removeItem("token");
-    AsyncStorage.removeItem("usuario");
->>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
   }
 
+  // JSX de retorno do contexto
   return (
     <AuthContext.Provider value={{ token, user, login, logout }}>
       {children}

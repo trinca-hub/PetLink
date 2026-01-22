@@ -1,10 +1,5 @@
-<<<<<<< HEAD
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-=======
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
->>>>>>> b6aa95b71cc22555ce2741ae2f58d1ab25962415
 using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
@@ -81,7 +76,6 @@ public class PetController : Controller
 
         return Ok(_response);
     }
-
 
     [HttpPost]
     public async Task<IActionResult> Post(PetDTO petDTO)
