@@ -23,58 +23,87 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
 
     public async Task<int> CreateCompleto(CriarAnuncioDTO dto)
     {
-        if (dto.UsuarioId <= 0) throw new ArgumentException("UsuarioId é obrigatório.");
+        if (dto is null) throw new ArgumentException("DTO é obrigatório.");
         if (string.IsNullOrWhiteSpace(dto.Descricao)) throw new ArgumentException("Descricao é obrigatória.");
 
         var tipo = (TipoAnuncio)dto.TipoAnuncio;
 
         ValidarPayloadPorTipo(tipo, dto);
 
-        // valida se usuario existe
-        if (!await _context.Usuarios.AnyAsync(u => u.Id == dto.UsuarioId))
-            throw new ArgumentException("UsuarioId não existe.");
-
-        // valida FKs por tipo (evita 500)
-        if (tipo == TipoAnuncio.PETINDER && !await _context.Pets.AnyAsync(p => p.Id == dto.PeTinder!.PetId))
-            throw new ArgumentException("PetId não existe.");
-
-        if (tipo == TipoAnuncio.PETFINDER && !await _context.Pets.AnyAsync(p => p.Id == dto.PetFinder!.PetId))
-            throw new ArgumentException("PetId não existe.");
-
-        if (tipo == TipoAnuncio.PAYPET && !await _context.Pets.AnyAsync(p => p.Id == dto.PayPet!.PetId))
-            throw new ArgumentException("PetId não existe.");
-
-        if (tipo == TipoAnuncio.PETSHOP && !await _context.Produtos.AnyAsync(pr => pr.Id == dto.PetShop!.ProdutoId))
-            throw new ArgumentException("ProdutoId não existe.");
-
-        // valida se pet é do usuario (quando for anúncio com pet)
-        if (tipo is TipoAnuncio.PETINDER or TipoAnuncio.PETFINDER or TipoAnuncio.PAYPET)
+        // ✅ quem cria: usuario ou admin
+        if (tipo == TipoAnuncio.PETSHOP)
         {
-            var petId = tipo switch
-            {
-                TipoAnuncio.PETINDER => dto.PeTinder!.PetId,
-                TipoAnuncio.PETFINDER => dto.PetFinder!.PetId,
-                _ => dto.PayPet!.PetId
-            };
+            if (dto.CriadorId is null || dto.CriadorId <= 0)
+                throw new ArgumentException("CriadorId (AdminId) é obrigatório para anúncio PETSHOP.");
 
-            var petEhDoUsuario = await _context.Pets.AnyAsync(p => p.Id == petId && p.UsuarioId == dto.UsuarioId);
-            if (!petEhDoUsuario)
-                throw new ArgumentException("Esse PetId não pertence a esse UsuarioId.");
+            // valida admin existe
+            if (!await _context.Administradores.AnyAsync(a => a.Id == dto.CriadorId.Value))
+                throw new ArgumentException("AdminId não existe.");
+
+            // valida produto existe
+            if (!await _context.Produtos.AnyAsync(pr => pr.Id == dto.PetShop!.ProdutoId))
+                throw new ArgumentException("ProdutoId não existe.");
+
+            // (recomendado) se seu Administrador tiver PetShopId:
+            // if (!await _context.Administradores.AnyAsync(a => a.Id == dto.CriadorId.Value && a.PetShopId == dto.PetShop!.PetShopId))
+            //     throw new ArgumentException("Admin não pertence a esse PetShop.");
+        }
+        else
+        {
+            if (dto.UsuarioId is null || dto.UsuarioId <= 0)
+                throw new ArgumentException("UsuarioId é obrigatório para esse tipo de anúncio.");
+
+            // valida se usuario existe
+            if (!await _context.Usuarios.AnyAsync(u => u.Id == dto.UsuarioId.Value))
+                throw new ArgumentException("UsuarioId não existe.");
+
+            // valida FKs por tipo (evita 500)
+            if (tipo == TipoAnuncio.PETINDER && !await _context.Pets.AnyAsync(p => p.Id == dto.PeTinder!.PetId))
+                throw new ArgumentException("PetId não existe.");
+
+            if (tipo == TipoAnuncio.PETFINDER && !await _context.Pets.AnyAsync(p => p.Id == dto.PetFinder!.PetId))
+                throw new ArgumentException("PetId não existe.");
+
+            if (tipo == TipoAnuncio.PAYPET && !await _context.Pets.AnyAsync(p => p.Id == dto.PayPet!.PetId))
+                throw new ArgumentException("PetId não existe.");
+
+            // valida se pet é do usuario (quando for anúncio com pet)
+            if (tipo is TipoAnuncio.PETINDER or TipoAnuncio.PETFINDER or TipoAnuncio.PAYPET)
+            {
+                var petId = tipo switch
+                {
+                    TipoAnuncio.PETINDER => dto.PeTinder!.PetId,
+                    TipoAnuncio.PETFINDER => dto.PetFinder!.PetId,
+                    _ => dto.PayPet!.PetId
+                };
+
+                var petEhDoUsuario = await _context.Pets.AnyAsync(p => p.Id == petId && p.UsuarioId == dto.UsuarioId.Value);
+                if (!petEhDoUsuario)
+                    throw new ArgumentException("Esse PetId não pertence a esse UsuarioId.");
+            }
         }
 
         using var trx = await _context.Database.BeginTransactionAsync();
 
+        // ✅ cria base (com “criador” e origem de endereço)
         var anuncio = new Anuncio
         {
             Descricao = dto.Descricao,
             TipoAnuncio = tipo,
-            UsuarioId = dto.UsuarioId,
-            DataCriacao = DateTime.UtcNow
+            DataCriacao = DateTime.UtcNow,
+
+            OrigemEndereco = (tipo == TipoAnuncio.PETSHOP) ? OrigemEndereco.PETSHOP : OrigemEndereco.USUARIO,
+
+            CriadorTipo = (tipo == TipoAnuncio.PETSHOP) ? CriadorAnuncio.ADMIN : CriadorAnuncio.USUARIO,
+            CriadorId = (tipo == TipoAnuncio.PETSHOP) ? dto.CriadorId!.Value : dto.UsuarioId!.Value,
+
+            UsuarioId = (tipo == TipoAnuncio.PETSHOP) ? null : dto.UsuarioId!.Value
         };
 
         _context.Anuncios.Add(anuncio);
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(); // agora anuncio.Id existe
 
+        // ✅ cria subtipo
         switch (tipo)
         {
             case TipoAnuncio.PAYPET:
@@ -113,12 +142,17 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
                     PetShopId = dto.PetShop!.PetShopId
                 });
                 break;
+
+            default:
+                throw new ArgumentException("TipoAnuncio inválido.");
         }
 
         await _context.SaveChangesAsync();
         await trx.CommitAsync();
+
         return anuncio.Id;
     }
+
 
 
     private static void ValidarPayloadPorTipo(TipoAnuncio tipo, CriarAnuncioDTO dto)

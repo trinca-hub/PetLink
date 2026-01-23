@@ -13,19 +13,18 @@ public class AnuncioBuilder
             .IsRequired()
             .HasMaxLength(500);
 
-        modelBuilder.Entity<Anuncio>().Property(a => a.TipoAnuncio)
-            .IsRequired();
+        modelBuilder.Entity<Anuncio>().Property(a => a.TipoAnuncio).IsRequired();
+        modelBuilder.Entity<Anuncio>().Property(a => a.DataCriacao).IsRequired();
 
-        modelBuilder.Entity<Anuncio>().Property(a => a.DataCriacao)
-            .IsRequired();
+        modelBuilder.Entity<Anuncio>().Property(a => a.CriadorTipo).IsRequired();
+        modelBuilder.Entity<Anuncio>().Property(a => a.CriadorId).IsRequired();
 
-        modelBuilder.Entity<Anuncio>().Property(a => a.UsuarioId)
-            .IsRequired();
+        modelBuilder.Entity<Anuncio>().Property(a => a.OrigemEndereco).IsRequired();
 
-        // 1 Usuario -> N Anuncios
+        // UsuarioId pode ser null
         modelBuilder.Entity<Anuncio>()
             .HasOne(a => a.Usuario)
-            .WithMany() // se você tiver Usuario.Anuncios, troca para .WithMany(u => u.Anuncios)
+            .WithMany()
             .HasForeignKey(a => a.UsuarioId)
             .OnDelete(DeleteBehavior.Restrict);
     }

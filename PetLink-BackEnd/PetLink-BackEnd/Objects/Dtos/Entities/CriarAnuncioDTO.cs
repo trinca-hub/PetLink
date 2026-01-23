@@ -2,12 +2,15 @@
 
 public class CriarAnuncioDTO
 {
-    // Base (sempre vem)
     public string Descricao { get; set; } = string.Empty;
     public int TipoAnuncio { get; set; }
-    public int UsuarioId { get; set; }
 
-    // Subtipos (só 1 deles deve vir, dependendo do TipoAnuncio)
+    // ✅ agora pode ser null (petshop)
+    public int? UsuarioId { get; set; }
+
+    // ✅ usado quando for Petshop (admin)
+    public int? CriadorId { get; set; }
+
     public CriarAnuncioPayPetDTO? PayPet { get; set; }
     public CriarAnuncioPetFinderDTO? PetFinder { get; set; }
     public CriarAnuncioPeTinderDTO? PeTinder { get; set; }

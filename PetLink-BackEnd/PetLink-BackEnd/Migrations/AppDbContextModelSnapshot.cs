@@ -93,6 +93,14 @@ namespace PetLink_BackEnd.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("CriadorId")
+                        .HasColumnType("integer")
+                        .HasColumnName("criadorid");
+
+                    b.Property<int>("CriadorTipo")
+                        .HasColumnType("integer")
+                        .HasColumnName("criadortipo");
+
                     b.Property<DateTime>("DataCriacao")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("datacriacao");
@@ -103,11 +111,15 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("descricao");
 
+                    b.Property<int>("OrigemEndereco")
+                        .HasColumnType("integer")
+                        .HasColumnName("origemendereco");
+
                     b.Property<int>("TipoAnuncio")
                         .HasColumnType("integer")
                         .HasColumnName("tipoanuncio");
 
-                    b.Property<int>("UsuarioId")
+                    b.Property<int?>("UsuarioId")
                         .HasColumnType("integer")
                         .HasColumnName("usuarioid");
 
@@ -703,8 +715,7 @@ namespace PetLink_BackEnd.Migrations
                     b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Usuario");
                 });
