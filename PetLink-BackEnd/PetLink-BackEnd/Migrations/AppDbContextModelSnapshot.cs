@@ -84,6 +84,130 @@ namespace PetLink_BackEnd.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Anuncio", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datacriacao");
+
+                    b.Property<string>("Descricao")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("descricao");
+
+                    b.Property<int>("TipoAnuncio")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipoanuncio");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuarioid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("anuncio");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPayPet", b =>
+                {
+                    b.Property<int>("AnuncioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("anuncioid");
+
+                    b.Property<int>("PetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("petid");
+
+                    b.Property<int>("TipoPayPet")
+                        .HasColumnType("integer")
+                        .HasColumnName("tipopaypet");
+
+                    b.Property<decimal?>("Valor")
+                        .HasColumnType("numeric")
+                        .HasColumnName("valor");
+
+                    b.HasKey("AnuncioId");
+
+                    b.HasIndex("PetId");
+
+                    b.ToTable("anuncio_paypet");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPeTinder", b =>
+                {
+                    b.Property<int>("AnuncioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("anuncioid");
+
+                    b.Property<int>("PetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("petid");
+
+                    b.HasKey("AnuncioId");
+
+                    b.HasIndex("PetId");
+
+                    b.ToTable("anuncio_petinder");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPetFinder", b =>
+                {
+                    b.Property<int>("AnuncioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("anuncioid");
+
+                    b.Property<DateTime>("DataDesaparecimento")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datadesaparecimento");
+
+                    b.Property<int>("PetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("petid");
+
+                    b.Property<string>("UltimoLocalVisto")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("ultimolocalvisto");
+
+                    b.HasKey("AnuncioId");
+
+                    b.HasIndex("PetId");
+
+                    b.ToTable("anuncio_petfinder");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPetShop", b =>
+                {
+                    b.Property<int>("AnuncioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("anuncioid");
+
+                    b.Property<int>("PetShopId")
+                        .HasColumnType("integer")
+                        .HasColumnName("petshopid");
+
+                    b.Property<int>("ProdutoId")
+                        .HasColumnType("integer")
+                        .HasColumnName("produtoid");
+
+                    b.HasKey("AnuncioId");
+
+                    b.HasIndex("ProdutoId");
+
+                    b.ToTable("anuncio_petshop");
+                });
+
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.ItemPedido", b =>
                 {
                     b.Property<int>("Id")
@@ -292,6 +416,10 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("character varying(256)")
                         .HasColumnName("descricao");
 
+                    b.Property<string>("Foto")
+                        .HasColumnType("text")
+                        .HasColumnName("foto");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
@@ -315,6 +443,7 @@ namespace PetLink_BackEnd.Migrations
                         {
                             Id = 1,
                             Descricao = "Ração Pedigree 500 gramas",
+                            Foto = "https://imgs.search.brave.com/r1PNHaYGnd3HRBoNFQeFO3bRfx1uCwlGuwVT1mok0qo/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9odHRw/Mi5tbHN0YXRpYy5j/b20vRF9RX05QXzJY/XzYzNjExOC1NTEE5/OTM1MDQ0MDgzOF8x/MTIwMjUtRS53ZWJw",
                             Nome = "Ração 500g",
                             Preco = 10f,
                             Quantidade = 10
@@ -323,6 +452,7 @@ namespace PetLink_BackEnd.Migrations
                         {
                             Id = 2,
                             Descricao = "Petisco de Palito sabor bacon",
+                            Foto = "https://imgs.search.brave.com/FKsGy9GxYXivL93X8J04VdbB87o_OqbnYrQk472t9P8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tLm1l/ZGlhLWFtYXpvbi5j/b20vaW1hZ2VzL0kv/NDFvU0xsLU5jZkwu/anBn",
                             Nome = "Petisco de Bacon",
                             Preco = 11f,
                             Quantidade = 15
@@ -566,6 +696,93 @@ namespace PetLink_BackEnd.Migrations
                             Salario = 100000f,
                             Status = 1
                         });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Anuncio", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPayPet", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Anuncio", "Anuncio")
+                        .WithOne()
+                        .HasForeignKey("PetLink_BackEnd.Objects.Models.AnuncioPayPet", "AnuncioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Pet", "Pet")
+                        .WithMany()
+                        .HasForeignKey("PetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Anuncio");
+
+                    b.Navigation("Pet");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPeTinder", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Anuncio", "Anuncio")
+                        .WithOne()
+                        .HasForeignKey("PetLink_BackEnd.Objects.Models.AnuncioPeTinder", "AnuncioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Pet", "Pet")
+                        .WithMany()
+                        .HasForeignKey("PetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Anuncio");
+
+                    b.Navigation("Pet");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPetFinder", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Anuncio", "Anuncio")
+                        .WithOne()
+                        .HasForeignKey("PetLink_BackEnd.Objects.Models.AnuncioPetFinder", "AnuncioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Pet", "Pet")
+                        .WithMany()
+                        .HasForeignKey("PetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Anuncio");
+
+                    b.Navigation("Pet");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPetShop", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Anuncio", "Anuncio")
+                        .WithOne()
+                        .HasForeignKey("PetLink_BackEnd.Objects.Models.AnuncioPetShop", "AnuncioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Produto", "Produto")
+                        .WithMany()
+                        .HasForeignKey("ProdutoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Anuncio");
+
+                    b.Navigation("Produto");
                 });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.ItemPedido", b =>

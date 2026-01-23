@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.Globalization;
-using System.Numerics;
 
 namespace PetLink_BackEnd.Objects.Models
 {
@@ -11,34 +9,34 @@ namespace PetLink_BackEnd.Objects.Models
         public int Id { get; set; }
 
         [Column("nome")]
-        public string Nome { get; set; }
+        public string Nome { get; set; } = string.Empty;
 
         [Column("telefone")]
-        public string Telefone { get; set; }
+        public string Telefone { get; set; } = string.Empty;
 
         [Column("cep")]
-        public string Cep { get; set; }
+        public string Cep { get; set; } = string.Empty;
 
         [Column("uf")]
-        public string Uf { get; set; }
+        public string Uf { get; set; } = string.Empty;
 
         [Column("cidade")]
-        public string Cidade { get; set; }
+        public string Cidade { get; set; } = string.Empty;
 
         [Column("bairro")]
-        public string Bairro { get; set; }
+        public string Bairro { get; set; } = string.Empty;
 
         [Column("rua")]
-        public string Rua { get; set; }
+        public string Rua { get; set; } = string.Empty;
 
         [Column("numero")]
         public int Numero { get; set; }
 
         [Column("email")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Column("senha")]
-        public string Senha { get; set; }
+        public string Senha { get; set; } = string.Empty;
 
         public Usuario() { }
 

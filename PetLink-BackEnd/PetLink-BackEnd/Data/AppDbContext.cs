@@ -13,10 +13,14 @@ public class AppDbContext : DbContext
     public DbSet<Veterinario> Veterinarios { get; set; }
     public DbSet<Pedido> Pedidos { get; set; }
     public DbSet<ItemPedido> ItemPedidos { get; set; }
-
     public DbSet<Pet> Pets { get; set; }
-
     public DbSet<Servico> Servicos { get; set; }
+    public DbSet<Anuncio> Anuncios { get; set; }
+    public DbSet<AnuncioPayPet> AnunciosPayPet { get; set; }
+    public DbSet<AnuncioPetFinder> AnunciosPetFinder { get; set; }
+    public DbSet<AnuncioPeTinder> AnunciosPeTinder { get; set; }
+    public DbSet<AnuncioPetShop> AnunciosPetShop { get; set; }
+
 
 
 
@@ -30,10 +34,15 @@ public class AppDbContext : DbContext
         VeterinarioBuilder.Build(modelBuilder);
         PedidoBuilder.Build(modelBuilder);
         ItemPedidoBuilder.Build(modelBuilder);
-
         PetBuilder.Build(modelBuilder);
-
         ServicoBuilder.Build(modelBuilder);
+        AnuncioBuilder.Build(modelBuilder);
+        AnuncioPayPetBuilder.Build(modelBuilder);
+        AnuncioPetFinderBuilder.Build(modelBuilder);
+        AnuncioPeTinderBuilder.Build(modelBuilder);
+        AnuncioPetShopBuilder.Build(modelBuilder);
+
+
 
     }
 }

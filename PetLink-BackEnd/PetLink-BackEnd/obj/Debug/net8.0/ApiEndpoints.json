@@ -158,6 +158,125 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "GetAll",
+    "RelativePath": "api/v1/Anuncio",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "Post",
+    "RelativePath": "api/v1/Anuncio",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.CriarAnuncioDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "GetById",
+    "RelativePath": "api/v1/Anuncio/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "Put",
+    "RelativePath": "api/v1/Anuncio/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "anuncioDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.AnuncioDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "Delete",
+    "RelativePath": "api/v1/Anuncio/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "FeedPaypet",
+    "RelativePath": "api/v1/Anuncio/feed/paypet",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "FeedPetfinder",
+    "RelativePath": "api/v1/Anuncio/feed/petfinder",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "FeedPetinder",
+    "RelativePath": "api/v1/Anuncio/feed/petinder",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "FeedPetshop",
+    "RelativePath": "api/v1/Anuncio/feed/petshop",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "PetLink_BackEnd.Controllers.ItemPedidoController",
     "Method": "GetAll",
     "RelativePath": "api/v1/ItemPedido",

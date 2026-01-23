@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class teste : Migration
+    public partial class testes : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -39,7 +39,8 @@ namespace PetLink_BackEnd.Migrations
                     nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
                     preco = table.Column<float>(type: "real", nullable: false),
                     descricao = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
-                    quantidade = table.Column<int>(type: "integer", nullable: false)
+                    quantidade = table.Column<int>(type: "integer", nullable: false),
+                    foto = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -102,6 +103,28 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "anuncio",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    descricao = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: false),
+                    tipoanuncio = table.Column<int>(type: "integer", nullable: false),
+                    datacriacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    usuarioid = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_anuncio", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_anuncio_usuario_usuarioid",
+                        column: x => x.usuarioid,
+                        principalTable: "usuario",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "pedido",
                 columns: table => new
                 {
@@ -150,6 +173,31 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "anuncio_petshop",
+                columns: table => new
+                {
+                    anuncioid = table.Column<int>(type: "integer", nullable: false),
+                    produtoid = table.Column<int>(type: "integer", nullable: false),
+                    petshopid = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_anuncio_petshop", x => x.anuncioid);
+                    table.ForeignKey(
+                        name: "FK_anuncio_petshop_anuncio_anuncioid",
+                        column: x => x.anuncioid,
+                        principalTable: "anuncio",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_anuncio_petshop_produto_produtoid",
+                        column: x => x.produtoid,
+                        principalTable: "produto",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "itempedido",
                 columns: table => new
                 {
@@ -176,6 +224,82 @@ namespace PetLink_BackEnd.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "anuncio_paypet",
+                columns: table => new
+                {
+                    anuncioid = table.Column<int>(type: "integer", nullable: false),
+                    petid = table.Column<int>(type: "integer", nullable: false),
+                    tipopaypet = table.Column<int>(type: "integer", nullable: false),
+                    valor = table.Column<decimal>(type: "numeric", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_anuncio_paypet", x => x.anuncioid);
+                    table.ForeignKey(
+                        name: "FK_anuncio_paypet_anuncio_anuncioid",
+                        column: x => x.anuncioid,
+                        principalTable: "anuncio",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_anuncio_paypet_pet_petid",
+                        column: x => x.petid,
+                        principalTable: "pet",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "anuncio_petfinder",
+                columns: table => new
+                {
+                    anuncioid = table.Column<int>(type: "integer", nullable: false),
+                    petid = table.Column<int>(type: "integer", nullable: false),
+                    ultimolocalvisto = table.Column<string>(type: "character varying(200)", maxLength: 200, nullable: false),
+                    datadesaparecimento = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_anuncio_petfinder", x => x.anuncioid);
+                    table.ForeignKey(
+                        name: "FK_anuncio_petfinder_anuncio_anuncioid",
+                        column: x => x.anuncioid,
+                        principalTable: "anuncio",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_anuncio_petfinder_pet_petid",
+                        column: x => x.petid,
+                        principalTable: "pet",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "anuncio_petinder",
+                columns: table => new
+                {
+                    anuncioid = table.Column<int>(type: "integer", nullable: false),
+                    petid = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_anuncio_petinder", x => x.anuncioid);
+                    table.ForeignKey(
+                        name: "FK_anuncio_petinder_anuncio_anuncioid",
+                        column: x => x.anuncioid,
+                        principalTable: "anuncio",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_anuncio_petinder_pet_petid",
+                        column: x => x.petid,
+                        principalTable: "pet",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
             migrationBuilder.InsertData(
                 table: "administrador",
                 columns: new[] { "id", "email", "nome", "senha", "status" },
@@ -188,11 +312,11 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.InsertData(
                 table: "produto",
-                columns: new[] { "id", "descricao", "nome", "preco", "quantidade" },
+                columns: new[] { "id", "descricao", "foto", "nome", "preco", "quantidade" },
                 values: new object[,]
                 {
-                    { 1, "Ração Pedigree 500 gramas", "Ração 500g", 10f, 10 },
-                    { 2, "Petisco de Palito sabor bacon", "Petisco de Bacon", 11f, 15 }
+                    { 1, "Ração Pedigree 500 gramas", "https://imgs.search.brave.com/r1PNHaYGnd3HRBoNFQeFO3bRfx1uCwlGuwVT1mok0qo/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9odHRw/Mi5tbHN0YXRpYy5j/b20vRF9RX05QXzJY/XzYzNjExOC1NTEE5/OTM1MDQ0MDgzOF8x/MTIwMjUtRS53ZWJw", "Ração 500g", 10f, 10 },
+                    { 2, "Petisco de Palito sabor bacon", "https://imgs.search.brave.com/FKsGy9GxYXivL93X8J04VdbB87o_OqbnYrQk472t9P8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tLm1l/ZGlhLWFtYXpvbi5j/b20vaW1hZ2VzL0kv/NDFvU0xsLU5jZkwu/anBn", "Petisco de Bacon", 11f, 15 }
                 });
 
             migrationBuilder.InsertData(
@@ -254,6 +378,31 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_anuncio_usuarioid",
+                table: "anuncio",
+                column: "usuarioid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_anuncio_paypet_petid",
+                table: "anuncio_paypet",
+                column: "petid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_anuncio_petfinder_petid",
+                table: "anuncio_petfinder",
+                column: "petid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_anuncio_petinder_petid",
+                table: "anuncio_petinder",
+                column: "petid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_anuncio_petshop_produtoid",
+                table: "anuncio_petshop",
+                column: "produtoid");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_itempedido_pedidoid",
                 table: "itempedido",
                 column: "pedidoid");
@@ -281,16 +430,31 @@ namespace PetLink_BackEnd.Migrations
                 name: "administrador");
 
             migrationBuilder.DropTable(
-                name: "itempedido");
+                name: "anuncio_paypet");
 
             migrationBuilder.DropTable(
-                name: "pet");
+                name: "anuncio_petfinder");
+
+            migrationBuilder.DropTable(
+                name: "anuncio_petinder");
+
+            migrationBuilder.DropTable(
+                name: "anuncio_petshop");
+
+            migrationBuilder.DropTable(
+                name: "itempedido");
 
             migrationBuilder.DropTable(
                 name: "servico");
 
             migrationBuilder.DropTable(
                 name: "veterinario");
+
+            migrationBuilder.DropTable(
+                name: "pet");
+
+            migrationBuilder.DropTable(
+                name: "anuncio");
 
             migrationBuilder.DropTable(
                 name: "pedido");
