@@ -90,9 +90,13 @@ builder.Services.AddScoped<IAdministradorRepository, AdministradorRepository>();
 builder.Services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
 builder.Services.AddScoped<IItemPedidoRepository, ItemPedidoRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
-
 builder.Services.AddScoped<IPetRepository, PetRepository>();
 builder.Services.AddScoped<IServicoRepository, ServicoRepository>();
+builder.Services.AddScoped<IAnuncioRepository, AnuncioRepository>();
+builder.Services.AddScoped<IAnuncioPayPetRepository, AnuncioPayPetRepository>();
+builder.Services.AddScoped<IAnuncioPetFinderRepository, AnuncioPetFinderRepository>();
+builder.Services.AddScoped<IAnuncioPeTinderRepository, AnuncioPeTinderRepository>();
+builder.Services.AddScoped<IAnuncioPetShopRepository, AnuncioPetShopRepository>();
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -100,9 +104,12 @@ builder.Services.AddScoped<IAdministradorService, AdministradorService>();
 builder.Services.AddScoped<IVeterinarioService, VeterinarioService>();
 builder.Services.AddScoped<IItemPedidoService, ItemPedidoService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
-
 builder.Services.AddScoped<IPetService, PetService>();
 builder.Services.AddScoped<IServicoService, ServicoService>();
+builder.Services.AddScoped<IAnuncioService, AnuncioService>();
+builder.Services.AddScoped<IAnuncioPayPetService, AnuncioPayPetService>();
+
+
 
 var app = builder.Build();
 

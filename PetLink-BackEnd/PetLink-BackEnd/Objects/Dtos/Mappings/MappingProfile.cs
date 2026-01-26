@@ -16,6 +16,11 @@ namespace PetLink_BackEnd.Objects.Dtos.Mappings
             CreateMap<ItemPedido, ItemPedidoDTO>().ReverseMap();
             CreateMap<Pet, PetDTO>().ReverseMap();
             CreateMap<Servico, ServicoDTO>().ReverseMap();
+            CreateMap<Anuncio, AnuncioDTO>().ReverseMap();
+            CreateMap<AnuncioPayPet, AnuncioPayPetDTO>().ReverseMap();
+            CreateMap<AnuncioPetFinder, AnuncioPetFinderDTO>().ReverseMap();
+            CreateMap<AnuncioPeTinder, AnuncioPeTinderDTO>().ReverseMap();
+            CreateMap<AnuncioPetShop, AnuncioPetShopDTO>().ReverseMap();
         }
     }
 }
