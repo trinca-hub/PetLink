@@ -4,7 +4,6 @@
     {
         PETINDER = 1,
         PETFINDER = 2,
-        PAYPET = 3,
-        PETSHOP = 4
+        PAYPET = 3
     }
 }

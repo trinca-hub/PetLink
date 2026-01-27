@@ -267,16 +267,6 @@
     "ReturnTypes": []
   },
   {
-    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
-    "Method": "FeedPetshop",
-    "RelativePath": "api/v1/Anuncio/feed/petshop",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
     "ContainingType": "PetLink_BackEnd.Controllers.ItemPedidoController",
     "Method": "GetAll",
     "RelativePath": "api/v1/ItemPedido",

@@ -199,27 +199,6 @@ namespace PetLink_BackEnd.Migrations
                     b.ToTable("anuncio_petfinder");
                 });
 
-            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPetShop", b =>
-                {
-                    b.Property<int>("AnuncioId")
-                        .HasColumnType("integer")
-                        .HasColumnName("anuncioid");
-
-                    b.Property<int>("PetShopId")
-                        .HasColumnType("integer")
-                        .HasColumnName("petshopid");
-
-                    b.Property<int>("ProdutoId")
-                        .HasColumnType("integer")
-                        .HasColumnName("produtoid");
-
-                    b.HasKey("AnuncioId");
-
-                    b.HasIndex("ProdutoId");
-
-                    b.ToTable("anuncio_petshop");
-                });
-
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.ItemPedido", b =>
                 {
                     b.Property<int>("Id")
@@ -784,25 +763,6 @@ namespace PetLink_BackEnd.Migrations
                     b.Navigation("Anuncio");
 
                     b.Navigation("Pet");
-                });
-
-            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPetShop", b =>
-                {
-                    b.HasOne("PetLink_BackEnd.Objects.Models.Anuncio", "Anuncio")
-                        .WithOne()
-                        .HasForeignKey("PetLink_BackEnd.Objects.Models.AnuncioPetShop", "AnuncioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PetLink_BackEnd.Objects.Models.Produto", "Produto")
-                        .WithMany()
-                        .HasForeignKey("ProdutoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Anuncio");
-
-                    b.Navigation("Produto");
                 });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.ItemPedido", b =>

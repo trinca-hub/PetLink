@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class teste : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -157,31 +157,6 @@ namespace PetLink_BackEnd.Migrations
                         principalTable: "usuario",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "anuncio_petshop",
-                columns: table => new
-                {
-                    anuncioid = table.Column<int>(type: "integer", nullable: false),
-                    produtoid = table.Column<int>(type: "integer", nullable: false),
-                    petshopid = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_anuncio_petshop", x => x.anuncioid);
-                    table.ForeignKey(
-                        name: "FK_anuncio_petshop_anuncio_anuncioid",
-                        column: x => x.anuncioid,
-                        principalTable: "anuncio",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_anuncio_petshop_produto_produtoid",
-                        column: x => x.produtoid,
-                        principalTable: "produto",
-                        principalColumn: "id",
-                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -408,11 +383,6 @@ namespace PetLink_BackEnd.Migrations
                 column: "petid");
 
             migrationBuilder.CreateIndex(
-                name: "IX_anuncio_petshop_produtoid",
-                table: "anuncio_petshop",
-                column: "produtoid");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_itempedido_pedidoid",
                 table: "itempedido",
                 column: "pedidoid");
@@ -452,9 +422,6 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.DropTable(
                 name: "anuncio_petinder");
-
-            migrationBuilder.DropTable(
-                name: "anuncio_petshop");
 
             migrationBuilder.DropTable(
                 name: "itempedido");

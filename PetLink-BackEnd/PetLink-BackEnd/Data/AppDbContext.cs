@@ -19,7 +19,6 @@ public class AppDbContext : DbContext
     public DbSet<AnuncioPayPet> AnunciosPayPet { get; set; }
     public DbSet<AnuncioPetFinder> AnunciosPetFinder { get; set; }
     public DbSet<AnuncioPeTinder> AnunciosPeTinder { get; set; }
-    public DbSet<AnuncioPetShop> AnunciosPetShop { get; set; }
 
 
 
@@ -40,7 +39,6 @@ public class AppDbContext : DbContext
         AnuncioPayPetBuilder.Build(modelBuilder);
         AnuncioPetFinderBuilder.Build(modelBuilder);
         AnuncioPeTinderBuilder.Build(modelBuilder);
-        AnuncioPetShopBuilder.Build(modelBuilder);
 
 
 

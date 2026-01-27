@@ -10,6 +10,5 @@ public interface IAnuncioService : IGenericService<Anuncio, AnuncioDTO>
     Task<IEnumerable<PetinderFeedDTO>> GetFeedPetinder();
     Task<IEnumerable<PetfinderFeedDTO>> GetFeedPetfinder();
     Task<IEnumerable<PaypetFeedDTO>> GetFeedPaypet();
-    Task<IEnumerable<PetshopFeedDTO>> GetFeedPetshop();
 
 }

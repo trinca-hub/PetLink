@@ -166,18 +166,6 @@
         }
       }
     },
-    "/api/v1/Anuncio/feed/petshop": {
-      "get": {
-        "tags": [
-          "Anuncio"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/v1/Anuncio": {
       "get": {
         "tags": [
@@ -1336,9 +1324,6 @@
           },
           "peTinder": {
             "$ref": "#/components/schemas/CriarAnuncioPeTinderDTO"
-          },
-          "petShop": {
-            "$ref": "#/components/schemas/CriarAnuncioPetShopDTO"
           }
         },
         "additionalProperties": false
@@ -1386,20 +1371,6 @@
           "dataDesaparecimento": {
             "type": "string",
             "format": "date-time"
-          }
-        },
-        "additionalProperties": false
-      },
-      "CriarAnuncioPetShopDTO": {
-        "type": "object",
-        "properties": {
-          "produtoId": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "petShopId": {
-            "type": "integer",
-            "format": "int32"
           }
         },
         "additionalProperties": false

@@ -49,16 +49,6 @@ public class AnuncioController : Controller
         return Ok(_response);
     }
 
-    [HttpGet("feed/petshop")]
-    public async Task<IActionResult> FeedPetshop()
-    {
-        _response.Code = ResponseEnum.SUCCESS;
-        _response.Data = await _anuncioService.GetFeedPetshop();
-        _response.Message = "Feed Petshop listado com sucesso";
-        return Ok(_response);
-    }
-
-
     // =========================
     // CRUD BASE (ANUNCIO)
     // =========================

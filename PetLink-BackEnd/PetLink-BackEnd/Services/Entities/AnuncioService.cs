@@ -40,10 +40,6 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
             if (!await _context.Administradores.AnyAsync(a => a.Id == dto.CriadorId.Value))
                 throw new ArgumentException("AdminId não existe.");
 
-            // valida produto existe
-            if (!await _context.Produtos.AnyAsync(pr => pr.Id == dto.PetShop!.ProdutoId))
-                throw new ArgumentException("ProdutoId não existe.");
-
             // (recomendado) se seu Administrador tiver PetShopId:
             // if (!await _context.Administradores.AnyAsync(a => a.Id == dto.CriadorId.Value && a.PetShopId == dto.PetShop!.PetShopId))
             //     throw new ArgumentException("Admin não pertence a esse PetShop.");
@@ -134,15 +130,6 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
                 });
                 break;
 
-            case TipoAnuncio.PETSHOP:
-                _context.AnunciosPetShop.Add(new AnuncioPetShop
-                {
-                    AnuncioId = anuncio.Id,
-                    ProdutoId = dto.PetShop!.ProdutoId,
-                    PetShopId = dto.PetShop!.PetShopId
-                });
-                break;
-
             default:
                 throw new ArgumentException("TipoAnuncio inválido.");
         }
@@ -161,8 +148,7 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
         var count =
             (dto.PayPet != null ? 1 : 0) +
             (dto.PetFinder != null ? 1 : 0) +
-            (dto.PeTinder != null ? 1 : 0) +
-            (dto.PetShop != null ? 1 : 0);
+            (dto.PeTinder != null ? 1 : 0);
 
         if (count != 1)
             throw new ArgumentException("Envie exatamente um bloco de dados: PayPet, PetFinder, PeTinder ou PetShop.");
@@ -179,10 +165,6 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
 
             case TipoAnuncio.PETINDER:
                 if (dto.PeTinder == null) throw new ArgumentException("PeTinder é obrigatório para TipoAnuncio=PETINDER.");
-                break;
-
-            case TipoAnuncio.PETSHOP:
-                if (dto.PetShop == null) throw new ArgumentException("PetShop é obrigatório para TipoAnuncio=PETSHOP.");
                 break;
 
             default:
@@ -269,23 +251,4 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
             })
             .ToListAsync();
     }
-
-    public async Task<IEnumerable<PetshopFeedDTO>> GetFeedPetshop()
-    {
-        return await _context.AnunciosPetShop
-            .AsNoTracking()
-            .Select(x => new PetshopFeedDTO
-            {
-                AnuncioId = x.AnuncioId,
-                Descricao = x.Anuncio.Descricao,
-                DataCriacao = x.Anuncio.DataCriacao,
-
-                ProdutoId = x.ProdutoId,
-                NomeProduto = x.Produto.Nome,
-                Preco = x.Produto.Preco,
-                FotoProduto = x.Produto.Foto
-            })
-            .ToListAsync();
-    }
-
 }

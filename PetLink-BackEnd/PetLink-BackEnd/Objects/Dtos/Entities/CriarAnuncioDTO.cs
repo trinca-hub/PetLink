@@ -14,7 +14,6 @@ public class CriarAnuncioDTO
     public CriarAnuncioPayPetDTO? PayPet { get; set; }
     public CriarAnuncioPetFinderDTO? PetFinder { get; set; }
     public CriarAnuncioPeTinderDTO? PeTinder { get; set; }
-    public CriarAnuncioPetShopDTO? PetShop { get; set; }
 }
 
 public class CriarAnuncioPayPetDTO
@@ -34,10 +33,4 @@ public class CriarAnuncioPetFinderDTO
 public class CriarAnuncioPeTinderDTO
 {
     public int PetId { get; set; }
-}
-
-public class CriarAnuncioPetShopDTO
-{
-    public int ProdutoId { get; set; }
-    public int PetShopId { get; set; }
 }
