@@ -1558,6 +1558,10 @@
           "valor": {
             "type": "number",
             "format": "float"
+          },
+          "petId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

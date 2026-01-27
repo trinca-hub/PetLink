@@ -20,15 +20,20 @@ namespace PetLink_BackEnd.Objects.Models
         [Column("valor")]
         public float Valor { get; set; }
 
+        [Column("petid")]
+        public int PetId { get; set; }
+        public Pet Pet { get; set; } = null!;
+
         public Servico() { }
 
-        public Servico(int id, DateTime dataServico, string descricao, int tipo, float valor)
+        public Servico(int id, DateTime dataServico, string descricao, int tipo, float valor, int petid)
         {
             Id = id;
             DataServico = dataServico;
             Descricao = descricao;
             Tipo = tipo;
             Valor = valor;
+            PetId = petid;
         }
     }
 }

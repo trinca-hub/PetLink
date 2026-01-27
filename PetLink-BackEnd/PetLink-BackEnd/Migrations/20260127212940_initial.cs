@@ -48,22 +48,6 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "servico",
-                columns: table => new
-                {
-                    id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    dataServico = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
-                    descricao = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
-                    tipo = table.Column<int>(type: "integer", nullable: false),
-                    valor = table.Column<float>(type: "real", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_servico", x => x.id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "usuario",
                 columns: table => new
                 {
@@ -303,6 +287,29 @@ namespace PetLink_BackEnd.Migrations
                         onDelete: ReferentialAction.Restrict);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "servico",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    dataServico = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    descricao = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    tipo = table.Column<int>(type: "integer", nullable: false),
+                    valor = table.Column<float>(type: "real", nullable: false),
+                    petid = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_servico", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_servico_pet_petid",
+                        column: x => x.petid,
+                        principalTable: "pet",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "administrador",
                 columns: new[] { "id", "email", "nome", "senha", "status" },
@@ -320,16 +327,6 @@ namespace PetLink_BackEnd.Migrations
                 {
                     { 1, "Ração Pedigree 500 gramas", "https://imgs.search.brave.com/r1PNHaYGnd3HRBoNFQeFO3bRfx1uCwlGuwVT1mok0qo/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9odHRw/Mi5tbHN0YXRpYy5j/b20vRF9RX05QXzJY/XzYzNjExOC1NTEE5/OTM1MDQ0MDgzOF8x/MTIwMjUtRS53ZWJw", "Ração 500g", 10f, 10 },
                     { 2, "Petisco de Palito sabor bacon", "https://imgs.search.brave.com/FKsGy9GxYXivL93X8J04VdbB87o_OqbnYrQk472t9P8/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tLm1l/ZGlhLWFtYXpvbi5j/b20vaW1hZ2VzL0kv/NDFvU0xsLU5jZkwu/anBn", "Petisco de Bacon", 11f, 15 }
-                });
-
-            migrationBuilder.InsertData(
-                table: "servico",
-                columns: new[] { "id", "dataServico", "descricao", "tipo", "valor" },
-                values: new object[,]
-                {
-                    { 1, new DateTime(2025, 10, 15, 0, 28, 32, 0, DateTimeKind.Utc), "Consulta do Joquinha", 1, 100f },
-                    { 2, new DateTime(2025, 9, 18, 15, 20, 22, 0, DateTimeKind.Utc), "Banho da Macoca", 2, 60f },
-                    { 3, new DateTime(2025, 6, 27, 10, 47, 2, 0, DateTimeKind.Utc), "Tosa da Penelope", 3, 80f }
                 });
 
             migrationBuilder.InsertData(
@@ -380,6 +377,16 @@ namespace PetLink_BackEnd.Migrations
                     { 2, 2, 2, 5 }
                 });
 
+            migrationBuilder.InsertData(
+                table: "servico",
+                columns: new[] { "id", "dataServico", "descricao", "petid", "tipo", "valor" },
+                values: new object[,]
+                {
+                    { 1, new DateTime(2025, 10, 15, 0, 28, 32, 0, DateTimeKind.Utc), "Consulta do Joquinha", 1, 1, 100f },
+                    { 2, new DateTime(2025, 9, 18, 15, 20, 22, 0, DateTimeKind.Utc), "Banho da Macoca", 2, 2, 60f },
+                    { 3, new DateTime(2025, 6, 27, 10, 47, 2, 0, DateTimeKind.Utc), "Tosa da Penelope", 3, 3, 80f }
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_anuncio_usuarioid",
                 table: "anuncio",
@@ -424,6 +431,11 @@ namespace PetLink_BackEnd.Migrations
                 name: "IX_pet_usuarioid",
                 table: "pet",
                 column: "usuarioid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_servico_petid",
+                table: "servico",
+                column: "petid");
         }
 
         /// <inheritdoc />
@@ -454,9 +466,6 @@ namespace PetLink_BackEnd.Migrations
                 name: "veterinario");
 
             migrationBuilder.DropTable(
-                name: "pet");
-
-            migrationBuilder.DropTable(
                 name: "anuncio");
 
             migrationBuilder.DropTable(
@@ -464,6 +473,9 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.DropTable(
                 name: "produto");
+
+            migrationBuilder.DropTable(
+                name: "pet");
 
             migrationBuilder.DropTable(
                 name: "usuario");

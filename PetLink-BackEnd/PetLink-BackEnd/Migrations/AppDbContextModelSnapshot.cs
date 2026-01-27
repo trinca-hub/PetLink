@@ -490,6 +490,10 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("character varying(250)")
                         .HasColumnName("descricao");
 
+                    b.Property<int>("PetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("petid");
+
                     b.Property<int>("Tipo")
                         .HasColumnType("integer")
                         .HasColumnName("tipo");
@@ -500,6 +504,8 @@ namespace PetLink_BackEnd.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PetId");
+
                     b.ToTable("servico");
 
                     b.HasData(
@@ -508,6 +514,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 1,
                             DataServico = new DateTime(2025, 10, 15, 0, 28, 32, 0, DateTimeKind.Utc),
                             Descricao = "Consulta do Joquinha",
+                            PetId = 1,
                             Tipo = 1,
                             Valor = 100f
                         },
@@ -516,6 +523,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 2,
                             DataServico = new DateTime(2025, 9, 18, 15, 20, 22, 0, DateTimeKind.Utc),
                             Descricao = "Banho da Macoca",
+                            PetId = 2,
                             Tipo = 2,
                             Valor = 60f
                         },
@@ -524,6 +532,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 3,
                             DataServico = new DateTime(2025, 6, 27, 10, 47, 2, 0, DateTimeKind.Utc),
                             Descricao = "Tosa da Penelope",
+                            PetId = 3,
                             Tipo = 3,
                             Valor = 80f
                         });
@@ -835,6 +844,17 @@ namespace PetLink_BackEnd.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Servico", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Pet", "Pet")
+                        .WithMany()
+                        .HasForeignKey("PetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pet");
                 });
 #pragma warning restore 612, 618
         }
