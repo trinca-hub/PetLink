@@ -1453,8 +1453,8 @@
             "nullable": true
           },
           "idade": {
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "nullable": true
           },
           "peso": {
             "type": "number",

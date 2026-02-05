@@ -21,20 +21,14 @@ type Pet = {
   id: number;
   nome?: string;
   raca?: string;
-  idade?: number; // pelo seu código: meses
+  idade?: string;
   foto?: string;
   fotoPet?: string;
+  tipoPet?: number;
 };
 
-function formatIdadeMeses(meses?: number) {
-  if (meses == null) return "Idade não informada";
-  if (meses >= 12) {
-    const anos = Math.floor(meses / 12);
-    const resto = meses % 12;
-    if (resto === 0) return `${anos} anos`;
-    return `${anos} anos e ${resto} meses`;
-  }
-  return `${meses} meses`;
+function formatIdade(idade?: string) {
+  return idade?.trim() ? idade : "Idade não informada";
 }
 
 export default function Home() {
@@ -228,7 +222,11 @@ export default function Home() {
                   {/* Infos */}
                   <View style={{ marginTop: 10, gap: 8 }}>
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                      <MaterialCommunityIcons name="dog" size={18} color="#0E2B5A" />
+                      <MaterialCommunityIcons
+                        name={String(item.tipoPet).toUpperCase() === "1" ? "cat" : "dog"}
+                        size={18}
+                        color="#0E2B5A"
+                      />
                       <Text style={{ color: "#222", fontWeight: "700" }}>
                         {item.raca || "R.N.D"}
                       </Text>
@@ -237,7 +235,7 @@ export default function Home() {
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                       <Ionicons name="calendar" size={18} color="#0E2B5A" />
                       <Text style={{ color: "#222", fontWeight: "700" }}>
-                        {formatIdadeMeses(item.idade)}
+                        {formatIdade(item.idade)}
                       </Text>
                     </View>
                   </View>

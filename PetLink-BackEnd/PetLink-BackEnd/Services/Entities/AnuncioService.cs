@@ -169,6 +169,7 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
                 IdadePet = x.Pet.Idade,
                 SexoPet = x.Pet.Sexo,
                 RacaPet = x.Pet.Raca,
+                TipoPet = x.Pet.TipoPet.ToString(),
 
                 NomeUsuario = x.Anuncio.Usuario!.Nome,
                 TelefoneUsuario = x.Anuncio.Usuario!.Telefone,
@@ -194,12 +195,20 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
                 FotoPet = x.Pet.Foto,
                 NomePet = x.Pet.Nome,
                 RacaPet = x.Pet.Raca,
+                IdadePet = x.Pet.Idade,
+                SexoPet = x.Pet.Sexo,
+                TipoPet = x.Pet.TipoPet.ToString(),
 
                 UltimoLocalVisto = x.UltimoLocalVisto,
                 DataDesaparecimento = x.DataDesaparecimento,
 
                 NomeUsuario = x.Anuncio.Usuario!.Nome,
-                TelefoneUsuario = x.Anuncio.Usuario!.Telefone
+                TelefoneUsuario = x.Anuncio.Usuario!.Telefone,
+                Cidade = x.Anuncio.Usuario!.Cidade,
+                Uf = x.Anuncio.Usuario!.Uf,
+                Bairro = x.Anuncio.Usuario!.Bairro,
+                Rua = x.Anuncio.Usuario!.Rua,
+                Numero = x.Anuncio.Usuario!.Numero
             })
             .ToListAsync();
     }
@@ -219,6 +228,7 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
                 IdadePet = x.Pet.Idade,
                 SexoPet = x.Pet.Sexo,
                 RacaPet = x.Pet.Raca,
+                TipoPet = x.Pet.TipoPet.ToString(),
 
                 TipoPayPet = (int)x.TipoPayPet,
                 Valor = x.Valor,

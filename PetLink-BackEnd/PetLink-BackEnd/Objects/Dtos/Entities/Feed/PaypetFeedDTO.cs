@@ -8,9 +8,10 @@ public class PaypetFeedDTO
 
     public string? FotoPet { get; set; }
     public string NomePet { get; set; } = string.Empty;
-    public int IdadePet { get; set; }
+    public string IdadePet { get; set; } = string.Empty;
     public string SexoPet { get; set; } = string.Empty;
     public string RacaPet { get; set; } = string.Empty;
+    public string TipoPet { get; set; } = string.Empty;
 
     public int TipoPayPet { get; set; }
     public decimal? Valor { get; set; }

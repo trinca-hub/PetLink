@@ -75,7 +75,7 @@ export default function Perfil() {
   Alert.alert("Até logo!", "Você saiu da sua conta.", [
     {
       text: "OK",
-      onPress: () => router.push("/login"), // ou "/login" dependendo das suas rotas
+      onPress: () => router.push("/login"),
     },
   ]);
 };

@@ -33,9 +33,10 @@ type AnuncioDetalhe = {
 
     fotoPet?: string;
     nomePet?: string;
-    idadePet?: number;
+    idadePet?: string;
     sexoPet?: string;
     racaPet?: string;
+    tipoPet?: string;
 
     nomeUsuario?: string;
     telefoneUsuario?: string;
@@ -271,15 +272,24 @@ export default function AnuncioDetalheScreen() {
                     </Text>
 
                     <Text style={{ marginTop: 6, color: "#333", fontWeight: "800", textAlign: "center" }}>
-                        {data?.racaPet || "Raça não informada"}
+                        {String(data?.tipoPet ?? "").toUpperCase() === "GATO" ? "Gato" : "Cachorro"}
                     </Text>
 
                     {/* Infos */}
                     <View style={{ marginTop: 14, gap: 10 }}>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                            <Ionicons name="calendar" size={18} color="#0E2B5A" />
-                            <Text style={{ color: "#222", fontWeight: "800" }}>
-                                {data?.idadePet != null ? `${data.idadePet} anos` : "Idade não informada"}
+                            <MaterialCommunityIcons
+                                name={
+                                    Number(data?.tipoPet) === 1 ||
+                                        String(data?.tipoPet ?? "").toUpperCase() === "GATO"
+                                        ? "cat"
+                                        : "dog"
+                                }
+                                size={18}
+                                color="#0E2B5A"
+                            />
+                            <Text style={{ color: "#222", fontWeight: "700" }}>
+                                {data?.racaPet || "R.N.D"}
                             </Text>
                         </View>
 
@@ -289,19 +299,30 @@ export default function AnuncioDetalheScreen() {
                         </View>
 
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                            <Ionicons name="location" size={18} color="#0E2B5A" />
+                            <Ionicons name="calendar" size={18} color="#0E2B5A" />
                             <Text style={{ color: "#222", fontWeight: "800" }}>
-                                {data?.cidade ? `${data.cidade}${data.uf ? ` - ${data.uf}` : ""}` : "Local não informado"}
-                                {data?.bairro ? ` • ${data.bairro}` : ""}
+                                {String(data?.idadePet ?? "").trim() ? String(data!.idadePet) : "Idade não informada"}
                             </Text>
                         </View>
 
                         {!!endereco && (
                             <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                                 <Ionicons name="map" size={18} color="#0E2B5A" />
-                                <Text style={{ color: "#222", fontWeight: "800" }}>{endereco}</Text>
+                                <Text
+                                    numberOfLines={4}
+                                    ellipsizeMode="tail"
+                                    style={{
+                                        color: "#222",
+                                        fontWeight: "800",
+                                        flex: 1,          // ✅ não estoura o card
+                                        paddingRight: 12, // ✅ “margem” no fim
+                                    }}
+                                >
+                                    {endereco}
+                                </Text>
                             </View>
                         )}
+
 
                         {/* Extras organizados por tipo */}
                         {base?.tipoAnuncio === 2 && ( // PetFinder
@@ -318,7 +339,7 @@ export default function AnuncioDetalheScreen() {
                                     <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                                         <Ionicons name="time" size={18} color="#0E2B5A" />
                                         <Text style={{ color: "#222", fontWeight: "800" }}>
-                                            Desapareceu em: {String(data.dataDesaparecimento).slice(0, 10)}
+                                            Desapareceu em: {new Date(String(data.dataDesaparecimento)).toLocaleDateString("pt-BR")}
                                         </Text>
                                     </View>
                                 )}

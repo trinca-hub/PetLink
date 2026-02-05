@@ -12,6 +12,7 @@ import {
 import { router, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, Feather } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { AuthContext } from "@/src/context/AuthContext";
 import { api } from "@/src/api/api";
@@ -36,10 +37,17 @@ function mapTipoToTitulo(tipo: TipoTela) {
 
 // ⚠️ Se seu backend usar outro enum, ajuste aqui.
 function mapTipoToApiEnum(tipo: TipoTela) {
-  // chute mais comum: 1=PeTinder, 2=PetFinder, 3=PayPet
+  // 1=PeTinder, 2=PetFinder, 3=PayPet
   if (tipo === "petfinder") return 2;
   if (tipo === "paypet") return 3;
   return 1;
+}
+
+function formatDateBR(d: Date) {
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
 }
 
 export default function NovoAnuncio() {
@@ -61,11 +69,15 @@ export default function NovoAnuncio() {
   const [petSelecionadoId, setPetSelecionadoId] = useState<number | null>(null);
   const [descricao, setDescricao] = useState("");
 
-  // campos extras (só aparecem quando necessário)
+  // campos extras
   const [ultimoLocalVisto, setUltimoLocalVisto] = useState("");
-  const [dataDesaparecimento, setDataDesaparecimento] = useState(""); // YYYY-MM-DD
-  const [tipoPayPet, setTipoPayPet] = useState<string>(""); // número em string
-  const [valor, setValor] = useState<string>(""); // número em string
+
+  // ✅ DatePicker PetFinder
+  const [dataDesaparecimento, setDataDesaparecimento] = useState<Date | null>(null);
+  const [showPicker, setShowPicker] = useState(false);
+
+  const [tipoPayPet, setTipoPayPet] = useState<string>("");
+  const [valor, setValor] = useState<string>("");
 
   const [posting, setPosting] = useState(false);
 
@@ -79,7 +91,6 @@ export default function NovoAnuncio() {
           return;
         }
 
-        // Preferencial (no zip do projeto): Pet/meus
         const res: any = await getMyPetsService(token);
 
         if (!res?.ok) {
@@ -88,11 +99,14 @@ export default function NovoAnuncio() {
           return;
         }
 
-        // dependendo do backend: res.data.data pode ser array
-        const list = Array.isArray(res?.data?.data) ? res.data.data : (Array.isArray(res?.data) ? res.data : []);
+        const list = Array.isArray(res?.data?.data)
+          ? res.data.data
+          : Array.isArray(res?.data)
+            ? res.data
+            : [];
+
         setPets(list);
 
-        // auto-seleciona o primeiro pet
         if (list?.length > 0) setPetSelecionadoId(list[0].id);
       } finally {
         setLoadingPets(false);
@@ -107,7 +121,7 @@ export default function NovoAnuncio() {
 
     if (tipo === "petfinder") {
       if (!ultimoLocalVisto.trim()) return "Informe o último local visto.";
-      if (!dataDesaparecimento.trim()) return "Informe a data de desaparecimento (YYYY-MM-DD).";
+      if (!dataDesaparecimento) return "Informe a data de desaparecimento.";
     }
 
     if (tipo === "paypet") {
@@ -129,14 +143,12 @@ export default function NovoAnuncio() {
 
     const tipoAnuncio = mapTipoToApiEnum(tipo);
 
-    // payload 100% no formato do Swagger
     const body: any = {
       descricao: descricao.trim(),
       tipoAnuncio,
       usuarioId: user!.id,
       criadorId: user!.id,
 
-      // apenas UM deles preenchido (os outros null)
       payPet: null,
       petFinder: null,
       peTinder: null,
@@ -147,10 +159,14 @@ export default function NovoAnuncio() {
     }
 
     if (tipo === "petfinder") {
+      // ✅ ISO com meia-noite (evita timezone zoar o dia)
+      const d = dataDesaparecimento!;
+      const iso = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0).toISOString();
+
       body.petFinder = {
         petId: petSelecionadoId,
         ultimoLocalVisto: ultimoLocalVisto.trim(),
-        dataDesaparecimento: new Date(`${dataDesaparecimento}T00:00:00`).toISOString(),
+        dataDesaparecimento: iso,
       };
     }
 
@@ -269,9 +285,9 @@ export default function NovoAnuncio() {
                         backgroundColor: "#EEE",
                       }}
                     >
-                      {!!p.fotoPet ? (
+                      {!!p.foto ? (
                         <Image
-                          source={{ uri: p.fotoPet }}
+                          source={{ uri: p.foto }}
                           style={{ width: "100%", height: "100%" }}
                           resizeMode="cover"
                         />
@@ -280,6 +296,7 @@ export default function NovoAnuncio() {
                           <Ionicons name="paw" size={24} color="#999" />
                         </View>
                       )}
+
                     </View>
 
                     <View style={{ flex: 1 }}>
@@ -322,13 +339,14 @@ export default function NovoAnuncio() {
           </View>
         </View>
 
-        {/* Campos extras por tipo */}
+        {/* Campos extras PetFinder */}
         {tipo === "petfinder" && (
           <>
             <View style={{ marginTop: 12 }}>
               <Text style={{ color: "rgba(255,255,255,0.95)", fontWeight: "900", marginBottom: 8 }}>
                 Último local visto
               </Text>
+
               <View
                 style={{
                   backgroundColor: "#fff",
@@ -353,38 +371,56 @@ export default function NovoAnuncio() {
 
             <View style={{ marginTop: 12 }}>
               <Text style={{ color: "rgba(255,255,255,0.95)", fontWeight: "900", marginBottom: 8 }}>
-                Data de desaparecimento (YYYY-MM-DD)
+                Data de desaparecimento
               </Text>
-              <View
+
+              <Pressable
+                onPress={() => setShowPicker(true)}
                 style={{
                   backgroundColor: "#fff",
                   borderRadius: 999,
-                  paddingHorizontal: 12,
-                  paddingVertical: 10,
+                  paddingHorizontal: 14,
+                  paddingVertical: 12,
                   flexDirection: "row",
                   alignItems: "center",
-                  gap: 8,
+                  justifyContent: "space-between",
                 }}
               >
-                <Ionicons name="calendar" size={18} color="#0E2B5A" />
-                <TextInput
-                  value={dataDesaparecimento}
-                  onChangeText={setDataDesaparecimento}
-                  placeholder="2026-02-05"
-                  placeholderTextColor="#8E8E93"
-                  style={{ flex: 1, color: "#111", fontWeight: "700" }}
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1 }}>
+                  <Ionicons name="calendar" size={18} color="#0E2B5A" />
+                  <Text style={{ color: dataDesaparecimento ? "#111" : "#8E8E93", fontWeight: "800" }}>
+                    {dataDesaparecimento ? formatDateBR(dataDesaparecimento) : "Selecione a data"}
+                  </Text>
+                </View>
+
+                <Ionicons name="chevron-down" size={18} color="#0E2B5A" />
+              </Pressable>
+
+              {showPicker && (
+                <DateTimePicker
+                  value={dataDesaparecimento ?? new Date()}
+                  mode="date"
+                  display="calendar"
+                  maximumDate={new Date()} // ✅ não deixa selecionar futuro
+                  onChange={(event, selected) => {
+                    setShowPicker(false);
+                    if (event.type === "dismissed") return;
+                    if (selected) setDataDesaparecimento(selected);
+                  }}
                 />
-              </View>
+              )}
             </View>
           </>
         )}
 
+        {/* Campos extras PayPet */}
         {tipo === "paypet" && (
           <>
             <View style={{ marginTop: 12 }}>
               <Text style={{ color: "rgba(255,255,255,0.95)", fontWeight: "900", marginBottom: 8 }}>
                 Tipo do PayPet (número)
               </Text>
+
               <View
                 style={{
                   backgroundColor: "#fff",
@@ -412,6 +448,7 @@ export default function NovoAnuncio() {
               <Text style={{ color: "rgba(255,255,255,0.95)", fontWeight: "900", marginBottom: 8 }}>
                 Valor
               </Text>
+
               <View
                 style={{
                   backgroundColor: "#fff",

@@ -22,7 +22,7 @@ namespace PetLink_BackEnd.Objects.Models
         public string Rga { get; set; }
 
         [Column("idade")]
-        public int Idade { get; set; }
+        public string Idade { get; set; }
 
         [Column("foto")]
         public string? Foto { get; set; }
@@ -43,7 +43,7 @@ namespace PetLink_BackEnd.Objects.Models
 
         public Pet() { }
 
-        public Pet(int id, string nome, string raca, string sexo, string rga, int idade, float peso, bool castrado, TipoPet tipoPet, int usuarioid, string? foto = null)
+        public Pet(int id, string nome, string raca, string sexo, string rga, string idade, float peso, bool castrado, TipoPet tipoPet, int usuarioid, string? foto = null)
 
         {
             Id = id;

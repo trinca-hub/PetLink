@@ -23,15 +23,40 @@ type AnuncioPetinder = {
   dataCriacao: string;
   fotoPet?: string;
   nomePet: string;
-  idadePet: number;
+  idadePet: string;
   sexoPet: string;
   racaPet: string;
   cidade: string;
   uf: string;
   bairro: string;
+  tipoPet: string;
 };
 
 type SexoFiltro = "M" | "F" | null;
+
+function idadeTextoParaMeses(texto?: string): number | null {
+  if (!texto) return null;
+
+  const t = texto.toLowerCase();
+
+  // pega "2 anos", "1 ano", etc
+  const anosMatch = t.match(/(\d+)\s*ano/);
+  // pega "3 meses", "1 mes", etc
+  const mesesMatch = t.match(/(\d+)\s*mes/);
+
+  const anos = anosMatch ? Number(anosMatch[1]) : 0;
+  const meses = mesesMatch ? Number(mesesMatch[1]) : 0;
+
+  const total = anos * 12 + meses;
+
+  // fallback: se veio só "2" (sem unidade), assume anos
+  if (total === 0) {
+    const n = t.match(/(\d+)/);
+    return n ? Number(n[1]) * 12 : null;
+  }
+
+  return total;
+}
 
 export default function Petinder() {
   const { token } = useContext(AuthContext);
@@ -114,11 +139,16 @@ export default function Petinder() {
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
 
-    const min = idadeMin.trim() === "" ? null : Number(idadeMin);
-    const max = idadeMax.trim() === "" ? null : Number(idadeMax);
+    const minAnos = idadeMin.trim() === "" ? null : Number(idadeMin);
+    const maxAnos = idadeMax.trim() === "" ? null : Number(idadeMax);
 
-    const minOk = min === null || !Number.isNaN(min);
-    const maxOk = max === null || !Number.isNaN(max);
+    const minOk = minAnos === null || !Number.isNaN(minAnos);
+    const maxOk = maxAnos === null || !Number.isNaN(maxAnos);
+
+    // converte anos digitados no filtro para meses
+    const minMeses = minOk && minAnos !== null ? minAnos * 12 : null;
+    const maxMeses = maxOk && maxAnos !== null ? maxAnos * 12 : null;
+
 
     return anuncios.filter((a) => {
       // pesquisa
@@ -127,14 +157,20 @@ export default function Petinder() {
           a.nomePet?.toLowerCase().includes(q) ||
           a.racaPet?.toLowerCase().includes(q) ||
           a.cidade?.toLowerCase().includes(q) ||
-          a.bairro?.toLowerCase().includes(q);
+          a.bairro?.toLowerCase().includes(q) ||
+          String(a.tipoPet ?? "").toLowerCase().includes(q);
+
 
         if (!matchesSearch) return false;
       }
 
       // idade
-      if (minOk && min !== null && a.idadePet < min) return false;
-      if (maxOk && max !== null && a.idadePet > max) return false;
+      // idade (comparando em meses)
+      const idadeEmMeses = idadeTextoParaMeses(a.idadePet);
+
+      if (minMeses !== null && idadeEmMeses !== null && idadeEmMeses < minMeses) return false;
+      if (maxMeses !== null && idadeEmMeses !== null && idadeEmMeses > maxMeses) return false;
+
 
       // raças
       if (racasSelecionadas.length > 0 && !racasSelecionadas.includes(a.racaPet)) {
@@ -218,7 +254,7 @@ export default function Petinder() {
         }}
       >
         <Pressable
-          onPress={() => {}}
+          onPress={() => { }}
           style={{
             width: 40,
             height: 40,
@@ -430,7 +466,11 @@ export default function Petinder() {
                 <View
                   style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
                 >
-                  <MaterialCommunityIcons name="dog" size={18} color="#0E2B5A" />
+                  <MaterialCommunityIcons
+                    name={String(item.tipoPet).toUpperCase() === "GATO" ? "cat" : "dog"}
+                    size={18}
+                    color="#0E2B5A"
+                  />
                   <Text style={{ color: "#222", fontWeight: "700" }}>
                     {item.racaPet || "Não informado"}
                   </Text>
@@ -441,7 +481,7 @@ export default function Petinder() {
                 >
                   <Ionicons name="calendar" size={18} color="#0E2B5A" />
                   <Text style={{ color: "#222", fontWeight: "700" }}>
-                    {item.idadePet} anos
+                    {item.idadePet || "Idade não informada"}
                   </Text>
                 </View>
 
@@ -449,7 +489,16 @@ export default function Petinder() {
                   style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
                 >
                   <Ionicons name="location" size={18} color="#0E2B5A" />
-                  <Text style={{ color: "#222", fontWeight: "700" }}>
+                  <Text
+                    numberOfLines={3}
+                    ellipsizeMode="tail"
+                    style={{
+                      color: "#222",
+                      fontWeight: "800",
+                      flex: 1,          // ocupa o espaço disponível sem estourar
+                      paddingRight: 12, // ✅ “margem” no fim do card
+                    }}
+                  >
                     {item.cidade}
                     {item.bairro ? ` • ${item.bairro}` : ""}
                   </Text>
