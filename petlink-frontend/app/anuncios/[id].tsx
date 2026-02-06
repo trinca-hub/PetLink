@@ -74,7 +74,8 @@ function tipoToTitulo(tipoAnuncio: number) {
 }
 
 export default function AnuncioDetalheScreen() {
-    const { token } = useContext(AuthContext);
+    const { token, user } = useContext(AuthContext);
+
     const params = useLocalSearchParams<{ id?: string }>();
     const id = useMemo(() => Number(params.id), [params.id]);
 
@@ -90,6 +91,13 @@ export default function AnuncioDetalheScreen() {
 
 
     const titulo = useMemo(() => (base ? tipoToTitulo(base.tipoAnuncio) : "Anúncio"), [base]);
+
+    const isOwner = useMemo(() => {
+        if (!user?.id) return false;
+        if (!base?.usuarioId) return false;
+        return Number(base.usuarioId) === Number(user.id);
+    }, [base?.usuarioId, user?.id]);
+
 
     async function load() {
         setError(null);
@@ -168,7 +176,11 @@ export default function AnuncioDetalheScreen() {
         return parts.join(" • ");
     }, [data]);
 
+    const isVenda = Number(base?.tipoAnuncio) === 3 && Number(data?.tipoPayPet) === 2;
+    const mostrarPreco = isVenda && Number(data?.valor ?? 0) > 0;
+
     const podeContato = !!data?.telefoneUsuario;
+
 
     if (loading) {
         return (
@@ -346,14 +358,15 @@ export default function AnuncioDetalheScreen() {
                             </>
                         )}
 
-                        {base?.tipoAnuncio === 3 && ( // PayPet
-                            data?.valor != null ? (
-                                <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                                    <Ionicons name="cash" size={18} color="#0E2B5A" />
-                                    <Text style={{ color: "#222", fontWeight: "800" }}>Valor: R$ {data.valor}</Text>
-                                </View>
-                            ) : null
+                        {base?.tipoAnuncio === 3 && mostrarPreco && (
+                            <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                                <Ionicons name="cash" size={18} color="#0E2B5A" />
+                                <Text style={{ color: "#222", fontWeight: "800" }}>
+                                    Valor: R$ {data?.valor}
+                                </Text>
+                            </View>
                         )}
+
                     </View>
 
                     {/* Descrição */}
@@ -406,6 +419,55 @@ export default function AnuncioDetalheScreen() {
                             </Text>
                         </Pressable>
 
+                        {/* ✅ C: Só aparece pro dono */}
+                        {isOwner && (
+                            <View style={{ marginTop: 10, gap: 10 }}>
+                                <Pressable
+                                    onPress={() => router.push({ pathname: "/anuncios/editar", params: { id: String(id) } })}
+                                    style={{
+                                        backgroundColor: "#111",
+                                        borderRadius: 999,
+                                        paddingVertical: 14,
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <Text style={{ color: "#fff", fontWeight: "900", fontSize: 16 }}>Editar anúncio</Text>
+                                </Pressable>
+
+                                <Pressable
+                                    onPress={() => {
+                                        Alert.alert("Excluir anúncio", "Tem certeza que deseja excluir?", [
+                                            { text: "Cancelar", style: "cancel" },
+                                            {
+                                                text: "Excluir",
+                                                style: "destructive",
+                                                onPress: async () => {
+                                                    const res: any = await api(`Anuncio/${id}`, "DELETE", undefined, token || undefined);
+                                                    if (!res?.ok) {
+                                                        Alert.alert("Erro", res?.data?.message || "Não foi possível excluir.");
+                                                        return;
+                                                    }
+                                                    Alert.alert("Sucesso", "Anúncio excluído!");
+                                                    router.back();
+                                                },
+                                            },
+                                        ]);
+                                    }}
+                                    style={{
+                                        backgroundColor: "#FF3B30",
+                                        borderRadius: 999,
+                                        paddingVertical: 14,
+                                        alignItems: "center",
+                                        justifyContent: "center",
+                                    }}
+                                >
+                                    <Text style={{ color: "#fff", fontWeight: "900", fontSize: 16 }}>Excluir anúncio</Text>
+                                </Pressable>
+                            </View>
+                        )}
+
+
                         <Pressable
                             onPress={() => router.back()}
                             style={{
@@ -419,6 +481,7 @@ export default function AnuncioDetalheScreen() {
                             <Text style={{ color: "#fff", fontWeight: "900", fontSize: 16 }}>Voltar</Text>
                         </Pressable>
                     </View>
+
                 </View>
             </ScrollView>
         </LinearGradient>

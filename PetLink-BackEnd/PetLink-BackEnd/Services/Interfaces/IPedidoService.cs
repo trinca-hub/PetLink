@@ -5,5 +5,6 @@ namespace PetLink_BackEnd.Services.Interfaces
 {
     public interface IPedidoService : IGenericService<Pedido, PedidoDTO>
     {
+        Task<int> CreateAndReturnId(PedidoDTO pedidoDTO);
     }
 }

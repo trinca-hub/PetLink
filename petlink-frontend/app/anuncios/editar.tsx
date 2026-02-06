@@ -1,3 +1,4 @@
+// app/anuncios/editar.tsx
 import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -7,7 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Image,
+  Platform,
 } from "react-native";
 import { router, useLocalSearchParams } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,32 +17,60 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { AuthContext } from "@/src/context/AuthContext";
 import { api } from "@/src/api/api";
-import { getMyPetsService } from "@/src/api/authService";
+import { getFeedPetinder, getFeedPetfinder, getFeedPaypet } from "@/src/api/anuncioService";
 
-type TipoTela = "petinder" | "petfinder" | "paypet";
-
-type Pet = {
+type BaseAnuncioDTO = {
   id: number;
-  nome?: string;
-  fotoPet?: string;
-  raca?: string;
-  idade?: number;
-  sexo?: string;
+  descricao: string;
+  tipoAnuncio: number;
+  usuarioId: number;
 };
 
-function mapTipoToTitulo(tipo: TipoTela) {
-  if (tipo === "petfinder") return "PetFinder";
-  if (tipo === "paypet") return "PayPet";
-  return "PeTinder";
-}
+type PetinderFeedDTO = {
+  anuncioId: number;
+  descricao: string;
+  dataCriacao: string;
+  fotoPet?: string;
+  nomePet: string;
+  idadePet?: string;
+  sexoPet?: string;
+  racaPet?: string;
+  tipoPet?: string | number;
+  nomeUsuario?: string;
+  telefoneUsuario?: string;
+};
 
-// ⚠️ Se seu backend usar outro enum, ajuste aqui.
-function mapTipoToApiEnum(tipo: TipoTela) {
-  // 1=PeTinder, 2=PetFinder, 3=PayPet
-  if (tipo === "petfinder") return 2;
-  if (tipo === "paypet") return 3;
-  return 1;
-}
+type PetfinderFeedDTO = {
+  anuncioId: number;
+  descricao: string;
+  dataCriacao: string;
+
+  fotoPet?: string;
+  nomePet: string;
+  racaPet: string;
+  tipoPet: string | number;
+  idadePet?: string;
+  sexoPet?: string;
+
+  ultimoLocalVisto: string;
+  dataDesaparecimento?: string; // ISO do back
+};
+
+type PaypetFeedDTO = {
+  anuncioId: number;
+  descricao: string;
+  dataCriacao: string;
+
+  fotoPet?: string;
+  nomePet: string;
+  idadePet?: string;
+  sexoPet?: string;
+  racaPet?: string;
+  tipoPet?: string | number;
+
+  tipoPayPet?: number; // 1=DOACAO/ADOCAO, 2=VENDA
+  valor?: number;
+};
 
 function formatDateBR(d: Date) {
   const dd = String(d.getDate()).padStart(2, "0");
@@ -50,154 +79,242 @@ function formatDateBR(d: Date) {
   return `${dd}/${mm}/${yyyy}`;
 }
 
-export default function NovoAnuncio() {
+function safeDateFromISO(iso?: string): Date | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return null;
+  return d;
+}
+
+// Se seu enum for diferente, ajuste aqui:
+function tipoToKey(tipoAnuncio: number): "petinder" | "petfinder" | "paypet" {
+  if (tipoAnuncio === 2) return "petfinder";
+  if (tipoAnuncio === 3) return "paypet";
+  return "petinder";
+}
+
+export default function EditarAnuncio() {
   const { token, user } = useContext(AuthContext);
-  const params = useLocalSearchParams<{ tipo?: string }>();
+  const params = useLocalSearchParams<{ id?: string }>();
+  const id = Number(params.id);
 
-  const tipo = useMemo<TipoTela>(() => {
-    const t = String(params.tipo ?? "petinder").toLowerCase();
-    if (t === "petfinder") return "petfinder";
-    if (t === "paypet") return "paypet";
-    return "petinder";
-  }, [params.tipo]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const titulo = useMemo(() => mapTipoToTitulo(tipo), [tipo]);
+  const [base, setBase] = useState<BaseAnuncioDTO | null>(null);
 
-  const [pets, setPets] = useState<Pet[]>([]);
-  const [loadingPets, setLoadingPets] = useState(true);
-
-  const [petSelecionadoId, setPetSelecionadoId] = useState<number | null>(null);
+  // comuns
   const [descricao, setDescricao] = useState("");
 
-  // campos extras
+  // petfinder
   const [ultimoLocalVisto, setUltimoLocalVisto] = useState("");
-
-  // ✅ DatePicker PetFinder
   const [dataDesaparecimento, setDataDesaparecimento] = useState<Date | null>(null);
   const [showPicker, setShowPicker] = useState(false);
 
-  // PAYPET
-  const [tipoPayPet, setTipoPayPet] = useState<1 | 2>(2); // 1=Doação, 2=Venda
-  const [valor, setValor] = useState<string>("");         // só usado se Venda
-  // só usado se Venda
+  // paypet
+  const [tipoPayPet, setTipoPayPet] = useState<1 | 2>(2);
+  const [valor, setValor] = useState<string>("");
 
+  const tipoKey = useMemo(() => {
+    if (!base) return "petinder";
+    return tipoToKey(Number(base.tipoAnuncio));
+  }, [base]);
 
-  const [posting, setPosting] = useState(false);
+  const isOwner = useMemo(() => {
+    if (!base?.usuarioId || !user?.id) return false;
+    return Number(base.usuarioId) === Number(user.id);
+  }, [base?.usuarioId, user?.id]);
+
+  async function load() {
+    setError(null);
+
+    if (!token) {
+      setError("Faça login novamente.");
+      return;
+    }
+    if (!Number.isFinite(id) || id <= 0) {
+      setError("ID inválido.");
+      return;
+    }
+
+    // 1) base
+    const resBase: any = await api(`Anuncio/${id}`, "GET", undefined, token || undefined);
+    if (!resBase?.ok) {
+      setError(resBase?.data?.message || "Erro ao buscar anúncio.");
+      return;
+    }
+
+    const b: BaseAnuncioDTO = resBase?.data?.data ?? resBase?.data;
+    setBase(b);
+    setDescricao(String(b?.descricao ?? ""));
+
+    // 2) detalhes (pega do feed correspondente)
+    const tk = tipoToKey(Number(b.tipoAnuncio));
+
+    if (tk === "petfinder") {
+      const res: any = await getFeedPetfinder(token || undefined);
+      const list: PetfinderFeedDTO[] = Array.isArray(res?.data?.data) ? res.data.data : [];
+      const item = list.find((x) => Number(x.anuncioId) === id);
+      if (item) {
+        setUltimoLocalVisto(String(item.ultimoLocalVisto ?? ""));
+        setDataDesaparecimento(safeDateFromISO(item.dataDesaparecimento) ?? null);
+      }
+    }
+
+    if (tk === "paypet") {
+      const res: any = await getFeedPaypet(token || undefined);
+      const list: PaypetFeedDTO[] = Array.isArray(res?.data?.data) ? res.data.data : [];
+      const item = list.find((x) => Number(x.anuncioId) === id);
+      if (item) {
+        const t = Number(item.tipoPayPet) === 1 ? 1 : 2;
+        setTipoPayPet(t);
+        setValor(
+          t === 2 && item.valor != null && !Number.isNaN(Number(item.valor))
+            ? String(item.valor)
+            : ""
+        );
+      }
+    }
+
+    // petinder não tem extras
+  }
 
   useEffect(() => {
     (async () => {
-      try {
-        setLoadingPets(true);
-
-        if (!token) {
-          setPets([]);
-          return;
-        }
-
-        const res: any = await getMyPetsService(token);
-
-        if (!res?.ok) {
-          console.log("[NOVO ANUNCIO] erro ao carregar pets:", res?.status, res?.data);
-          setPets([]);
-          return;
-        }
-
-        const list = Array.isArray(res?.data?.data)
-          ? res.data.data
-          : Array.isArray(res?.data)
-            ? res.data
-            : [];
-
-        setPets(list);
-
-        if (list?.length > 0) setPetSelecionadoId(list[0].id);
-      } finally {
-        setLoadingPets(false);
-      }
+      setLoading(true);
+      await load();
+      setLoading(false);
     })();
-  }, [token]);
+  }, [id]);
+
+  useEffect(() => {
+    // se carregou e não é dono, avisa
+    if (!loading && base && !isOwner) {
+      Alert.alert("Sem permissão", "Você só pode editar anúncios criados por você.");
+      router.back();
+    }
+  }, [loading, base, isOwner]);
 
   function validate() {
-    if (!user?.id) return "Usuário não carregado. Faça login novamente.";
-    if (!petSelecionadoId) return "Selecione um pet.";
-    if (!descricao.trim()) return "Escreva uma descrição.";
+    if (!descricao.trim()) return "A descrição é obrigatória.";
 
-    if (tipo === "petfinder") {
+    if (tipoKey === "petfinder") {
       if (!ultimoLocalVisto.trim()) return "Informe o último local visto.";
-      if (!dataDesaparecimento) return "Informe a data de desaparecimento.";
+      if (!dataDesaparecimento) return "Selecione a data de desaparecimento.";
+      // não deixa futuro
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const chosen = new Date(dataDesaparecimento);
+      chosen.setHours(0, 0, 0, 0);
+      if (chosen.getTime() > today.getTime()) return "A data não pode ser no futuro.";
     }
 
-    if (tipo === "paypet") {
-      if (tipoPayPet !== 1 && tipoPayPet !== 2) return "Selecione doação ou venda.";
-
+    if (tipoKey === "paypet") {
       if (tipoPayPet === 2) {
         const v = Number(valor);
         if (!valor.trim() || Number.isNaN(v) || v <= 0) return "Para venda, informe um preço maior que 0.";
       }
     }
 
-
     return null;
   }
 
-  async function publicar() {
-    const err = validate();
-    if (err) {
-      Alert.alert("Atenção", err);
+  async function salvar() {
+    const msg = validate();
+    if (msg) {
+      Alert.alert("Atenção", msg);
       return;
     }
+    if (!token) return;
 
-    setPosting(true);
+    setSaving(true);
 
-    const tipoAnuncio = mapTipoToApiEnum(tipo);
-
-    const body: any = {
-      descricao: descricao.trim(),
-      tipoAnuncio,
-      usuarioId: user!.id,
-      criadorId: user!.id,
-
-      payPet: null,
-      petFinder: null,
-      peTinder: null,
-    };
-
-    if (tipo === "petinder") {
-      body.peTinder = { petId: petSelecionadoId };
-    }
-
-    if (tipo === "petfinder") {
-      // ✅ ISO com meia-noite (evita timezone zoar o dia)
-      const d = dataDesaparecimento!;
-      const iso = new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0).toISOString();
-
-      body.petFinder = {
-        petId: petSelecionadoId,
-        ultimoLocalVisto: ultimoLocalVisto.trim(),
-        dataDesaparecimento: iso,
+    try {
+      // 1) sempre atualiza descrição na base
+      const bodyBase = {
+        id,
+        descricao: descricao.trim(),
+        tipoAnuncio: base?.tipoAnuncio ?? 1,
+        usuarioId: base?.usuarioId ?? user?.id ?? 0,
       };
+
+      const resBase: any = await api(`Anuncio/${id}`, "PUT", bodyBase, token || undefined);
+      if (!resBase?.ok) {
+        Alert.alert("Erro", resBase?.data?.message || "Não foi possível salvar a descrição.");
+        return;
+      }
+
+      // 2) extras por tipo
+      if (tipoKey === "petfinder") {
+        const d = dataDesaparecimento!;
+        const utcIso = new Date(d.getFullYear(), d.getMonth(), d.getDate()).toISOString();
+
+        const resPF: any = await api(
+          `Anuncio/${id}/petfinder`,
+          "PUT",
+          {
+            ultimoLocalVisto: ultimoLocalVisto.trim(),
+            dataDesaparecimento: utcIso,
+          },
+          token || undefined
+        );
+
+        if (!resPF?.ok) {
+          Alert.alert("Erro", resPF?.data?.message || "Não foi possível salvar os dados do PetFinder.");
+          return;
+        }
+      }
+
+      if (tipoKey === "paypet") {
+        const payload: any = {
+          tipoPayPet: tipoPayPet, // 1/2
+          valor: tipoPayPet === 1 ? 0 : Number(valor),
+        };
+
+        const resPP: any = await api(`Anuncio/${id}/paypet`, "PUT", payload, token || undefined);
+        if (!resPP?.ok) {
+          Alert.alert("Erro", resPP?.data?.message || "Não foi possível salvar os dados do PayPet.");
+          return;
+        }
+      }
+
+      Alert.alert("Sucesso", "Anúncio atualizado!");
+      router.back();
+    } finally {
+      setSaving(false);
     }
+  }
 
-    if (tipo === "paypet") {
-      body.payPet = {
-        petId: petSelecionadoId,
-        tipoPayPet: tipoPayPet,               // 1 doação | 2 venda
-        valor: tipoPayPet === 1 ? 0 : Number(valor), // doação manda 0
-      };
-    }
+  if (loading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+        <Text style={{ marginTop: 10 }}>Carregando...</Text>
+      </View>
+    );
+  }
 
+  if (!!error) {
+    return (
+      <LinearGradient
+        colors={["#0B0B0F", "#0E2B5A"]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={{ flex: 1, paddingHorizontal: 16, paddingTop: 20 }}
+      >
+        <Pressable onPress={() => router.back()} style={{ width: 40, height: 40, justifyContent: "center" }}>
+          <Feather name="arrow-left" size={22} color="#fff" />
+        </Pressable>
 
-    const res: any = await api("Anuncio", "POST", body, token || undefined);
-    setPosting(false);
-
-    if (!res?.ok) {
-      console.log("[NOVO ANUNCIO] POST erro:", res?.status, res?.data);
-      Alert.alert("Erro ao publicar", res?.data?.message || "Não foi possível criar o anúncio.");
-      return;
-    }
-
-    Alert.alert("Sucesso", "Anúncio publicado!");
-    router.back();
+        <Text style={{ color: "#fff", fontWeight: "900", fontSize: 18, marginTop: 10 }}>
+          Erro
+        </Text>
+        <Text style={{ color: "rgba(255,255,255,0.85)", marginTop: 10, fontWeight: "700" }}>
+          {error}
+        </Text>
+      </LinearGradient>
+    );
   }
 
   return (
@@ -231,101 +348,14 @@ export default function NovoAnuncio() {
         </Pressable>
 
         <Text style={{ color: "#fff", fontSize: 18, fontWeight: "900" }}>
-          Novo anúncio • {titulo}
+          Editar anúncio • {tipoKey === "petinder" ? "PeTinder" : tipoKey === "petfinder" ? "PetFinder" : "PayPet"}
         </Text>
 
         <View style={{ width: 40, height: 40 }} />
       </View>
 
       <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 24 }}>
-        {/* Selecionar pet */}
-        <View style={{ marginTop: 12 }}>
-          <Text style={{ color: "rgba(255,255,255,0.95)", fontWeight: "900", marginBottom: 10 }}>
-            Selecione um pet
-          </Text>
-
-          {loadingPets ? (
-            <View style={{ paddingVertical: 16, alignItems: "center" }}>
-              <ActivityIndicator color="#fff" />
-              <Text style={{ marginTop: 10, color: "rgba(255,255,255,0.75)" }}>
-                Carregando seus pets...
-              </Text>
-            </View>
-          ) : pets.length === 0 ? (
-            <View
-              style={{
-                backgroundColor: "rgba(255,255,255,0.12)",
-                borderRadius: 16,
-                padding: 14,
-                borderWidth: 1,
-                borderColor: "rgba(255,255,255,0.18)",
-              }}
-            >
-              <Text style={{ color: "#fff", fontWeight: "900" }}>Você não tem pets cadastrados.</Text>
-              <Text style={{ color: "rgba(255,255,255,0.75)", marginTop: 6 }}>
-                Cadastre um pet para poder criar anúncios.
-              </Text>
-            </View>
-          ) : (
-            <View style={{ gap: 12 }}>
-              {pets.map((p) => {
-                const selected = p.id === petSelecionadoId;
-                return (
-                  <Pressable
-                    key={p.id}
-                    onPress={() => setPetSelecionadoId(p.id)}
-                    style={{
-                      backgroundColor: selected ? "rgba(255,255,255,0.18)" : "rgba(255,255,255,0.10)",
-                      borderRadius: 18,
-                      padding: 12,
-                      borderWidth: 1,
-                      borderColor: selected ? "rgba(255,255,255,0.55)" : "rgba(255,255,255,0.18)",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      gap: 12,
-                    }}
-                  >
-                    <View
-                      style={{
-                        width: 62,
-                        height: 62,
-                        borderRadius: 16,
-                        overflow: "hidden",
-                        backgroundColor: "#EEE",
-                      }}
-                    >
-                      {!!p.foto ? (
-                        <Image
-                          source={{ uri: p.foto }}
-                          style={{ width: "100%", height: "100%" }}
-                          resizeMode="cover"
-                        />
-                      ) : (
-                        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                          <Ionicons name="paw" size={24} color="#999" />
-                        </View>
-                      )}
-
-                    </View>
-
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ color: "#fff", fontWeight: "900", fontSize: 16 }}>
-                        {p.nome || `Pet #${p.id}`}
-                      </Text>
-                      <Text style={{ color: "rgba(255,255,255,0.80)", marginTop: 4, fontWeight: "700" }}>
-                        {p.raca || "Raça não informada"}
-                      </Text>
-                    </View>
-
-                    {selected && <Ionicons name="checkmark-circle" size={22} color="#fff" />}
-                  </Pressable>
-                );
-              })}
-            </View>
-          )}
-        </View>
-
-        {/* Descrição */}
+        {/* Descrição (sempre) */}
         <View style={{ marginTop: 16 }}>
           <Text style={{ color: "rgba(255,255,255,0.95)", fontWeight: "900", marginBottom: 8 }}>
             Descrição
@@ -335,7 +365,7 @@ export default function NovoAnuncio() {
             <TextInput
               value={descricao}
               onChangeText={setDescricao}
-              placeholder="Escreva a descrição do anúncio..."
+              placeholder="Escreva a descrição..."
               placeholderTextColor="#8E8E93"
               multiline
               style={{
@@ -348,8 +378,8 @@ export default function NovoAnuncio() {
           </View>
         </View>
 
-        {/* Campos extras PetFinder */}
-        {tipo === "petfinder" && (
+        {/* PetFinder extras */}
+        {tipoKey === "petfinder" && (
           <>
             <View style={{ marginTop: 12 }}>
               <Text style={{ color: "rgba(255,255,255,0.95)", fontWeight: "900", marginBottom: 8 }}>
@@ -409,11 +439,13 @@ export default function NovoAnuncio() {
                 <DateTimePicker
                   value={dataDesaparecimento ?? new Date()}
                   mode="date"
-                  display="calendar"
-                  maximumDate={new Date()} // ✅ não deixa selecionar futuro
+                  display={Platform.OS === "ios" ? "spinner" : "calendar"}
+                  maximumDate={new Date()} // ✅ não deixa futuro
                   onChange={(event, selected) => {
+                    // android cancel
                     setShowPicker(false);
-                    if (event.type === "dismissed") return;
+                    // @ts-ignore
+                    if (event?.type === "dismissed") return;
                     if (selected) setDataDesaparecimento(selected);
                   }}
                 />
@@ -422,20 +454,17 @@ export default function NovoAnuncio() {
           </>
         )}
 
-        {/* Campos extras PayPet */}
-        {tipo === "paypet" && (
+        {/* PayPet extras */}
+        {tipoKey === "paypet" && (
           <>
-            <View style={{ marginTop: 12 }}>
+            <View style={{ marginTop: 14 }}>
               <Text style={{ color: "rgba(255,255,255,0.95)", fontWeight: "900", marginBottom: 8 }}>
-                Tipo do anúncio
+                Tipo
               </Text>
 
               <View style={{ flexDirection: "row", gap: 10 }}>
                 <Pressable
-                  onPress={() => {
-                    setTipoPayPet(1);
-                    setValor(""); // limpa preço ao mudar pra doação
-                  }}
+                  onPress={() => setTipoPayPet(1)}
                   style={{
                     flex: 1,
                     paddingVertical: 12,
@@ -500,33 +529,27 @@ export default function NovoAnuncio() {
           </>
         )}
 
-
-        {/* Botão publicar */}
+        {/* Salvar */}
         <Pressable
-          disabled={posting || loadingPets || pets.length === 0}
-          onPress={publicar}
+          disabled={saving}
+          onPress={salvar}
           style={{
             marginTop: 18,
-            backgroundColor: posting ? "rgba(28,102,255,0.55)" : "#1C66FF",
+            backgroundColor: saving ? "rgba(28,102,255,0.55)" : "#1C66FF",
             borderRadius: 999,
             paddingVertical: 14,
             alignItems: "center",
             justifyContent: "center",
-            opacity: loadingPets || pets.length === 0 ? 0.6 : 1,
           }}
         >
-          {posting ? (
+          {saving ? (
             <ActivityIndicator color="#fff" />
           ) : (
             <Text style={{ color: "#fff", fontWeight: "900", fontSize: 16 }}>
-              Publicar anúncio
+              Salvar alterações
             </Text>
           )}
         </Pressable>
-
-        <Text style={{ marginTop: 10, color: "rgba(255,255,255,0.65)", textAlign: "center" }}>
-          Você só seleciona o pet e escreve a descrição. O resto vem do seu cadastro.
-        </Text>
       </ScrollView>
     </LinearGradient>
   );

@@ -124,6 +124,100 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
         return anuncio.Id;
     }
 
+    public async Task UpdateDescricao(int anuncioId, string descricao)
+    {
+        if (string.IsNullOrWhiteSpace(descricao))
+            throw new ArgumentException("Descrição é obrigatória.");
+
+        var anuncio = await _context.Anuncios
+            .FirstOrDefaultAsync(a => a.Id == anuncioId);
+
+        if (anuncio == null)
+            throw new ArgumentException("Anúncio não existe.");
+
+        // ✅ só muda descrição
+        anuncio.Descricao = descricao.Trim();
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdatePetFinder(int anuncioId, EditarPetFinderDTO dto)
+    {
+        if (dto == null)
+            throw new ArgumentException("DTO é obrigatório.");
+
+        if (string.IsNullOrWhiteSpace(dto.UltimoLocalVisto))
+            throw new ArgumentException("UltimoLocalVisto é obrigatório.");
+
+        if (dto.DataDesaparecimento == default)
+            throw new ArgumentException("DataDesaparecimento é obrigatória.");
+
+        // ✅ valida se o anúncio é PetFinder
+        var anuncio = await _context.Anuncios
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == anuncioId);
+
+        if (anuncio == null)
+            throw new ArgumentException("Anúncio não existe.");
+
+        if (anuncio.TipoAnuncio != TipoAnuncio.PETFINDER)
+            throw new ArgumentException("Este anúncio não é do tipo PetFinder.");
+
+        // ✅ pega a tabela do subtipo e atualiza
+        var pf = await _context.AnunciosPetFinder
+            .FirstOrDefaultAsync(x => x.AnuncioId == anuncioId);
+
+        if (pf == null)
+            throw new ArgumentException("Registro PetFinder não encontrado para este anúncio.");
+
+        pf.UltimoLocalVisto = dto.UltimoLocalVisto.Trim();
+        pf.DataDesaparecimento = DateTime.SpecifyKind(dto.DataDesaparecimento, DateTimeKind.Utc);
+
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task UpdatePayPet(int anuncioId, EditarPayPetDTO dto)
+    {
+        if (dto == null)
+            throw new ArgumentException("DTO é obrigatório.");
+
+        // 1=ADOCAO/DOACAO, 2=VENDA
+        var isDoacao = dto.TipoPayPet == 1;
+        var isVenda = dto.TipoPayPet == 2;
+
+        if (!isDoacao && !isVenda)
+            throw new ArgumentException("TipoPayPet inválido.");
+
+        if (isVenda && (dto.Valor == null || dto.Valor <= 0))
+            throw new ArgumentException("Para venda, informe um valor maior que 0.");
+
+        // ✅ valida se o anúncio é PayPet
+        var anuncio = await _context.Anuncios
+            .AsNoTracking()
+            .FirstOrDefaultAsync(a => a.Id == anuncioId);
+
+        if (anuncio == null)
+            throw new ArgumentException("Anúncio não existe.");
+
+        if (anuncio.TipoAnuncio != TipoAnuncio.PAYPET)
+            throw new ArgumentException("Este anúncio não é do tipo PayPet.");
+
+        // ✅ pega a tabela do subtipo e atualiza
+        var pp = await _context.AnunciosPayPet
+            .FirstOrDefaultAsync(x => x.AnuncioId == anuncioId);
+
+        if (pp == null)
+            throw new ArgumentException("Registro PayPet não encontrado para este anúncio.");
+
+        pp.TipoPayPet = (TipoPayPet)dto.TipoPayPet;
+
+        // se doação, zera valor (pra não ficar lixo no banco)
+        pp.Valor = isDoacao ? 0 : dto.Valor!.Value;
+
+        await _context.SaveChangesAsync();
+    }
+
+
     private static void ValidarPayloadPorTipo(TipoAnuncio tipo, CriarAnuncioDTO dto)
     {
         // Só 3 blocos agora
@@ -203,7 +297,7 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
                 DataDesaparecimento = x.DataDesaparecimento,
 
                 NomeUsuario = x.Anuncio.Usuario!.Nome,
-                TelefoneUsuario = x.Anuncio.Usuario!.Telefone,
+                TelefoneUsuario = x.Anuncio.Usuario!.Telefone, 
                 Cidade = x.Anuncio.Usuario!.Cidade,
                 Uf = x.Anuncio.Usuario!.Uf,
                 Bairro = x.Anuncio.Usuario!.Bairro,

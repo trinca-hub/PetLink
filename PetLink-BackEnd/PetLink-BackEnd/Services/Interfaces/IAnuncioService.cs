@@ -11,4 +11,9 @@ public interface IAnuncioService : IGenericService<Anuncio, AnuncioDTO>
     Task<IEnumerable<PetfinderFeedDTO>> GetFeedPetfinder();
     Task<IEnumerable<PaypetFeedDTO>> GetFeedPaypet();
 
+    Task UpdateDescricao(int anuncioId, string descricao);
+    Task UpdatePetFinder(int anuncioId, EditarPetFinderDTO dto);
+    Task UpdatePayPet(int anuncioId, EditarPayPetDTO dto);
+
+
 }
