@@ -7,5 +7,6 @@
         public string Descricao { get; set; }
         public int Tipo { get; set; }
         public float Valor { get; set; }
+        public int PetId { get; set; }
     }
 }

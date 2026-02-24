@@ -166,18 +166,6 @@
         }
       }
     },
-    "/api/v1/Anuncio/feed/petshop": {
-      "get": {
-        "tags": [
-          "Anuncio"
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          }
-        }
-      }
-    },
     "/api/v1/Anuncio": {
       "get": {
         "tags": [
@@ -296,6 +284,90 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/Anuncio/{id}/petfinder": {
+      "put": {
+        "tags": [
+          "Anuncio"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarPetFinderDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarPetFinderDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarPetFinderDTO"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/v1/Anuncio/{id}/paypet": {
+      "put": {
+        "tags": [
+          "Anuncio"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarPayPetDTO"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarPayPetDTO"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/EditarPayPetDTO"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "OK"
@@ -1336,9 +1408,6 @@
           },
           "peTinder": {
             "$ref": "#/components/schemas/CriarAnuncioPeTinderDTO"
-          },
-          "petShop": {
-            "$ref": "#/components/schemas/CriarAnuncioPetShopDTO"
           }
         },
         "additionalProperties": false
@@ -1390,16 +1459,31 @@
         },
         "additionalProperties": false
       },
-      "CriarAnuncioPetShopDTO": {
+      "EditarPayPetDTO": {
         "type": "object",
         "properties": {
-          "produtoId": {
+          "tipoPayPet": {
             "type": "integer",
             "format": "int32"
           },
-          "petShopId": {
-            "type": "integer",
-            "format": "int32"
+          "valor": {
+            "type": "number",
+            "format": "double",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "EditarPetFinderDTO": {
+        "type": "object",
+        "properties": {
+          "ultimoLocalVisto": {
+            "type": "string",
+            "nullable": true
+          },
+          "dataDesaparecimento": {
+            "type": "string",
+            "format": "date-time"
           }
         },
         "additionalProperties": false
@@ -1482,8 +1566,8 @@
             "nullable": true
           },
           "idade": {
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "nullable": true
           },
           "peso": {
             "type": "number",
@@ -1558,6 +1642,10 @@
           "valor": {
             "type": "number",
             "format": "float"
+          },
+          "petId": {
+            "type": "integer",
+            "format": "int32"
           }
         },
         "additionalProperties": false

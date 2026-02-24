@@ -238,6 +238,48 @@
   },
   {
     "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "PutPayPet",
+    "RelativePath": "api/v1/Anuncio/{id}/paypet",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.EditarPayPetDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "PutPetFinder",
+    "RelativePath": "api/v1/Anuncio/{id}/petfinder",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.EditarPetFinderDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
     "Method": "FeedPaypet",
     "RelativePath": "api/v1/Anuncio/feed/paypet",
     "HttpMethod": "GET",
@@ -260,16 +302,6 @@
     "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
     "Method": "FeedPetinder",
     "RelativePath": "api/v1/Anuncio/feed/petinder",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
-    "Method": "FeedPetshop",
-    "RelativePath": "api/v1/Anuncio/feed/petshop",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,

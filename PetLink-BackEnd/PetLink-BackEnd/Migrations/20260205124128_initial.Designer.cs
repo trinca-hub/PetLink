@@ -12,7 +12,7 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260123204053_initial")]
+    [Migration("20260205124128_initial")]
     partial class initial
     {
         /// <inheritdoc />
@@ -202,27 +202,6 @@ namespace PetLink_BackEnd.Migrations
                     b.ToTable("anuncio_petfinder");
                 });
 
-            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPetShop", b =>
-                {
-                    b.Property<int>("AnuncioId")
-                        .HasColumnType("integer")
-                        .HasColumnName("anuncioid");
-
-                    b.Property<int>("PetShopId")
-                        .HasColumnType("integer")
-                        .HasColumnName("petshopid");
-
-                    b.Property<int>("ProdutoId")
-                        .HasColumnType("integer")
-                        .HasColumnName("produtoid");
-
-                    b.HasKey("AnuncioId");
-
-                    b.HasIndex("ProdutoId");
-
-                    b.ToTable("anuncio_petshop");
-                });
-
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.ItemPedido", b =>
                 {
                     b.Property<int>("Id")
@@ -325,8 +304,10 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("character varying(1000)")
                         .HasColumnName("foto");
 
-                    b.Property<int>("Idade")
-                        .HasColumnType("integer")
+                    b.Property<string>("Idade")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
                         .HasColumnName("idade");
 
                     b.Property<string>("Nome")
@@ -377,12 +358,12 @@ namespace PetLink_BackEnd.Migrations
                             Id = 1,
                             Castrado = false,
                             Foto = "https://www.prodograw.com/wp-content/uploads/2025/09/American-Pitbull-1-800x800.jpg",
-                            Idade = 12,
+                            Idade = "7 anos",
                             Nome = "Peroba",
                             Peso = 35.3f,
                             Raca = "Pit Bull",
                             Rga = "22992",
-                            Sexo = "Masculino",
+                            Sexo = "Macho",
                             TipoPet = 2,
                             UsuarioId = 1
                         },
@@ -391,27 +372,69 @@ namespace PetLink_BackEnd.Migrations
                             Id = 2,
                             Castrado = true,
                             Foto = "https://images.tcdn.com.br/img/img_prod/1087789/noticia_619419434679a87734bc0e.png",
-                            Idade = 5,
+                            Idade = "3 anos",
                             Nome = "Felipina",
                             Peso = 5.5f,
                             Raca = "Yorkshire",
                             Rga = "22392",
                             Sexo = "Fêmea",
-                            TipoPet = 1,
+                            TipoPet = 2,
                             UsuarioId = 2
                         },
                         new
                         {
                             Id = 3,
                             Castrado = false,
-                            Foto = "https://objectstorage.sa-vinhedo-1.oraclecloud.com/n/axuh3s32sabm/b/cobasi-institutional-cms-bucket/o/prod/Pastor%202.jpg",
-                            Idade = 24,
+                            Foto = "https://imgs.search.brave.com/Zf7U4EzVoIouXr_8pci0FiteQUnpCBmJF6NO38G0qdo/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvNDcy/NDY3OTUyL3B0L2Zv/dG8vYyVDMyVBM28t/cGFzdG9yLWFsZW0l/QzMlQTNvLWNhY2hv/cnJpbmhvLXRyaXN0/ZS1jJUMzJUEzby1k/ZWl0YWRvLW9saGFu/ZG8uanBnP3M9NjEy/eDYxMiZ3PTAmaz0y/MCZjPS0xV1NNYmtr/RzV1RTg5SnBPQ2NF/eU1PUllZalAxMUZP/ZzNQNWE4WXBMOXM9",
+                            Idade = "8 meses",
                             Nome = "Neguin",
-                            Peso = 30.9f,
+                            Peso = 14.9f,
                             Raca = "Pastor Alemão",
                             Rga = "22192",
-                            Sexo = "Masculino",
+                            Sexo = "Macho",
                             TipoPet = 2,
+                            UsuarioId = 3
+                        },
+                        new
+                        {
+                            Id = 4,
+                            Castrado = true,
+                            Foto = "https://imgs.search.brave.com/OiTS8j_7NOegyditO95P5Iw58RfR0yv__Gohg9GgVe4/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9pbWcu/ZnJlZXBpay5jb20v/Zm90b3MtZ3JhdGlz/L3JldHJhdG8tZWxl/Z2FudGUtZGUtdW0t/Z2F0by1zaWFtZXNf/MjMtMjE1MTk4MzU0/NC5qcGc_c2VtdD1h/aXNfaHlicmlkJnc9/NzQwJnE9ODA",
+                            Idade = "8 anos",
+                            Nome = "Garfield",
+                            Peso = 5.3f,
+                            Raca = "Siamês",
+                            Rga = "22992",
+                            Sexo = "Macho",
+                            TipoPet = 1,
+                            UsuarioId = 1
+                        },
+                        new
+                        {
+                            Id = 5,
+                            Castrado = true,
+                            Foto = "https://imgs.search.brave.com/1uVQa0yKTFnW7bqkIzG0jlsP8yOKb1kqLWWaIUFm5NM/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9jZG4w/LmV4cGVydG9hbmlt/YWwuY29tL2VzL3Jh/emFzLzQvOC8xL2dh/dG8tcmFnZG9sbF8x/ODRfNl9vcmlnLmpw/Zw",
+                            Idade = "6 meses",
+                            Nome = "Tom",
+                            Peso = 2.5f,
+                            Raca = "Ragdoll",
+                            Rga = "43432",
+                            Sexo = "Macho",
+                            TipoPet = 1,
+                            UsuarioId = 2
+                        },
+                        new
+                        {
+                            Id = 6,
+                            Castrado = true,
+                            Foto = "https://imgs.search.brave.com/V0Na41tb7sTCIIeoRfAtv2KeDyLqOm3kiFDn7jKBwHo/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9tZWRp/YS5pc3RvY2twaG90/by5jb20vaWQvMTE4/OTk3NDk1MC9waG90/by9tYWluZS1jb29u/LWNhdC1jbG9zZS11/cC1mdW5ueS1jdXRl/LWNhdC13aXRoLW1h/cmJsZS1mdXItY29s/b3ItbGFyZ2VzdC1k/b21lc3RpY2F0ZWQt/YnJlZWRzLW9mLmpw/Zz9zPTYxMng2MTIm/dz0wJms9MjAmYz16/djAzeG1iLVdFR2hE/YkNhZFRid3Z3SUxQ/N3ZwS01KTDF5eEY4/MjFhWXJJPQ",
+                            Idade = "3 anos",
+                            Nome = "Marie",
+                            Peso = 3.2f,
+                            Raca = "Coon",
+                            Rga = "22192",
+                            Sexo = "Fêmea",
+                            TipoPet = 1,
                             UsuarioId = 3
                         });
                 });
@@ -493,6 +516,10 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("character varying(250)")
                         .HasColumnName("descricao");
 
+                    b.Property<int>("PetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("petid");
+
                     b.Property<int>("Tipo")
                         .HasColumnType("integer")
                         .HasColumnName("tipo");
@@ -503,6 +530,8 @@ namespace PetLink_BackEnd.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("PetId");
+
                     b.ToTable("servico");
 
                     b.HasData(
@@ -511,6 +540,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 1,
                             DataServico = new DateTime(2025, 10, 15, 0, 28, 32, 0, DateTimeKind.Utc),
                             Descricao = "Consulta do Joquinha",
+                            PetId = 1,
                             Tipo = 1,
                             Valor = 100f
                         },
@@ -519,6 +549,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 2,
                             DataServico = new DateTime(2025, 9, 18, 15, 20, 22, 0, DateTimeKind.Utc),
                             Descricao = "Banho da Macoca",
+                            PetId = 2,
                             Tipo = 2,
                             Valor = 60f
                         },
@@ -527,6 +558,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 3,
                             DataServico = new DateTime(2025, 6, 27, 10, 47, 2, 0, DateTimeKind.Utc),
                             Descricao = "Tosa da Penelope",
+                            PetId = 3,
                             Tipo = 3,
                             Valor = 80f
                         });
@@ -780,25 +812,6 @@ namespace PetLink_BackEnd.Migrations
                     b.Navigation("Pet");
                 });
 
-            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AnuncioPetShop", b =>
-                {
-                    b.HasOne("PetLink_BackEnd.Objects.Models.Anuncio", "Anuncio")
-                        .WithOne()
-                        .HasForeignKey("PetLink_BackEnd.Objects.Models.AnuncioPetShop", "AnuncioId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("PetLink_BackEnd.Objects.Models.Produto", "Produto")
-                        .WithMany()
-                        .HasForeignKey("ProdutoId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Anuncio");
-
-                    b.Navigation("Produto");
-                });
-
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.ItemPedido", b =>
                 {
                     b.HasOne("PetLink_BackEnd.Objects.Models.Pedido", "Pedido")
@@ -838,6 +851,17 @@ namespace PetLink_BackEnd.Migrations
                         .IsRequired();
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Servico", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Pet", "Pet")
+                        .WithMany()
+                        .HasForeignKey("PetId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Pet");
                 });
 #pragma warning restore 612, 618
         }

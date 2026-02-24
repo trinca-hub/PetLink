@@ -96,7 +96,6 @@ builder.Services.AddScoped<IAnuncioRepository, AnuncioRepository>();
 builder.Services.AddScoped<IAnuncioPayPetRepository, AnuncioPayPetRepository>();
 builder.Services.AddScoped<IAnuncioPetFinderRepository, AnuncioPetFinderRepository>();
 builder.Services.AddScoped<IAnuncioPeTinderRepository, AnuncioPeTinderRepository>();
-builder.Services.AddScoped<IAnuncioPetShopRepository, AnuncioPetShopRepository>();
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();

@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { AuthContext } from "@/src/context/AuthContext";
 import { updateUserService } from "@/src/api/authService";
+import { router } from "expo-router";
 
 export default function Perfil() {
   const { user, token, logout } = useContext(AuthContext);
@@ -68,10 +69,16 @@ export default function Perfil() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    Alert.alert("Até logo!", "Você saiu da sua conta.");
-  };
+  const handleLogout = async () => {
+  await logout();
+
+  Alert.alert("Até logo!", "Você saiu da sua conta.", [
+    {
+      text: "OK",
+      onPress: () => router.push("/login"),
+    },
+  ]);
+};
 
   return (
     <ScrollView contentContainerStyle={styles.scrollContent}>

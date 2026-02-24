@@ -38,7 +38,7 @@ export default function TabLayout() {
               return <Feather name="search" size={22} color={color} />; // antes: compass
             case 'paypet':
               return <Feather name="tag" size={22} color={color} />;
-            case 'produtos':
+            case 'petshop':
               return <MaterialIcons name="shopping-cart" size={22} color={color} />;
             case 'perfil':
               return <Ionicons name="person-outline" size={24} color={color} />;
@@ -52,7 +52,7 @@ export default function TabLayout() {
       <Tabs.Screen name="petinder" options={{ title: 'PeTinder' }} />
       <Tabs.Screen name="petfinder" options={{ title: 'PetFinder' }} />
       <Tabs.Screen name="paypet" options={{ title: 'PayPet' }} />
-      <Tabs.Screen name="produtos" options={{ title: 'Produtos' }} />
+      <Tabs.Screen name="petshop" options={{ title: 'PetShop' }} />
       <Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
     </Tabs>
   );

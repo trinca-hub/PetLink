@@ -311,10 +311,12 @@ public class UsuarioController : Controller
         // Claims são informações sobre o usuário que você quer armazenar no token
         var claims = new[]
         {
-            new Claim(JwtRegisteredClaimNames.Sub, usuarioDTO.Nome), // Subject (identificador do usuário)
+            new Claim(JwtRegisteredClaimNames.Sub, usuarioDTO.Id.ToString()), // ✅ agora é o ID
+            new Claim(ClaimTypes.NameIdentifier, usuarioDTO.Id.ToString()),   // ✅ padrão
             new Claim(JwtRegisteredClaimNames.Email, usuarioDTO.Email),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()) // JWT ID, para rastreabilidade
+            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
+
 
         var token = new JwtSecurityToken(
             issuer: _configuration["Jwt:Issuer"],

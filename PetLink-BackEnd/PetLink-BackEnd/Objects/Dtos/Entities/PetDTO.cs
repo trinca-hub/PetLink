@@ -9,7 +9,7 @@ namespace PetLink_BackEnd.Objects.Dtos.Entities
             public string Raca { get; set; }
             public string Sexo { get; set; }
             public string Rga { get; set; }
-            public int Idade { get; set; }
+            public string Idade { get; set; }
             public float Peso { get; set; }
             public bool Castrado { get; set; }
             public string? Foto { get; set; }
