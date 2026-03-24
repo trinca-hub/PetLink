@@ -28,7 +28,7 @@ namespace PetLink_BackEnd.Services.Entities
             return _mapper.Map<TDto>(entity);
         }
 
-        public async Task Create(TDto entityDTO)
+        public virtual async Task Create(TDto entityDTO)
         {
             var entity = _mapper.Map<T>(entityDTO);
             await _repository.Add(entity);

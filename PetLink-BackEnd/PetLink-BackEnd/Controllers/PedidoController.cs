@@ -51,6 +51,18 @@ public class PedidoController : Controller
         return Ok(_response);
     }
 
+    [HttpGet("usuario/{usuarioId}")]
+    public async Task<IActionResult> GetByUsuarioId(int usuarioId)
+    {
+        var pedidosDTO = await _pedidoService.GetByUsuarioId(usuarioId);
+
+        _response.Code = ResponseEnum.SUCCESS;
+        _response.Data = pedidosDTO;
+        _response.Message = "Pedidos do usuário listados com sucesso";
+
+        return Ok(_response);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Post(PedidoDTO pedidoDTO)
     {

@@ -388,6 +388,22 @@
     "ReturnTypes": []
   },
   {
+    "ContainingType": "PetLink_BackEnd.Controllers.ItemPedidoController",
+    "Method": "GetByPedidoId",
+    "RelativePath": "api/v1/ItemPedido/pedido/{pedidoId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "pedidoId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
     "ContainingType": "PetLink_BackEnd.Controllers.PedidoController",
     "Method": "GetAll",
     "RelativePath": "api/v1/Pedido",
@@ -460,6 +476,22 @@
     "Parameters": [
       {
         "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.PedidoController",
+    "Method": "GetByUsuarioId",
+    "RelativePath": "api/v1/Pedido/usuario/{usuarioId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "usuarioId",
         "Type": "System.Int32",
         "IsRequired": true
       }

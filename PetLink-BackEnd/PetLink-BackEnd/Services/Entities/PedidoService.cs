@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using PetLink_BackEnd.Data;
 using PetLink_BackEnd.Data.Interafces;
-using PetLink_BackEnd.Data.Interfaces;
 using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Objects.Models;
 using PetLink_BackEnd.Services.Interfaces;
@@ -12,6 +11,7 @@ namespace PetLink_BackEnd.Services.Entities;
 public class PedidoService : GenericService<Pedido, PedidoDTO>, IPedidoService
 {
     private readonly AppDbContext _context;
+    private readonly IPedidoRepository _pedidoRepo;
     private readonly IMapper _mapper;
 
     public PedidoService(
@@ -21,6 +21,7 @@ public class PedidoService : GenericService<Pedido, PedidoDTO>, IPedidoService
     ) : base(pedidoRepo, mapper)
     {
         _context = context;
+        _pedidoRepo = pedidoRepo;
         _mapper = mapper;
     }
 
@@ -52,5 +53,11 @@ public class PedidoService : GenericService<Pedido, PedidoDTO>, IPedidoService
         await _context.SaveChangesAsync();
 
         return entity.Id;
+    }
+
+    public async Task<IEnumerable<PedidoDTO>> GetByUsuarioId(int usuarioId)
+    {
+        var pedidos = await _pedidoRepo.GetByUsuarioId(usuarioId);
+        return _mapper.Map<IEnumerable<PedidoDTO>>(pedidos);
     }
 }
