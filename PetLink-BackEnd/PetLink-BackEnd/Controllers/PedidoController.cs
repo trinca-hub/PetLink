@@ -51,6 +51,18 @@ public class PedidoController : Controller
         return Ok(_response);
     }
 
+    [HttpGet("usuario/{usuarioId}")]
+    public async Task<IActionResult> GetByUsuarioId(int usuarioId)
+    {
+        var pedidosDTO = await _pedidoService.GetByUsuarioId(usuarioId);
+
+        _response.Code = ResponseEnum.SUCCESS;
+        _response.Data = pedidosDTO;
+        _response.Message = "Pedidos do usuário listados com sucesso";
+
+        return Ok(_response);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Post(PedidoDTO pedidoDTO)
     {
@@ -65,26 +77,33 @@ public class PedidoController : Controller
 
         try
         {
-            // Zeramos o id antes de cadastrar para que o banco gere automaticamente
-            // e evite conflito com ids existentes
-            pedidoDTO.Id = 0;
-            await _pedidoService.Create(pedidoDTO);
+            // ✅ agora retorna o ID real
+            var id = await _pedidoService.CreateAndReturnId(pedidoDTO);
 
             _response.Code = ResponseEnum.SUCCESS;
-            _response.Data = pedidoDTO;
-            _response.Message = " cadastrado com sucesso";
+            _response.Data = new { id };
+            _response.Message = "Pedido cadastrado com sucesso";
 
             return Ok(_response);
+        }
+        catch (ArgumentException ex)
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = ex.Message;
+
+            return BadRequest(_response);
         }
         catch (Exception ex)
         {
             _response.Code = ResponseEnum.ERROR;
-            _response.Message = "Não foi possível cadastrar o pedido";
+            _response.Message = "Ocorreu um erro ao tentar cadastrar o pedido";
             _response.Data = new
             {
                 ErrorMessage = ex.Message,
                 StackTrace = ex.StackTrace ?? "No stack trace available"
             };
+
             return StatusCode(StatusCodes.Status500InternalServerError, _response);
         }
     }

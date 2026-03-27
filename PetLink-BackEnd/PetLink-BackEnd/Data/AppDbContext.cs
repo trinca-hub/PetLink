@@ -13,7 +13,15 @@ public class AppDbContext : DbContext
     public DbSet<Veterinario> Veterinarios { get; set; }
     public DbSet<Pedido> Pedidos { get; set; }
     public DbSet<ItemPedido> ItemPedidos { get; set; }
-    public DbSet<Pet> Pet { get; set; }
+    public DbSet<Pet> Pets { get; set; }
+    public DbSet<Servico> Servicos { get; set; }
+    public DbSet<Anuncio> Anuncios { get; set; }
+    public DbSet<AnuncioPayPet> AnunciosPayPet { get; set; }
+    public DbSet<AnuncioPetFinder> AnunciosPetFinder { get; set; }
+    public DbSet<AnuncioPeTinder> AnunciosPeTinder { get; set; }
+
+
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -26,5 +34,13 @@ public class AppDbContext : DbContext
         PedidoBuilder.Build(modelBuilder);
         ItemPedidoBuilder.Build(modelBuilder);
         PetBuilder.Build(modelBuilder);
+        ServicoBuilder.Build(modelBuilder);
+        AnuncioBuilder.Build(modelBuilder);
+        AnuncioPayPetBuilder.Build(modelBuilder);
+        AnuncioPetFinderBuilder.Build(modelBuilder);
+        AnuncioPeTinderBuilder.Build(modelBuilder);
+
+
+
     }
 }

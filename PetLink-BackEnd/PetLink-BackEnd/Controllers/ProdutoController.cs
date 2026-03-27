@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
@@ -7,6 +9,7 @@ namespace PetLink_BackEnd.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
 public class ProdutoController : Controller
 {
     private readonly IProdutoService _produtoService;

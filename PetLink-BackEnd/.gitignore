@@ -1,22 +1,18 @@
-## Ignore arquivos do Visual Studio
+## Diretórios de build e IDE
+bin/
+obj/
 .vs/
 .vscode/
+.idea/
+
+## Usuário
 *.user
 *.suo
 *.userosscache
 *.sln.docstates
+*.sln.iml
 
-## Arquivos de build do .NET
-bin/
-obj/
-[Bb]uild/
-[Ll]og/
-
-## Arquivos de publicação
-*.publishsettings
-.publish/
-
-## Diretórios do pacote NuGet
+## NuGet
 *.nupkg
 *.snupkg
 *.nuspec
@@ -24,75 +20,70 @@ packages/
 project.lock.json
 project.fragment.lock.json
 artifacts/
-
-## Arquivos de lock e cache do NuGet
 *.nuget.props
 *.nuget.targets
 *.csproj.nuget.g.props
 *.csproj.nuget.g.targets
 .nuget/
 
-## Cache do Rider ou outros IDEs
+## Logs e temporários
+*.log
+*.tmp
+*.temp
+*.cache
+*.pid
+*.dump
+*.db
+
+## Publicação
+*.publishsettings
+.publish/
+*.zip
+*.tar.gz
+
+## Configurações locais e segredos
+*.env
+*.secret
+*.local.json
+secrets.json
+appsettings.Development.json
+appsettings.Local.json
+appsettings.*.json
+
+## Certificados
+*.pfx
+*.key
+*.cer
+
+## Testes e cobertura
+TestResults/
+*.coverage
+*.coveragexml
+*.codecoverage
+
+## Depuração
+*.pdb
+*.mdb
+
+## Ferramentas JetBrains e extensões
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+## Rider
 .idea/
 *.sln.iml
 
-## Arquivos de log e temporários
-*.log
-*.tmp
+## SonarQube
+.sonar/
 
-## Arquivos do sistema operacional
+## StyleCop
+StyleCopReport.xml
+
+## Sistema operacional
 Thumbs.db
 ehthumbs.db
 .DS_Store
 Icon?
 Desktop.ini
 $RECYCLE.BIN/
-
-## Configurações específicas de usuários
-*.env
-*.secret
-*.local.json
-secrets.json
-
-## Arquivos de configuração do IIS/ASP.NET
-appsettings.Development.json
-appsettings.Local.json
-appsettings.*.json
-
-## Certificados de desenvolvimento
-*.pfx
-*.key
-*.cer
-
-## Testes e cobertura de código
-TestResults/
-*.coverage
-*.coveragexml
-*.codecoverage
-
-## Arquivos de dump
-*.dmp
-
-## Arquivos de debug
-*.mdb
-*.pdb
-
-## Arquivos de pacote gerados
-*.zip
-*.tar.gz
-
-## Arquivos do JetBrains Rider
-.idea/
-*.sln.iml
-
-## Arquivos do Resharper
-_ReSharper*/
-*.[Rr]e[Ss]harper
-*.DotSettings.user
-
-## Arquivos do SonarQube
-.sonar/
-
-## Arquivos do StyleCop
-StyleCopReport.xml
-

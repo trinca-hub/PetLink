@@ -1,5 +1,7 @@
-﻿using PetLink_BackEnd.Data.Builders;
+﻿using Microsoft.EntityFrameworkCore;
+using PetLink_BackEnd.Data.Builders;
 using PetLink_BackEnd.Data.Interafces;
+using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Models;
 
 namespace PetLink_BackEnd.Data.Repositories
@@ -12,5 +14,17 @@ namespace PetLink_BackEnd.Data.Repositories
         {
             _context = context;
         }
+
+        public async Task<Usuario> Login(Login login)
+        {
+            return await _context.Usuarios.AsNoTracking().FirstOrDefaultAsync(p => p.Email == login.Email && p.Senha == login.Password);
+        }
+
+        public async Task<Usuario> GetByEmail(string email)
+        {
+            return await _context.Usuarios
+                .FirstOrDefaultAsync(u => u.Email == email);
+        }
+
     }
 }

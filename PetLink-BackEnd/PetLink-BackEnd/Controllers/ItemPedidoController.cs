@@ -51,6 +51,18 @@ public class ItemPedidoController : Controller
         return Ok(_response);
     }
 
+    [HttpGet("pedido/{pedidoId}")]
+    public async Task<IActionResult> GetByPedidoId(int pedidoId)
+    {
+        var itensDTO = await _itempedidoService.GetByPedidoId(pedidoId);
+
+        _response.Code = ResponseEnum.SUCCESS;
+        _response.Data = itensDTO;
+        _response.Message = "Itens do pedido listados com sucesso";
+
+        return Ok(_response);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Post(ItemPedidoDTO itempedidoDTO)
     {
@@ -72,9 +84,17 @@ public class ItemPedidoController : Controller
 
             _response.Code = ResponseEnum.SUCCESS;
             _response.Data = itempedidoDTO;
-            _response.Message = " cadastrado com sucesso";
+            _response.Message = "Item do pedido cadastrado com sucesso";
 
             return Ok(_response);
+        }
+        catch (ArgumentException ex)
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = ex.Message;
+
+            return BadRequest(_response);
         }
         catch (Exception ex)
         {

@@ -10,11 +10,21 @@ namespace PetLink_BackEnd.Objects.Dtos.Mappings
         {
             CreateMap<Produto, ProdutoDTO>().ReverseMap();
             CreateMap<Usuario, UsuarioDTO>().ReverseMap();
+
+            CreateMap<UsuarioDTO, Usuario>()
+                .ForMember(dest => dest.Senha, opt => opt.Ignore())
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+
             CreateMap<Administrador, AdministradorDTO>().ReverseMap();
             CreateMap<Veterinario, VeterinarioDTO>().ReverseMap();
             CreateMap<Pedido, PedidoDTO>().ReverseMap();
             CreateMap<ItemPedido, ItemPedidoDTO>().ReverseMap();
             CreateMap<Pet, PetDTO>().ReverseMap();
+            CreateMap<Servico, ServicoDTO>().ReverseMap();
+            CreateMap<Anuncio, AnuncioDTO>().ReverseMap();
+            CreateMap<AnuncioPayPet, AnuncioPayPetDTO>().ReverseMap();
+            CreateMap<AnuncioPetFinder, AnuncioPetFinderDTO>().ReverseMap();
+            CreateMap<AnuncioPeTinder, AnuncioPeTinderDTO>().ReverseMap();
         }
     }
 }

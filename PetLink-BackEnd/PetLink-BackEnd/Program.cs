@@ -6,12 +6,15 @@ using PetLink_BackEnd.Services.Interfaces;
 using PetLink_BackEnd.Services.Entities;
 using PetLink_BackEnd.Data;
 using PetLink_BackEnd.Data.Interfaces;
-using StudentManager.WebAPI.Data.Repositories;
+using PetLink_BackEnd.Data.Repositories;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
+using PetLink_BackEnd.WebAPI.Data.Repositories;
 
 
 var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(opt =>
@@ -19,18 +22,67 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 builder.Services.AddAutoMapper(opt => { }, AppDomain.CurrentDomain.GetAssemblies());
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 
-// Criamos uma nova política para o CORS para permitir que ele aceite as requisições do nosso frontend
-builder.Services.AddCors(o => o.AddPolicy("DefaultPolicy", builder =>
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(c =>
 {
-    builder.WithOrigins("http://localhost:3000", "http://localhost:5173")
-        .AllowAnyMethod()
-        .AllowAnyHeader()
-        .AllowCredentials();
-}));
+    c.SwaggerDoc("v1", new() { Title = "PetLink API", Version = "v1" });
+
+    c.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = Microsoft.OpenApi.Models.SecuritySchemeType.ApiKey,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = Microsoft.OpenApi.Models.ParameterLocation.Header,
+        Description = "Digite: Bearer {seu token JWT}"
+    });
+
+    c.AddSecurityRequirement(new Microsoft.OpenApi.Models.OpenApiSecurityRequirement
+    {
+        {
+            new Microsoft.OpenApi.Models.OpenApiSecurityScheme
+            {
+                Reference = new Microsoft.OpenApi.Models.OpenApiReference
+                {
+                    Type = Microsoft.OpenApi.Models.ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
+
+// CORS liberado para React Native (qualquer origem)
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+        };
+    });
+
+builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IProdutoRepository, ProdutoRepository>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -39,6 +91,11 @@ builder.Services.AddScoped<IVeterinarioRepository, VeterinarioRepository>();
 builder.Services.AddScoped<IItemPedidoRepository, ItemPedidoRepository>();
 builder.Services.AddScoped<IPedidoRepository, PedidoRepository>();
 builder.Services.AddScoped<IPetRepository, PetRepository>();
+builder.Services.AddScoped<IServicoRepository, ServicoRepository>();
+builder.Services.AddScoped<IAnuncioRepository, AnuncioRepository>();
+builder.Services.AddScoped<IAnuncioPayPetRepository, AnuncioPayPetRepository>();
+builder.Services.AddScoped<IAnuncioPetFinderRepository, AnuncioPetFinderRepository>();
+builder.Services.AddScoped<IAnuncioPeTinderRepository, AnuncioPeTinderRepository>();
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -47,11 +104,14 @@ builder.Services.AddScoped<IVeterinarioService, VeterinarioService>();
 builder.Services.AddScoped<IItemPedidoService, ItemPedidoService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
 builder.Services.AddScoped<IPetService, PetService>();
+builder.Services.AddScoped<IServicoService, ServicoService>();
+builder.Services.AddScoped<IAnuncioService, AnuncioService>();
+builder.Services.AddScoped<IAnuncioPayPetService, AnuncioPayPetService>();
+
 
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -60,11 +120,14 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-//Aplica politica criada acima
-app.UseCors("DefaultPolicy");
+// <<< AQUI troca sua policy por esta >>>
+app.UseCors("AllowAll");
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.Urls.Add("http://0.0.0.0:5078");
 
 app.Run();

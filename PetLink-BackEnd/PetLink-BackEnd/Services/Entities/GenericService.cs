@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using PetLink_BackEnd.Data.Interafces;
+using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
 
 namespace PetLink_BackEnd.Services.Entities
@@ -27,7 +28,7 @@ namespace PetLink_BackEnd.Services.Entities
             return _mapper.Map<TDto>(entity);
         }
 
-        public async Task Create(TDto entityDTO)
+        public virtual async Task Create(TDto entityDTO)
         {
             var entity = _mapper.Map<T>(entityDTO);
             await _repository.Add(entity);
@@ -35,15 +36,16 @@ namespace PetLink_BackEnd.Services.Entities
 
         public async Task Update(TDto entityDTO, int id)
         {
-            var existingEntity = await _repository.GetById(id); // Supondo que sua entidade tenha um campo Id
+            var existingEntity = await _repository.GetById(id);
 
             if (existingEntity == null)
-            {
                 throw new KeyNotFoundException($"Entity with id {id} not found.");
-            }
 
-            var entity = _mapper.Map<T>(entityDTO);
-            await _repository.Update(entity);
+            // ✅ Atualiza SOMENTE os campos do DTO em cima do objeto existente
+            _mapper.Map(entityDTO, existingEntity);
+
+            // ✅ Salva o objeto existente (que ainda tem a senha intacta)
+            await _repository.Update(existingEntity);
         }
 
         public async Task Remove(int id)
@@ -55,6 +57,11 @@ namespace PetLink_BackEnd.Services.Entities
             }
 
             await _repository.Remove(entity);
+        }
+
+        public Task<IEnumerable<PetDTO>> GetByUsuarioId(int usuarioId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

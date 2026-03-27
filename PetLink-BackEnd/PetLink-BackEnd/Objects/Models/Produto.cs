@@ -20,15 +20,20 @@ namespace PetLink_BackEnd.Objects.Models
         [Column("quantidade")]
         public int Quantidade { get; set; }
 
+        [Column("foto")]
+        public string? Foto { get; set; }
+
+
         public Produto() { }
 
-        public Produto(int id, string nome, float preco, string descricao, int quantidade)
+        public Produto(int id, string nome, float preco, string descricao, int quantidade, string foto)
         {
             Id = id;
             Nome = nome;
             Preco = preco;
             Descricao = descricao;
             Quantidade = quantidade;
+            Foto = foto;
         }
     }
 }
