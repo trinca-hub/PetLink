@@ -6,8 +6,8 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 
 import { AuthContext } from "@/src/context/AuthContext";
 import { getProdutoById } from "@/src/api/produtoService";
-import { addToCartProducts, getCartProducts, clearCartProducts } from "@/src/storage/cartProducts";
-import { criarPedido, criarItemPedido } from "@/src/api/pedidoService";
+import { addToCartProducts } from "@/src/storage/cartProducts";
+import { checkoutFromItems } from "@/src/services/checkoutService";
 
 type ProdutoDTO = {
     id: number;
@@ -33,6 +33,7 @@ export default function ProdutoDetalhe() {
     const [loading, setLoading] = useState(true);
     const [posting, setPosting] = useState(false);
     const [data, setData] = useState<ProdutoDTO | null>(null);
+    const [buyQty, setBuyQty] = useState(1);
 
     async function load() {
         const res: any = await getProdutoById(id, token || undefined);
@@ -53,6 +54,15 @@ export default function ProdutoDetalhe() {
         })();
     }, [id]);
 
+    useEffect(() => {
+        const estoque = Number(data?.quantidade ?? 0);
+        if (estoque <= 0) {
+            setBuyQty(1);
+            return;
+        }
+        setBuyQty((prev) => Math.min(Math.max(1, prev), estoque));
+    }, [data?.quantidade]);
+
     const semEstoque = (data?.quantidade ?? 0) <= 0;
 
     async function addCarrinho() {
@@ -70,64 +80,51 @@ export default function ProdutoDetalhe() {
         Alert.alert("Pronto!", "Adicionado ao carrinho.");
     }
 
-    // Compra simples: compra tudo do carrinho (1 item ou vários)
+    function decBuyQty() {
+        setBuyQty((prev) => Math.max(1, prev - 1));
+    }
+
+    function incBuyQty() {
+        const estoque = Number(data?.quantidade ?? 0);
+        if (estoque <= 0) return;
+        setBuyQty((prev) => Math.min(estoque, prev + 1));
+    }
+
+    // Compra imediata: compra apenas o produto atual
     async function comprarAgora() {
         if (!user?.id) return Alert.alert("Login", "Faça login para comprar.");
         if (!token) return Alert.alert("Login", "Token não encontrado.");
-        if (semEstoque) return Alert.alert("Sem estoque", "Esse produto está esgotado.");
+        if (!data) return;
+
+        const estoqueAtual = Number(data.quantidade ?? 0);
+        if (estoqueAtual <= 0) return Alert.alert("Sem estoque", "Esse produto está esgotado.");
+
+        const quantidade = Math.min(Math.max(1, buyQty), estoqueAtual);
 
         setPosting(true);
         try {
-            // garante que o produto está no carrinho (pra simplificar)
-            await addToCartProducts(user.id, {
-                produtoId: data!.id,
-                nome: data!.nome,
-                preco: data!.preco,
-                foto: data!.foto,
-                estoque: data!.quantidade,
-            }, 1);
-
-            const cart = await getCartProducts(user.id);
-
-            // valida estoque local (evita comprar mais do que tem)
-            for (const it of cart) {
-                if (it.estoque != null && it.quantidade > it.estoque) {
-                    setPosting(false);
-                    return Alert.alert("Estoque", `Quantidade acima do estoque para: ${it.nome}`);
-                }
-            }
-
-            // 1) cria pedido
-            const pedidoRes: any = await criarPedido(
-                { usuarioId: user.id, dataPedido: new Date().toISOString() },
-                token
+            const result = await checkoutFromItems(
+                user.id,
+                token,
+                [
+                    {
+                        produtoId: data.id,
+                        nome: data.nome,
+                        preco: data.preco,
+                        foto: data.foto,
+                        quantidade,
+                    },
+                ]
             );
 
-            if (!pedidoRes?.ok) {
-                setPosting(false);
-                return Alert.alert("Erro", pedidoRes?.data?.message || "Erro ao criar pedido.");
+            if (!result.ok) {
+                const reason =
+                    result.failedItems[0]?.message ||
+                    result.generalError ||
+                    "Não foi possível concluir a compra.";
+                return Alert.alert("Erro", reason);
             }
 
-            const pedidoId = pedidoRes?.data?.data?.id ?? pedidoRes?.data?.data?.Id ?? pedidoRes?.data?.id;
-            if (!pedidoId) {
-                setPosting(false);
-                return Alert.alert("Erro", "Pedido criado, mas não retornou o ID.");
-            }
-
-            // 2) cria itens do pedido
-            for (const it of cart) {
-                const itemRes: any = await criarItemPedido(
-                    { pedidoId: Number(pedidoId), produtoId: it.produtoId, quantidade: it.quantidade },
-                    token
-                );
-                if (!itemRes?.ok) {
-                    setPosting(false);
-                    return Alert.alert("Erro", itemRes?.data?.message || `Erro ao adicionar item: ${it.nome}`);
-                }
-            }
-
-            // 3) limpa carrinho e recarrega o produto (pra pegar estoque novo)
-            await clearCartProducts(user.id);
             await load();
 
             Alert.alert("Sucesso", "Compra realizada!");
@@ -222,6 +219,53 @@ export default function ProdutoDetalhe() {
                     <Text style={{ marginTop: 12, color: "#222", fontWeight: "700", lineHeight: 20 }}>
                         {data.descricao?.trim() || "Sem descrição."}
                     </Text>
+
+                    <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+                        <Text style={{ color: "#111", fontWeight: "900" }}>Quantidade imediata</Text>
+                        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                            <Pressable
+                                onPress={decBuyQty}
+                                style={{
+                                    width: 34,
+                                    height: 34,
+                                    borderRadius: 10,
+                                    backgroundColor: "rgba(0,0,0,0.06)",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                }}
+                            >
+                                <Ionicons name="remove" size={18} color="#0E2B5A" />
+                            </Pressable>
+
+                            <Text style={{ minWidth: 22, textAlign: "center", fontWeight: "900", color: "#111" }}>
+                                {buyQty}
+                            </Text>
+
+                            <Pressable
+                                onPress={incBuyQty}
+                                disabled={semEstoque || buyQty >= Number(data.quantidade ?? 0)}
+                                style={{
+                                    width: 34,
+                                    height: 34,
+                                    borderRadius: 10,
+                                    backgroundColor:
+                                        semEstoque || buyQty >= Number(data.quantidade ?? 0)
+                                            ? "rgba(0,0,0,0.03)"
+                                            : "rgba(28,102,255,0.14)",
+                                    borderWidth: 1,
+                                    borderColor:
+                                        semEstoque || buyQty >= Number(data.quantidade ?? 0)
+                                            ? "rgba(0,0,0,0.08)"
+                                            : "rgba(28,102,255,0.35)",
+                                    alignItems: "center",
+                                    justifyContent: "center",
+                                    opacity: semEstoque || buyQty >= Number(data.quantidade ?? 0) ? 0.6 : 1,
+                                }}
+                            >
+                                <Ionicons name="add" size={18} color="#0E2B5A" />
+                            </Pressable>
+                        </View>
+                    </View>
 
                     <Pressable
                         disabled={posting || semEstoque}

@@ -17,11 +17,11 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, Feather } from "@expo/vector-icons";
 
 import { AuthContext } from "@/src/context/AuthContext";
-import { getProdutos } from "@/src/api/produtoService";
+import { getProdutoById, getProdutos } from "@/src/api/produtoService";
 import { getFavoriteProductIds, toggleFavoriteProduct } from "@/src/storage/favoritesProducts";
 
-import { getCartProducts, setCartProducts, CartProductItem } from "@/src/storage/cartProducts";
-import { criarPedido, criarItemPedido } from "@/src/api/pedidoService";
+import { getCartProducts, setCartProducts, CartProductItem, removeCartProduct } from "@/src/storage/cartProducts";
+import { checkoutFromItems } from "@/src/services/checkoutService";
 
 type ProdutoDTO = {
   id: number;
@@ -122,7 +122,7 @@ export default function Produtos() {
 
   const totalSelecionado = useMemo(() => {
     return cartItems
-      .filter((x) => selectedIds.includes(x.produtoId))
+      .filter((x) => selectedIds.includes(x.produtoId) && Number(x.quantidade) > 0)
       .reduce((sum, x: any) => sum + Number(x.preco) * Number(x.quantidade), 0);
   }, [cartItems, selectedIds]);
 
@@ -132,25 +132,35 @@ export default function Produtos() {
     return Number(p?.quantidade ?? 0);
   }
 
+  function isUnavailable(item: CartProductItem) {
+    const estoque = Number(item.estoque ?? getEstoqueAtual(item.produtoId));
+    return estoque <= 0 || Number(item.quantidade) <= 0;
+  }
+
   async function openCart() {
     if (!user?.id) return Alert.alert("Login", "Faça login para ver o carrinho.");
 
     const items = await getCartProducts(user.id);
 
-    // ✅ garante que cada item tem estoque atualizado
+    // garante que cada item tenha estoque atualizado e quantidade coerente
     const withStock = items.map((it: any) => {
       const estoqueAtual = Number(it.estoque ?? getEstoqueAtual(it.produtoId));
-      const quantidadeAtual = Math.min(Number(it.quantidade ?? 1), estoqueAtual || 0);
+      const quantidadeInformada = Number(it.quantidade ?? 1);
+      const quantidadeAtual =
+        estoqueAtual <= 0
+          ? 0
+          : Math.min(Math.max(1, quantidadeInformada || 1), estoqueAtual);
 
       return {
         ...it,
         estoque: estoqueAtual,
-        quantidade: Math.max(1, quantidadeAtual || 1),
+        quantidade: quantidadeAtual,
       };
     });
 
+    await setCartProducts(user.id, withStock);
     setCartItems(withStock);
-    setSelectedIds(withStock.map((x) => x.produtoId)); // abre já selecionado
+    setSelectedIds(withStock.filter((x) => !isUnavailable(x)).map((x) => x.produtoId));
     setCartOpen(true);
   }
 
@@ -158,11 +168,14 @@ export default function Produtos() {
   async function decQty(produtoId: number) {
     if (!user?.id) return;
 
-    const next = cartItems.map((x: any) =>
-      x.produtoId !== produtoId
-        ? x
-        : { ...x, quantidade: Math.max(1, Number(x.quantidade) - 1) }
-    );
+    const next = cartItems.map((x: any) => {
+      if (x.produtoId !== produtoId) return x;
+
+      const estoque = Number(x.estoque ?? getEstoqueAtual(x.produtoId));
+      if (estoque <= 0) return { ...x, estoque, quantidade: 0 };
+
+      return { ...x, estoque, quantidade: Math.max(1, Number(x.quantidade) - 1) };
+    });
 
     setCartItems(next);
     await setCartProducts(user.id, next);
@@ -175,6 +188,7 @@ export default function Produtos() {
       if (x.produtoId !== produtoId) return x;
 
       const estoque = Number(x.estoque ?? getEstoqueAtual(x.produtoId));
+      if (estoque <= 0) return { ...x, estoque, quantidade: 0 };
       const q = Number(x.quantidade ?? 1);
       const nextQty = Math.min(q + 1, estoque);
 
@@ -185,88 +199,137 @@ export default function Produtos() {
     await setCartProducts(user.id, next);
   }
 
+  async function removeItem(produtoId: number) {
+    if (!user?.id) return;
+
+    const next = await removeCartProduct(user.id, produtoId);
+    setCartItems(next);
+    setSelectedIds((prev) => prev.filter((id) => id !== produtoId));
+  }
+
+  function summarizeFailures(names: string[]) {
+    if (names.length === 0) return "";
+    if (names.length === 1) return names[0];
+    return `${names.slice(0, 2).join(", ")}${names.length > 2 ? "..." : ""}`;
+  }
+
   async function finalizarCompraSelecionados() {
     if (!user?.id || !token) return Alert.alert("Login", "Faça login para comprar.");
 
-    const items = cartItems.filter((x) => selectedIds.includes(x.produtoId));
-    if (items.length === 0) return Alert.alert("Carrinho", "Selecione pelo menos 1 produto.");
-
-    // ✅ valida estoque REAL (com base no feed atual)
-    for (const it of items as any[]) {
-      const estoqueAtual = getEstoqueAtual(it.produtoId);
-
-      if (estoqueAtual <= 0) {
-        return Alert.alert("Estoque", `${it.nome} está esgotado.`);
-      }
-      if (Number(it.quantidade) > estoqueAtual) {
-        return Alert.alert(
-          "Estoque insuficiente",
-          `${it.nome} tem apenas ${estoqueAtual} em estoque.`
-        );
-      }
-    }
+    const initiallySelected = cartItems.filter((x) => selectedIds.includes(x.produtoId));
+    if (initiallySelected.length === 0) return Alert.alert("Carrinho", "Selecione pelo menos 1 produto.");
 
     setBuying(true);
     try {
-      // 1) cria pedido
-      const pedidoRes: any = await criarPedido(
-        { usuarioId: user.id, dataPedido: new Date().toISOString() },
-        token
+      let nextCart = [...cartItems];
+      const adjustedNames: string[] = [];
+      const removedNames: string[] = [];
+
+      for (const selected of initiallySelected) {
+        let estoqueAtual = 0;
+        try {
+          const estoqueRes: any = await getProdutoById(selected.produtoId, token);
+          if (estoqueRes?.ok) {
+            estoqueAtual = Number(estoqueRes?.data?.data?.quantidade ?? 0);
+          } else {
+            estoqueAtual = getEstoqueAtual(selected.produtoId);
+          }
+        } catch {
+          estoqueAtual = getEstoqueAtual(selected.produtoId);
+        }
+
+        nextCart = nextCart.map((item) => {
+          if (item.produtoId !== selected.produtoId) return item;
+
+          if (estoqueAtual <= 0) {
+            if (selectedIds.includes(item.produtoId)) {
+              removedNames.push(item.nome);
+            }
+            return { ...item, estoque: 0, quantidade: 0 };
+          }
+
+          const desired = Number(item.quantidade || 1);
+          const adjustedQty = Math.min(Math.max(1, desired), estoqueAtual);
+          if (adjustedQty !== desired) {
+            adjustedNames.push(item.nome);
+          }
+          return { ...item, estoque: estoqueAtual, quantidade: adjustedQty };
+        });
+      }
+
+      const nextSelected = selectedIds.filter((id) => {
+        const item = nextCart.find((x) => x.produtoId === id);
+        if (!item) return false;
+        return !isUnavailable(item);
+      });
+
+      setCartItems(nextCart);
+      setSelectedIds(nextSelected);
+      await setCartProducts(user.id, nextCart);
+
+      if (adjustedNames.length > 0) {
+        Alert.alert(
+          "Estoque atualizado",
+          `Quantidade ajustada para: ${summarizeFailures(adjustedNames)}`
+        );
+      }
+
+      if (removedNames.length > 0) {
+        Alert.alert(
+          "Itens indisponíveis",
+          `Itens removidos da seleção por estoque zero: ${summarizeFailures(removedNames)}`
+        );
+      }
+
+      const validItems = nextCart.filter(
+        (item) => nextSelected.includes(item.produtoId) && !isUnavailable(item)
       );
 
-      console.log("[PEDIDO] resposta criarPedido:", JSON.stringify(pedidoRes?.data, null, 2));
-
-      if (!pedidoRes?.ok) {
-        return Alert.alert("Erro", pedidoRes?.data?.message || "Erro ao criar pedido.");
+      if (validItems.length === 0) {
+        return Alert.alert("Carrinho", "Nenhum item válido restou selecionado para finalizar.");
       }
 
-      const body = pedidoRes?.data;
+      const checkout = await checkoutFromItems(
+        user.id,
+        token,
+        validItems.map((item) => ({
+          produtoId: item.produtoId,
+          nome: item.nome,
+          preco: item.preco,
+          foto: item.foto,
+          quantidade: Number(item.quantidade),
+        }))
+      );
 
-      // tenta pegar em vários formatos comuns
-      let pedidoId: any =
-        body?.data?.id ??
-        body?.data?.Id ??
-        body?.data?.pedidoId ??
-        body?.data?.PedidoId ??
-        body?.id ??
-        body?.Id;
-
-      // se o backend devolveu array por algum motivo
-      if (!pedidoId && Array.isArray(body?.data) && body.data.length > 0) {
-        pedidoId = body.data[0]?.id ?? body.data[0]?.Id;
-      }
-
-      pedidoId = Number(pedidoId);
-
-      if (!pedidoId || Number.isNaN(pedidoId)) {
-        console.log("[PEDIDO] body sem id:", JSON.stringify(body, null, 2));
-        return Alert.alert("Erro", "Pedido criado, mas não retornou o ID.");
-      }
-
-
-      // 2) cria itens do pedido (só os selecionados)
-      for (const it of items as any[]) {
-        const itemRes: any = await criarItemPedido(
-          { pedidoId: Number(pedidoId), produtoId: it.produtoId, quantidade: Number(it.quantidade) },
-          token
-        );
-
-        if (!itemRes?.ok) {
-          return Alert.alert("Erro", itemRes?.data?.message || `Erro ao adicionar: ${it.nome}`);
-        }
-      }
-
-      // 3) remove do carrinho só os selecionados
-      const remaining = cartItems.filter((x) => !selectedIds.includes(x.produtoId));
+      const confirmedIds = new Set(checkout.confirmedItems.map((item) => item.produtoId));
+      const remaining = nextCart.filter((item) => !confirmedIds.has(item.produtoId));
       await setCartProducts(user.id, remaining);
 
       setCartItems(remaining);
-      setSelectedIds([]);
+      setSelectedIds((prev) => prev.filter((id) => !confirmedIds.has(id)));
 
-      Alert.alert("Sucesso", "Compra realizada!");
-      setCartOpen(false);
+      if (!checkout.ok) {
+        const msg = checkout.generalError || "Falha ao concluir compra dos itens selecionados.";
+        return Alert.alert("Erro", msg);
+      }
 
-      // 4) recarrega produtos pra refletir estoque
+      if (checkout.status === "partial") {
+        const failedNames = checkout.failedItems.map((f) => f.item.nome);
+        Alert.alert(
+          "Compra parcial",
+          `Itens confirmados: ${checkout.confirmedItems.length}. Falhas em: ${summarizeFailures(
+            failedNames
+          )}`
+        );
+      } else {
+        Alert.alert("Sucesso", "Compra realizada!");
+      }
+
+      if (remaining.length === 0) {
+        setCartOpen(false);
+      }
+
+      // recarrega produtos pra refletir estoque
       await load();
     } finally {
       setBuying(false);
@@ -425,10 +488,17 @@ export default function Produtos() {
             justifyContent: "space-between",
           }}
         >
-          <Pressable onPress={() => setFiltersOpen(true)} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-            <Ionicons name="funnel" size={18} color="#fff" />
-            <Text style={{ color: "#fff", fontWeight: "800" }}>Filtros({filtersCount})</Text>
-          </Pressable>
+          <View style={{ flexDirection: "row", alignItems: "center", gap: 14 }}>
+            <Pressable onPress={() => setFiltersOpen(true)} style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
+              <Ionicons name="funnel" size={18} color="#fff" />
+              <Text style={{ color: "#fff", fontWeight: "800" }}>Filtros({filtersCount})</Text>
+            </Pressable>
+
+            <Pressable onPress={() => router.push("/pedidos")} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+              <Ionicons name="receipt-outline" size={18} color="#fff" />
+              <Text style={{ color: "#fff", fontWeight: "800" }}>Meus pedidos</Text>
+            </Pressable>
+          </View>
 
           <Pressable
             onPress={openCart}
@@ -695,6 +765,7 @@ export default function Produtos() {
                   renderItem={({ item }: any) => {
                     const checked = isSelected(item.produtoId);
                     const estoque = Number(item.estoque ?? getEstoqueAtual(item.produtoId));
+                    const indisponivel = estoque <= 0 || Number(item.quantidade) <= 0;
                     const travado = Number(item.quantidade) >= estoque;
 
                     return (
@@ -706,7 +777,10 @@ export default function Produtos() {
                         }}
                       >
                         <Pressable
-                          onPress={() => toggleSelect(item.produtoId)}
+                          onPress={() => {
+                            if (indisponivel) return;
+                            toggleSelect(item.produtoId);
+                          }}
                           style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
                         >
                           {/* checkbox */}
@@ -716,7 +790,11 @@ export default function Produtos() {
                               height: 26,
                               borderRadius: 8,
                               borderWidth: 2,
-                              borderColor: checked ? "#0B3B91" : "rgba(0,0,0,0.25)",
+                              borderColor: indisponivel
+                                ? "rgba(0,0,0,0.12)"
+                                : checked
+                                  ? "#0B3B91"
+                                  : "rgba(0,0,0,0.25)",
                               backgroundColor: checked ? "rgba(11,59,145,0.12)" : "transparent",
                               alignItems: "center",
                               justifyContent: "center",
@@ -771,13 +849,18 @@ export default function Produtos() {
                           <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                             <Pressable
                               onPress={() => decQty(item.produtoId)}
+                              disabled={indisponivel || Number(item.quantidade) <= 1}
                               style={{
                                 width: 34,
                                 height: 34,
                                 borderRadius: 10,
-                                backgroundColor: "rgba(0,0,0,0.06)",
+                                backgroundColor:
+                                  indisponivel || Number(item.quantidade) <= 1
+                                    ? "rgba(0,0,0,0.03)"
+                                    : "rgba(0,0,0,0.06)",
                                 alignItems: "center",
                                 justifyContent: "center",
+                                opacity: indisponivel || Number(item.quantidade) <= 1 ? 0.6 : 1,
                               }}
                             >
                               <Ionicons name="remove" size={18} color="#0E2B5A" />
@@ -789,29 +872,41 @@ export default function Produtos() {
 
                             <Pressable
                               onPress={() => incQty(item.produtoId)}
-                              disabled={travado || estoque <= 0}
+                              disabled={indisponivel || travado || estoque <= 0}
                               style={{
                                 width: 34,
                                 height: 34,
                                 borderRadius: 10,
-                                backgroundColor: travado || estoque <= 0 ? "rgba(0,0,0,0.03)" : "rgba(28,102,255,0.14)",
+                                backgroundColor: indisponivel || travado || estoque <= 0 ? "rgba(0,0,0,0.03)" : "rgba(28,102,255,0.14)",
                                 borderWidth: 1,
-                                borderColor: travado || estoque <= 0 ? "rgba(0,0,0,0.08)" : "rgba(28,102,255,0.35)",
+                                borderColor: indisponivel || travado || estoque <= 0 ? "rgba(0,0,0,0.08)" : "rgba(28,102,255,0.35)",
                                 alignItems: "center",
                                 justifyContent: "center",
-                                opacity: travado || estoque <= 0 ? 0.6 : 1,
+                                opacity: indisponivel || travado || estoque <= 0 ? 0.6 : 1,
                               }}
                             >
                               <Ionicons name="add" size={18} color="#0E2B5A" />
                             </Pressable>
                           </View>
 
-                          {travado && estoque > 0 && (
+                          {indisponivel ? (
+                            <Text style={{ fontSize: 12, fontWeight: "800", color: "#B00020" }}>
+                              Indisponível
+                            </Text>
+                          ) : travado && estoque > 0 ? (
                             <Text style={{ fontSize: 12, fontWeight: "800", color: "#B00020" }}>
                               Limite do estoque
                             </Text>
-                          )}
+                          ) : null}
                         </View>
+
+                        <Pressable
+                          onPress={() => removeItem(item.produtoId)}
+                          style={{ marginTop: 8, alignSelf: "flex-end", flexDirection: "row", alignItems: "center", gap: 6 }}
+                        >
+                          <Ionicons name="trash-outline" size={16} color="#B00020" />
+                          <Text style={{ color: "#B00020", fontWeight: "800", fontSize: 12 }}>Remover</Text>
+                        </Pressable>
                       </View>
                     );
                   }}

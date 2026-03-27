@@ -12,7 +12,7 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260205124128_initial")]
+    [Migration("20260324000853_initial")]
     partial class initial
     {
         /// <inheritdoc />
