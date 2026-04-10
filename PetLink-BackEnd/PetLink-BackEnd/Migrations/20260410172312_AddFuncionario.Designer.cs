@@ -12,8 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260324000853_initial")]
-    partial class initial
+    [Migration("20260410172312_AddFuncionario")]
+    partial class AddFuncionario
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -200,6 +200,71 @@ namespace PetLink_BackEnd.Migrations
                     b.HasIndex("PetId");
 
                     b.ToTable("anuncio_petfinder");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Funcionario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nome");
+
+                    b.Property<decimal>("Salario")
+                        .HasColumnType("numeric")
+                        .HasColumnName("salario");
+
+                    b.Property<string>("Senha")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("senha");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("funcionario");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "funcionario1@petlink.com",
+                            Nome = "Funcionario 1",
+                            Salario = 2500.00m,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "funcionario2@petlink.com",
+                            Nome = "Funcionario 2",
+                            Salario = 3200.00m,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Email = "funcionario3@petlink.com",
+                            Nome = "Funcionario 3",
+                            Salario = 4100.00m,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+                        });
                 });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.ItemPedido", b =>
