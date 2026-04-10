@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Produto> Produtos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<Funcionario> Funcionarios { get; set; }
     public DbSet<Administrador> Administradores { get; set; }
     public DbSet<Veterinario> Veterinarios { get; set; }
     public DbSet<Pedido> Pedidos { get; set; }
@@ -29,6 +30,7 @@ public class AppDbContext : DbContext
 
         ProdutoBuilder.Build(modelBuilder);
         UsuarioBuilder.Build(modelBuilder);
+        FuncionarioBuilder.Build(modelBuilder);
         AdministradorBuilder.Build(modelBuilder);
         VeterinarioBuilder.Build(modelBuilder);
         PedidoBuilder.Build(modelBuilder);

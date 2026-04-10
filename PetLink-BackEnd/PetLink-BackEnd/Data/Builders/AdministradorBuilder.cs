@@ -17,9 +17,9 @@ namespace PetLink_BackEnd.Data.Builders
             modelBuilder.Entity<Administrador>()
                 .HasData(new List<Administrador>
                 {
-                new (1, "Miguel Silva", "miguelsilva@gmail.com", "123456", Status.ATIVO),
-                new (2, "Gabriel Oliveira", "gabrieloliveira@gmail.com", "abcdefg" ,Status.ATIVO),
-                new (3, "Marco Brito", "marcobrito@gmail.com", "aaaaaaa", Status.DESATIVO)
+                new (1, "Miguel Silva", "miguelsilva@gmail.com", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", Status.ATIVO),
+                new (2, "Gabriel Oliveira", "gabrieloliveira@gmail.com", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92" ,Status.ATIVO),
+                new (3, "Marco Brito", "marcobrito@gmail.com", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", Status.DESATIVO)
                 });
         }
     }

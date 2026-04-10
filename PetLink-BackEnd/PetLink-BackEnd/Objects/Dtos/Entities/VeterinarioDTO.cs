@@ -7,6 +7,7 @@ public class VeterinarioDTO
     public string Nome { get; set; }
     public string Crmv { get; set; }
     public float Salario { get; set; }
+    public string Senha { get; set; }
     public string Email
     {
         get => _email;
