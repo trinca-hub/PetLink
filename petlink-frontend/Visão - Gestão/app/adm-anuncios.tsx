@@ -6,8 +6,10 @@ import {
   updateAdminAnuncioPaypet,
   updateAdminAnuncioPetfinder,
 } from "@/src/api/anuncioService";
+import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
+import { parseDecimalInput, parseIntInput } from "@/src/utils/numberUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -88,8 +90,19 @@ export default function ListaAnuncios() {
   const [editForm, setEditForm] = useState<EditForm>(INITIAL_EDIT_FORM);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
+  const [openTipoPayPetSelect, setOpenTipoPayPetSelect] = useState(false);
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+
+  const tipoPayPetOptions: SelectOption[] = [
+    { value: "1", label: "Adoção", subtitle: "TipoPayPet = 1" },
+    { value: "2", label: "Venda", subtitle: "TipoPayPet = 2" },
+  ];
+
+  const selectedTipoPayPet = useMemo(
+    () => tipoPayPetOptions.find((option) => option.value === editForm.tipoPayPet),
+    [editForm.tipoPayPet]
+  );
 
   const loadAnuncios = useCallback(async () => {
     if (!token) return;
@@ -181,7 +194,7 @@ export default function ListaAnuncios() {
         editing.anuncioId,
         {
           ultimoLocalVisto: editForm.ultimoLocalVisto.trim(),
-          dataDesaparecimento: new Date(`${editForm.dataDesaparecimento}T12:00:00.000Z`).toISOString(),
+          dataDesaparecimento: new Date(`${editForm.dataDesaparecimento}T00:00:00.000Z`).toISOString(),
         },
         token
       );
@@ -194,7 +207,7 @@ export default function ListaAnuncios() {
     }
 
     if (editing.tipoAnuncio === 3) {
-      const tipoPayPet = Number(editForm.tipoPayPet);
+      const tipoPayPet = parseIntInput(editForm.tipoPayPet);
       const isDoacao = tipoPayPet === 1;
       const isVenda = tipoPayPet === 2;
 
@@ -206,7 +219,7 @@ export default function ListaAnuncios() {
 
       const valor = isDoacao
         ? 0
-        : Number(editForm.valor.replace(".", "").replace(",", "."));
+        : parseDecimalInput(editForm.valor);
 
       if (isVenda && (Number.isNaN(valor) || valor <= 0)) {
         setSaving(false);
@@ -424,20 +437,16 @@ export default function ListaAnuncios() {
 
             {editing?.tipoAnuncio === 3 && (
               <>
-                <TextInput
-                  style={styles.input}
-                  placeholder="Tipo PayPet (1 = adoção, 2 = venda)"
-                  placeholderTextColor="#98abc9"
-                  keyboardType="numeric"
-                  value={editForm.tipoPayPet}
-                  onChangeText={(value) => setEditForm((prev) => ({ ...prev, tipoPayPet: value }))}
-                />
+                <TouchableOpacity style={styles.selectButton} onPress={() => setOpenTipoPayPetSelect(true)}>
+                  <Text style={styles.selectLabel}>Tipo PayPet</Text>
+                  <Text style={styles.selectValue}>{selectedTipoPayPet?.label || "Selecionar tipo"}</Text>
+                </TouchableOpacity>
 
                 <TextInput
                   style={styles.input}
                   placeholder="Valor (somente para venda)"
                   placeholderTextColor="#98abc9"
-                  keyboardType="numeric"
+                  keyboardType="decimal-pad"
                   value={editForm.valor}
                   onChangeText={(value) => setEditForm((prev) => ({ ...prev, valor: value }))}
                 />
@@ -482,6 +491,14 @@ export default function ListaAnuncios() {
           </View>
         </View>
       </Modal>
+
+      <SearchableSelectModal
+        visible={openTipoPayPetSelect}
+        title="Selecionar tipo do PayPet"
+        options={tipoPayPetOptions}
+        onClose={() => setOpenTipoPayPetSelect(false)}
+        onSelect={(option) => setEditForm((prev) => ({ ...prev, tipoPayPet: option.value }))}
+      />
     </LinearGradient>
   );
 }
@@ -713,6 +730,17 @@ const styles = StyleSheet.create({
     color: "#eaf2ff",
     backgroundColor: "rgba(20, 56, 99, 0.45)",
   },
+  selectButton: {
+    borderWidth: 1,
+    borderColor: "rgba(138,180,248,0.25)",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: "rgba(20, 56, 99, 0.45)",
+    gap: 2,
+  },
+  selectLabel: { color: "#9fc0f6", fontSize: 11, fontWeight: "700" },
+  selectValue: { color: "#eaf2ff", fontSize: 13 },
   multilineInput: {
     minHeight: 92,
     textAlignVertical: "top",

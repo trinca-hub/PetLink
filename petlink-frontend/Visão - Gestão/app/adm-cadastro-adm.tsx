@@ -4,12 +4,13 @@ import {
   deleteAdministrador,
   getAdministradores,
 } from "@/src/api/administradorService";
+import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   Alert,
   Modal,
@@ -45,6 +46,17 @@ export default function CadastroAdministrador() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [formError, setFormError] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [openStatusSelect, setOpenStatusSelect] = useState(false);
+
+  const statusOptions: SelectOption[] = [
+    { value: "1", label: "Ativo", subtitle: "Status = 1" },
+    { value: "2", label: "Desativado", subtitle: "Status = 2" },
+  ];
+
+  const selectedStatus = useMemo(
+    () => statusOptions.find((option) => option.value === form.status),
+    [form.status]
+  );
 
   const loadAdministradores = useCallback(async () => {
     if (!token) return;
@@ -164,14 +176,10 @@ export default function CadastroAdministrador() {
             onChangeText={(value) => setForm((prev) => ({ ...prev, senha: value }))}
           />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Status (1 = Ativo, 2 = Desativado)"
-            placeholderTextColor="#98abc9"
-            keyboardType="numeric"
-            value={form.status}
-            onChangeText={(value) => setForm((prev) => ({ ...prev, status: value }))}
-          />
+          <TouchableOpacity style={styles.selectButton} onPress={() => setOpenStatusSelect(true)}>
+            <Text style={styles.selectLabel}>Status</Text>
+            <Text style={styles.selectValue}>{selectedStatus?.label || "Selecionar status"}</Text>
+          </TouchableOpacity>
 
           {!!formError && <Text style={styles.errorText}>{formError}</Text>}
 
@@ -229,6 +237,14 @@ export default function CadastroAdministrador() {
           </View>
         </View>
       </Modal>
+
+      <SearchableSelectModal
+        visible={openStatusSelect}
+        title="Selecionar status"
+        options={statusOptions}
+        onClose={() => setOpenStatusSelect(false)}
+        onSelect={(option) => setForm((prev) => ({ ...prev, status: option.value }))}
+      />
     </LinearGradient>
   );
 }
@@ -288,6 +304,17 @@ const styles = StyleSheet.create({
     color: "#eaf2ff",
     backgroundColor: "rgba(20, 56, 99, 0.45)",
   },
+  selectButton: {
+    borderWidth: 1,
+    borderColor: "rgba(138,180,248,0.25)",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: "rgba(20, 56, 99, 0.45)",
+    gap: 2,
+  },
+  selectLabel: { color: "#9fc0f6", fontSize: 11, fontWeight: "700" },
+  selectValue: { color: "#eaf2ff", fontSize: 13 },
   primaryButton: {
     marginTop: 4,
     flexDirection: "row",

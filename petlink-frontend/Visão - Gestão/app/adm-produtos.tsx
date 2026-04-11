@@ -7,12 +7,15 @@ import {
 } from "@/src/api/produtoService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
+import { validateImageUrl } from "@/src/utils/imageUrlUtils";
+import { parseDecimalInput, parseIntInput } from "@/src/utils/numberUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import {
   Alert,
+  Image,
   Modal,
   ScrollView,
   StyleSheet,
@@ -38,6 +41,8 @@ const INITIAL_FORM: FormState = {
   foto: "",
 };
 
+type ImageStatus = "idle" | "loading" | "ok" | "error";
+
 export default function ListaProdutos() {
   const router = useRouter();
   const { token } = useContext(AuthContext);
@@ -50,6 +55,7 @@ export default function ListaProdutos() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [formError, setFormError] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [imageStatus, setImageStatus] = useState<ImageStatus>("idle");
 
   const isEdit = useMemo(() => editId !== null, [editId]);
 
@@ -76,6 +82,7 @@ export default function ListaProdutos() {
     setForm(INITIAL_FORM);
     setEditId(null);
     setFormError("");
+    setImageStatus("idle");
   }
 
   function openCreateModal() {
@@ -92,12 +99,42 @@ export default function ListaProdutos() {
       quantidade: String(item.quantidade ?? ""),
       foto: item.foto || "",
     });
+    setImageStatus("idle");
     setOpenModal(true);
+
+    if (item.foto) {
+      void handleValidateImageUrl(item.foto);
+    }
   }
 
   function closeModal() {
     setOpenModal(false);
     resetForm();
+  }
+
+  async function handleValidateImageUrl(url: string) {
+    const trimmed = url.trim();
+    if (!trimmed) {
+      setImageStatus("idle");
+      return;
+    }
+
+    setImageStatus("loading");
+    const result = await validateImageUrl(trimmed);
+    setImageStatus(result.valid ? "ok" : "error");
+  }
+
+  function askSaveWithoutPhoto(): Promise<boolean> {
+    return new Promise((resolve) => {
+      Alert.alert(
+        "Imagem inválida",
+        "A URL da foto não passou na validação. Deseja salvar este produto sem foto?",
+        [
+          { text: "Cancelar", style: "cancel", onPress: () => resolve(false) },
+          { text: "Salvar sem foto", onPress: () => resolve(true) },
+        ]
+      );
+    });
   }
 
   async function handleSave() {
@@ -110,8 +147,8 @@ export default function ListaProdutos() {
       return;
     }
 
-    const preco = Number(form.preco.replace(".", "").replace(",", "."));
-    const quantidade = Number(form.quantidade);
+    const preco = parseDecimalInput(form.preco);
+    const quantidade = parseIntInput(form.quantidade);
 
     if (Number.isNaN(preco) || preco <= 0) {
       setFormError("Preço inválido. Informe um valor maior que zero.");
@@ -125,13 +162,23 @@ export default function ListaProdutos() {
 
     setSaving(true);
 
+    let foto = form.foto.trim();
+    if (foto && imageStatus === "error") {
+      const shouldSaveWithoutPhoto = await askSaveWithoutPhoto();
+      if (!shouldSaveWithoutPhoto) {
+        return;
+      }
+
+      foto = "";
+    }
+
     const payload = {
       id: editId ?? 0,
       nome: form.nome.trim(),
       preco,
       descricao: form.descricao.trim(),
       quantidade,
-      foto: form.foto.trim() || undefined,
+      foto: foto || undefined,
     };
 
     const result = isEdit && editId
@@ -197,11 +244,21 @@ export default function ListaProdutos() {
           ) : (
             produtos.map((item) => (
               <View key={item.id} style={styles.itemCard}>
-                <View style={styles.itemMain}>
-                  <Text style={styles.itemTitle}>{item.nome}</Text>
-                  <Text style={styles.itemSubtitle}>{item.descricao}</Text>
-                  <Text style={styles.itemPrice}>Preço: R$ {Number(item.preco || 0).toFixed(2)}</Text>
-                  <Text style={styles.itemStock}>Estoque: {item.quantidade}</Text>
+                <View style={styles.itemLeftWrap}>
+                  {item.foto ? (
+                    <Image source={{ uri: item.foto }} style={styles.itemImage} />
+                  ) : (
+                    <View style={[styles.itemImage, styles.itemImageFallback]}>
+                      <Ionicons name="image-outline" size={20} color="#8fb1e0" />
+                    </View>
+                  )}
+
+                  <View style={styles.itemMain}>
+                    <Text style={styles.itemTitle}>{item.nome}</Text>
+                    <Text style={styles.itemSubtitle}>{item.descricao}</Text>
+                    <Text style={styles.itemPrice}>Preço: R$ {Number(item.preco || 0).toFixed(2)}</Text>
+                    <Text style={styles.itemStock}>Estoque: {item.quantidade}</Text>
+                  </View>
                 </View>
 
                 <View style={styles.itemActions}>
@@ -236,7 +293,7 @@ export default function ListaProdutos() {
               style={styles.input}
               placeholder="Preço"
               placeholderTextColor="#98abc9"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               value={form.preco}
               onChangeText={(value) => setForm((prev) => ({ ...prev, preco: value }))}
             />
@@ -253,7 +310,7 @@ export default function ListaProdutos() {
               style={styles.input}
               placeholder="Quantidade"
               placeholderTextColor="#98abc9"
-              keyboardType="numeric"
+              keyboardType="number-pad"
               value={form.quantidade}
               onChangeText={(value) => setForm((prev) => ({ ...prev, quantidade: value }))}
             />
@@ -263,8 +320,19 @@ export default function ListaProdutos() {
               placeholder="URL da foto (opcional)"
               placeholderTextColor="#98abc9"
               value={form.foto}
-              onChangeText={(value) => setForm((prev) => ({ ...prev, foto: value }))}
+              onChangeText={(value) => {
+                setForm((prev) => ({ ...prev, foto: value }));
+                if (!value.trim()) setImageStatus("idle");
+              }}
+              onBlur={() => void handleValidateImageUrl(form.foto)}
             />
+
+            {imageStatus === "loading" && <Text style={styles.infoText}>Validando imagem...</Text>}
+            {imageStatus === "error" && <Text style={styles.errorText}>URL inválida. Você pode salvar sem foto.</Text>}
+
+            {!!form.foto.trim() && imageStatus === "ok" && (
+              <Image source={{ uri: form.foto.trim() }} style={styles.previewImage} resizeMode="cover" />
+            )}
 
             {!!formError && <Text style={styles.errorText}>{formError}</Text>}
 
@@ -375,6 +443,15 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     gap: 10,
   },
+  itemLeftWrap: { flexDirection: "row", gap: 12, flex: 1 },
+  itemImage: { width: 74, height: 74, borderRadius: 10 },
+  itemImageFallback: {
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(11, 27, 44, 0.7)",
+    borderWidth: 1,
+    borderColor: "rgba(138,180,248,0.25)",
+  },
   itemMain: { flex: 1, gap: 3 },
   itemTitle: { color: "#f4f8ff", fontSize: 15, fontWeight: "700" },
   itemSubtitle: { color: "#b7c8e8", fontSize: 12 },
@@ -421,6 +498,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     color: "#eaf2ff",
     backgroundColor: "rgba(20, 56, 99, 0.45)",
+  },
+  previewImage: {
+    width: "100%",
+    height: 160,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "rgba(138,180,248,0.25)",
   },
   errorText: { color: "#ffb0b0", fontSize: 13, lineHeight: 18, marginTop: 2 },
   confirmText: { color: "#c6d7f2", fontSize: 14, lineHeight: 20 },

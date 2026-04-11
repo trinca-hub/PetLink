@@ -5,8 +5,10 @@ import {
   updateVeterinario,
   Veterinario,
 } from "@/src/api/veterinarioService";
+import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
+import { parseDecimalInput } from "@/src/utils/numberUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -52,8 +54,19 @@ export default function ListaVeterinarios() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [formError, setFormError] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [openStatusSelect, setOpenStatusSelect] = useState(false);
 
   const isEdit = useMemo(() => editId !== null, [editId]);
+
+  const statusOptions: SelectOption[] = [
+    { value: "1", label: "Ativo", subtitle: "Status = 1" },
+    { value: "2", label: "Desativado", subtitle: "Status = 2" },
+  ];
+
+  const selectedStatus = useMemo(
+    () => statusOptions.find((option) => option.value === form.status),
+    [form.status]
+  );
 
   const loadVeterinarios = useCallback(async () => {
     if (!token) return;
@@ -113,7 +126,7 @@ export default function ListaVeterinarios() {
       return;
     }
 
-    const salario = Number(form.salario.replace(".", "").replace(",", "."));
+    const salario = parseDecimalInput(form.salario);
     if (Number.isNaN(salario) || salario <= 0) {
       setFormError("Salário inválido. Informe um valor maior que zero.");
       return;
@@ -239,7 +252,6 @@ export default function ListaVeterinarios() {
               style={styles.input}
               placeholder="E-mail"
               placeholderTextColor="#98abc9"
-              autoCapitalize="none"
               keyboardType="email-address"
               value={form.email}
               onChangeText={(value) => setForm((prev) => ({ ...prev, email: value }))}
@@ -247,29 +259,17 @@ export default function ListaVeterinarios() {
 
             <TextInput
               style={styles.input}
-              placeholder="CRMV"
-              placeholderTextColor="#98abc9"
-              value={form.crmv}
-              onChangeText={(value) => setForm((prev) => ({ ...prev, crmv: value }))}
-            />
-
-            <TextInput
-              style={styles.input}
               placeholder="Salário"
               placeholderTextColor="#98abc9"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               value={form.salario}
               onChangeText={(value) => setForm((prev) => ({ ...prev, salario: value }))}
             />
 
-            <TextInput
-              style={styles.input}
-              placeholder="Status (1 = Ativo, 2 = Desativado)"
-              placeholderTextColor="#98abc9"
-              keyboardType="numeric"
-              value={form.status}
-              onChangeText={(value) => setForm((prev) => ({ ...prev, status: value }))}
-            />
+            <TouchableOpacity style={styles.selectButton} onPress={() => setOpenStatusSelect(true)}>
+              <Text style={styles.selectLabel}>Status</Text>
+              <Text style={styles.selectValue}>{selectedStatus?.label || "Selecionar status"}</Text>
+            </TouchableOpacity>
 
             {!isEdit && (
               <TextInput
@@ -320,6 +320,14 @@ export default function ListaVeterinarios() {
           </View>
         </View>
       </Modal>
+
+      <SearchableSelectModal
+        visible={openStatusSelect}
+        title="Selecionar status"
+        options={statusOptions}
+        onClose={() => setOpenStatusSelect(false)}
+        onSelect={(option) => setForm((prev) => ({ ...prev, status: option.value }))}
+      />
     </LinearGradient>
   );
 }
@@ -438,6 +446,17 @@ const styles = StyleSheet.create({
     color: "#eaf2ff",
     backgroundColor: "rgba(20, 56, 99, 0.45)",
   },
+  selectButton: {
+    borderWidth: 1,
+    borderColor: "rgba(138,180,248,0.25)",
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    backgroundColor: "rgba(20, 56, 99, 0.45)",
+    gap: 2,
+  },
+  selectLabel: { color: "#9fc0f6", fontSize: 11, fontWeight: "700" },
+  selectValue: { color: "#eaf2ff", fontSize: 13 },
   errorText: { color: "#ffb0b0", fontSize: 13, lineHeight: 18, marginTop: 2 },
   confirmText: { color: "#c6d7f2", fontSize: 14, lineHeight: 20 },
   modalActions: { marginTop: 4, flexDirection: "row", justifyContent: "flex-end", gap: 10 },
