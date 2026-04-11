@@ -12,8 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260410172312_AddFuncionario")]
-    partial class AddFuncionario
+    [Migration("20260411004548_pussynigga")]
+    partial class pussynigga
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -66,7 +66,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 1,
                             Email = "miguelsilva@gmail.com",
                             Nome = "Miguel Silva",
-                            Senha = "123456",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 1
                         },
                         new
@@ -74,7 +74,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 2,
                             Email = "gabrieloliveira@gmail.com",
                             Nome = "Gabriel Oliveira",
-                            Senha = "abcdefg",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 1
                         },
                         new
@@ -82,7 +82,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 3,
                             Email = "marcobrito@gmail.com",
                             Nome = "Marco Brito",
-                            Senha = "aaaaaaa",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 2
                         });
                 });
@@ -772,6 +772,12 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("real")
                         .HasColumnName("salario");
 
+                    b.Property<string>("Senha")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("senha");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer")
                         .HasColumnName("status");
@@ -788,6 +794,7 @@ namespace PetLink_BackEnd.Migrations
                             Email = "gabriel@gmail.com",
                             Nome = "Gabriel",
                             Salario = 100000f,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 2
                         },
                         new
@@ -797,6 +804,7 @@ namespace PetLink_BackEnd.Migrations
                             Email = "enzo@gmail.com",
                             Nome = "Enzo",
                             Salario = 100000f,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 1
                         },
                         new
@@ -806,6 +814,7 @@ namespace PetLink_BackEnd.Migrations
                             Email = "yasmin@gmail.com",
                             Nome = "Yasmin",
                             Salario = 100000f,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 1
                         });
                 });

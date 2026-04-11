@@ -1,4 +1,4 @@
-const BASE_URL = "http://192.168.103.67:5078/api/v1";
+const BASE_URL = "http://192.168.18.74:5078/api/v1";
 
 export async function api(
   endpoint: string,

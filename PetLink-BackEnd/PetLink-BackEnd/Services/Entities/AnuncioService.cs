@@ -248,6 +248,105 @@ public class AnuncioService : GenericService<Anuncio, AnuncioDTO>, IAnuncioServi
         }
     }
 
+    public async Task<IEnumerable<AdminAnuncioFeedDTO>> GetAdminFeed()
+    {
+        var petinder = await _context.AnunciosPeTinder
+            .AsNoTracking()
+            .Select(x => new AdminAnuncioFeedDTO
+            {
+                AnuncioId = x.AnuncioId,
+                TipoAnuncio = (int)TipoAnuncio.PETINDER,
+                TipoAnuncioLabel = "PeTinder",
+                Descricao = x.Anuncio.Descricao,
+                DataCriacao = x.Anuncio.DataCriacao,
+
+                FotoPet = x.Pet.Foto,
+                NomePet = x.Pet.Nome,
+                IdadePet = x.Pet.Idade,
+                SexoPet = x.Pet.Sexo,
+                RacaPet = x.Pet.Raca,
+                TipoPet = x.Pet.TipoPet.ToString(),
+
+                UsuarioId = x.Anuncio.UsuarioId ?? 0,
+                NomeUsuario = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Nome : string.Empty,
+                TelefoneUsuario = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Telefone : string.Empty,
+                Cidade = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Cidade : string.Empty,
+                Uf = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Uf : string.Empty,
+                Bairro = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Bairro : string.Empty,
+                Rua = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Rua : string.Empty,
+                Numero = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Numero : 0,
+            })
+            .ToListAsync();
+
+        var petfinder = await _context.AnunciosPetFinder
+            .AsNoTracking()
+            .Select(x => new AdminAnuncioFeedDTO
+            {
+                AnuncioId = x.AnuncioId,
+                TipoAnuncio = (int)TipoAnuncio.PETFINDER,
+                TipoAnuncioLabel = "PetFinder",
+                Descricao = x.Anuncio.Descricao,
+                DataCriacao = x.Anuncio.DataCriacao,
+
+                FotoPet = x.Pet.Foto,
+                NomePet = x.Pet.Nome,
+                IdadePet = x.Pet.Idade,
+                SexoPet = x.Pet.Sexo,
+                RacaPet = x.Pet.Raca,
+                TipoPet = x.Pet.TipoPet.ToString(),
+
+                UsuarioId = x.Anuncio.UsuarioId ?? 0,
+                NomeUsuario = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Nome : string.Empty,
+                TelefoneUsuario = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Telefone : string.Empty,
+                Cidade = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Cidade : string.Empty,
+                Uf = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Uf : string.Empty,
+                Bairro = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Bairro : string.Empty,
+                Rua = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Rua : string.Empty,
+                Numero = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Numero : 0,
+
+                UltimoLocalVisto = x.UltimoLocalVisto,
+                DataDesaparecimento = x.DataDesaparecimento,
+            })
+            .ToListAsync();
+
+        var paypet = await _context.AnunciosPayPet
+            .AsNoTracking()
+            .Select(x => new AdminAnuncioFeedDTO
+            {
+                AnuncioId = x.AnuncioId,
+                TipoAnuncio = (int)TipoAnuncio.PAYPET,
+                TipoAnuncioLabel = "PayPet",
+                Descricao = x.Anuncio.Descricao,
+                DataCriacao = x.Anuncio.DataCriacao,
+
+                FotoPet = x.Pet.Foto,
+                NomePet = x.Pet.Nome,
+                IdadePet = x.Pet.Idade,
+                SexoPet = x.Pet.Sexo,
+                RacaPet = x.Pet.Raca,
+                TipoPet = x.Pet.TipoPet.ToString(),
+
+                UsuarioId = x.Anuncio.UsuarioId ?? 0,
+                NomeUsuario = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Nome : string.Empty,
+                TelefoneUsuario = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Telefone : string.Empty,
+                Cidade = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Cidade : string.Empty,
+                Uf = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Uf : string.Empty,
+                Bairro = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Bairro : string.Empty,
+                Rua = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Rua : string.Empty,
+                Numero = x.Anuncio.Usuario != null ? x.Anuncio.Usuario.Numero : 0,
+
+                TipoPayPet = (int)x.TipoPayPet,
+                Valor = x.Valor,
+            })
+            .ToListAsync();
+
+        return petinder
+            .Concat(petfinder)
+            .Concat(paypet)
+            .OrderByDescending(x => x.DataCriacao)
+            .ThenByDescending(x => x.AnuncioId);
+    }
+
     public async Task<IEnumerable<PetinderFeedDTO>> GetFeedPetinder()
     {
         return await _context.AnunciosPeTinder

@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class teste : Migration
+    public partial class pussynigga : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -28,6 +28,22 @@ namespace PetLink_BackEnd.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_administrador", x => x.id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "funcionario",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    senha = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
+                    salario = table.Column<decimal>(type: "numeric", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_funcionario", x => x.id);
                 });
 
             migrationBuilder.CreateTable(
@@ -79,6 +95,7 @@ namespace PetLink_BackEnd.Migrations
                     crmv = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     salario = table.Column<float>(type: "real", nullable: false),
                     email = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    senha = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     status = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
@@ -290,9 +307,19 @@ namespace PetLink_BackEnd.Migrations
                 columns: new[] { "id", "email", "nome", "senha", "status" },
                 values: new object[,]
                 {
-                    { 1, "miguelsilva@gmail.com", "Miguel Silva", "123456", 1 },
-                    { 2, "gabrieloliveira@gmail.com", "Gabriel Oliveira", "abcdefg", 1 },
-                    { 3, "marcobrito@gmail.com", "Marco Brito", "aaaaaaa", 2 }
+                    { 1, "miguelsilva@gmail.com", "Miguel Silva", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", 1 },
+                    { 2, "gabrieloliveira@gmail.com", "Gabriel Oliveira", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", 1 },
+                    { 3, "marcobrito@gmail.com", "Marco Brito", "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", 2 }
+                });
+
+            migrationBuilder.InsertData(
+                table: "funcionario",
+                columns: new[] { "id", "email", "nome", "salario", "senha" },
+                values: new object[,]
+                {
+                    { 1, "funcionario1@petlink.com", "Funcionario 1", 2500.00m, "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92" },
+                    { 2, "funcionario2@petlink.com", "Funcionario 2", 3200.00m, "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92" },
+                    { 3, "funcionario3@petlink.com", "Funcionario 3", 4100.00m, "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92" }
                 });
 
             migrationBuilder.InsertData(
@@ -316,12 +343,12 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.InsertData(
                 table: "veterinario",
-                columns: new[] { "id", "crmv", "email", "nome", "salario", "status" },
+                columns: new[] { "id", "crmv", "email", "nome", "salario", "senha", "status" },
                 values: new object[,]
                 {
-                    { 1, "4750", "gabriel@gmail.com", "Gabriel", 100000f, 2 },
-                    { 2, "7452", "enzo@gmail.com", "Enzo", 100000f, 1 },
-                    { 3, "0001", "yasmin@gmail.com", "Yasmin", 100000f, 1 }
+                    { 1, "4750", "gabriel@gmail.com", "Gabriel", 100000f, "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", 2 },
+                    { 2, "7452", "enzo@gmail.com", "Enzo", 100000f, "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", 1 },
+                    { 3, "0001", "yasmin@gmail.com", "Yasmin", 100000f, "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92", 1 }
                 });
 
             migrationBuilder.InsertData(
@@ -386,6 +413,12 @@ namespace PetLink_BackEnd.Migrations
                 column: "petid");
 
             migrationBuilder.CreateIndex(
+                name: "IX_funcionario_email",
+                table: "funcionario",
+                column: "email",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_itempedido_pedidoid",
                 table: "itempedido",
                 column: "pedidoid");
@@ -425,6 +458,9 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.DropTable(
                 name: "anuncio_petinder");
+
+            migrationBuilder.DropTable(
+                name: "funcionario");
 
             migrationBuilder.DropTable(
                 name: "itempedido");
