@@ -29,6 +29,8 @@ const INITIAL_FORM: FormState = {
 export default function AdmServicos() {
   const router = useRouter();
   const { token, perfil } = useContext(AuthContext);
+  const canCreate = perfil === "adm" || perfil === "vet";
+  const canEditDelete = perfil === "adm";
   const readOnly = perfil === "func";
 
   const [servicos, setServicos] = useState<Servico[]>([]);
@@ -108,7 +110,7 @@ export default function AdmServicos() {
   }, [loadData]);
 
   function openCreateModal() {
-    if (readOnly) return;
+    if (!canCreate) return;
 
     setEditId(null);
     setForm(INITIAL_FORM);
@@ -117,7 +119,7 @@ export default function AdmServicos() {
   }
 
   function openEditModal(servico: Servico) {
-    if (readOnly) return;
+    if (!canEditDelete) return;
 
     setEditId(servico.id);
     setForm({
@@ -139,7 +141,9 @@ export default function AdmServicos() {
   }
 
   async function handleSave() {
-    if (!token || readOnly) return;
+    if (!token) return;
+    if (editId && !canEditDelete) return;
+    if (!editId && !canCreate) return;
 
     if (!form.dataServico || !form.descricao.trim() || !form.tipo || !form.valor || !form.petId) {
       setFormError("Preencha todos os campos obrigatórios.");
@@ -192,7 +196,7 @@ export default function AdmServicos() {
   }
 
   async function confirmDelete() {
-    if (!token || confirmDeleteId === null || readOnly) return;
+    if (!token || confirmDeleteId === null || !canEditDelete) return;
 
     const result = await deleteAdminServico(confirmDeleteId, token);
     setConfirmDeleteId(null);
@@ -210,9 +214,15 @@ export default function AdmServicos() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCard}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.badge}>Módulo Administrativo</Text>
+            <Text style={styles.badge}>{perfil === "vet" ? "Módulo Veterinário" : "Módulo Administrativo"}</Text>
             <Text style={styles.title}>Serviços</Text>
-            <Text style={styles.subtitle}>{readOnly ? "Visualização de serviços vinculados aos pets." : "CRUD completo de serviços com vínculo em pets."}</Text>
+            <Text style={styles.subtitle}>
+              {readOnly
+                ? "Visualização de serviços vinculados aos pets."
+                : perfil === "vet"
+                  ? "Cadastro de serviços vinculados aos pets."
+                  : "CRUD completo de serviços com vínculo em pets."}
+            </Text>
           </View>
           <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
             <Ionicons name="arrow-back-outline" size={16} color="#dbe9ff" />
@@ -220,7 +230,7 @@ export default function AdmServicos() {
           </TouchableOpacity>
         </View>
 
-        {!readOnly && (
+        {canCreate && (
           <TouchableOpacity style={styles.primaryButton} onPress={openCreateModal}>
             <Ionicons name="add-circle-outline" size={18} color="#fff" />
             <Text style={styles.primaryButtonText}>Novo serviço</Text>
@@ -244,7 +254,7 @@ export default function AdmServicos() {
                   <Text style={styles.itemSubtitle}>Data: {new Date(servico.dataServico).toLocaleDateString("pt-BR")}</Text>
                 </View>
 
-                {!readOnly && (
+                {canEditDelete && (
                   <View style={styles.itemActions}>
                     <TouchableOpacity style={styles.iconAction} onPress={() => openEditModal(servico)}>
                       <Ionicons name="create-outline" size={16} color="#dce9ff" />
@@ -260,7 +270,7 @@ export default function AdmServicos() {
         </View>
       </ScrollView>
 
-      <Modal transparent visible={openModal && !readOnly} animationType="fade" onRequestClose={closeModal}>
+      <Modal transparent visible={openModal && canCreate} animationType="fade" onRequestClose={closeModal}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>{editId ? "Editar serviço" : "Novo serviço"}</Text>
@@ -290,7 +300,7 @@ export default function AdmServicos() {
         </View>
       </Modal>
 
-      <Modal transparent visible={confirmDeleteId !== null && !readOnly} animationType="fade" onRequestClose={() => setConfirmDeleteId(null)}>
+      <Modal transparent visible={confirmDeleteId !== null && canEditDelete} animationType="fade" onRequestClose={() => setConfirmDeleteId(null)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Confirmar exclusão</Text>

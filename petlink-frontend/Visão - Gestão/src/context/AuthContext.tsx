@@ -6,6 +6,7 @@ type AuthContextType = {
   token: string | null;
   user: any;
   perfil: PerfilGestao | null;
+  hydrated: boolean;
   login: (perfil: PerfilGestao, email: string, senha: string) => Promise<{ code: number; message?: string }>;
   logout: () => Promise<void>;
 };
@@ -26,6 +27,7 @@ export function AuthProvider({ children }: any) {
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<any>(null);
   const [perfil, setPerfil] = useState<PerfilGestao | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     async function loadStorage() {
@@ -35,6 +37,8 @@ export function AuthProvider({ children }: any) {
         setUser(data.user);
         setPerfil(data.perfil);
       }
+
+      setHydrated(true);
     }
 
     loadStorage();
@@ -70,7 +74,7 @@ export function AuthProvider({ children }: any) {
   }
 
   return (
-    <AuthContext.Provider value={{ token, user, perfil, login, logout }}>
+    <AuthContext.Provider value={{ token, user, perfil, hydrated, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
