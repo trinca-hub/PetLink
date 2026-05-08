@@ -7,6 +7,8 @@ public interface IAnuncioService : IGenericService<Anuncio, AnuncioDTO>
 {
     Task<int> CreateCompleto(CriarAnuncioDTO dto);
 
+    Task<IEnumerable<AdminAnuncioFeedDTO>> GetAdminFeed();
+
     Task<IEnumerable<PetinderFeedDTO>> GetFeedPetinder();
     Task<IEnumerable<PetfinderFeedDTO>> GetFeedPetfinder();
     Task<IEnumerable<PaypetFeedDTO>> GetFeedPaypet();

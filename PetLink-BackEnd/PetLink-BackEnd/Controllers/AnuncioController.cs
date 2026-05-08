@@ -84,6 +84,15 @@ public class AnuncioController : Controller
         return Ok(_response);
     }
 
+    [HttpGet("admin/feed")]
+    public async Task<IActionResult> FeedAdmin()
+    {
+        _response.Code = ResponseEnum.SUCCESS;
+        _response.Data = await _anuncioService.GetAdminFeed();
+        _response.Message = "Feed administrativo de anúncios listado com sucesso";
+        return Ok(_response);
+    }
+
     // =========================
     // CRUD BASE (ANUNCIO)
     // =========================
@@ -206,6 +215,34 @@ public class AnuncioController : Controller
         return Ok(_response);
     }
 
+    [HttpPut("admin/{id}")]
+    public async Task<IActionResult> PutAdmin(int id, [FromBody] AnuncioDTO anuncioDTO)
+    {
+        if (anuncioDTO is null || string.IsNullOrWhiteSpace(anuncioDTO.Descricao))
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "Descrição inválida";
+            return BadRequest(_response);
+        }
+
+        var existing = await _anuncioService.GetById(id);
+        if (existing is null)
+        {
+            _response.Code = ResponseEnum.NOT_FOUND;
+            _response.Data = null;
+            _response.Message = "O anúncio informado não existe";
+            return NotFound(_response);
+        }
+
+        await _anuncioService.UpdateDescricao(id, anuncioDTO.Descricao.Trim());
+
+        _response.Code = ResponseEnum.SUCCESS;
+        _response.Data = null;
+        _response.Message = "Descrição atualizada com sucesso (admin)";
+        return Ok(_response);
+    }
+
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(int id)
@@ -234,6 +271,41 @@ public class AnuncioController : Controller
             _response.Code = ResponseEnum.SUCCESS;
             _response.Data = null;
             _response.Message = "Anúncio removido com sucesso";
+
+            return Ok(_response);
+        }
+        catch (Exception ex)
+        {
+            _response.Code = ResponseEnum.ERROR;
+            _response.Message = "Ocorreu um erro ao tentar remover o anúncio";
+            _response.Data = new
+            {
+                ErrorMessage = ex.Message,
+                StackTrace = ex.StackTrace ?? "No stack trace available"
+            };
+            return StatusCode(StatusCodes.Status500InternalServerError, _response);
+        }
+    }
+
+    [HttpDelete("admin/{id}")]
+    public async Task<IActionResult> DeleteAdmin(int id)
+    {
+        try
+        {
+            var existingAnuncioDTO = await _anuncioService.GetById(id);
+            if (existingAnuncioDTO is null)
+            {
+                _response.Code = ResponseEnum.NOT_FOUND;
+                _response.Data = null;
+                _response.Message = "O anúncio informado não existe";
+                return NotFound(_response);
+            }
+
+            await _anuncioService.Remove(id);
+
+            _response.Code = ResponseEnum.SUCCESS;
+            _response.Data = null;
+            _response.Message = "Anúncio removido com sucesso (admin)";
 
             return Ok(_response);
         }
@@ -281,6 +353,34 @@ public class AnuncioController : Controller
         _response.Code = ResponseEnum.SUCCESS;
         _response.Data = null;
         _response.Message = "PetFinder atualizado com sucesso";
+        return Ok(_response);
+    }
+
+    [HttpPut("admin/{id}/petfinder")]
+    public async Task<IActionResult> PutPetFinderAdmin(int id, [FromBody] EditarPetFinderDTO dto)
+    {
+        if (dto is null || string.IsNullOrWhiteSpace(dto.UltimoLocalVisto) || dto.DataDesaparecimento == default)
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "Dados do PetFinder inválidos";
+            return BadRequest(_response);
+        }
+
+        var existing = await _anuncioService.GetById(id);
+        if (existing is null)
+        {
+            _response.Code = ResponseEnum.NOT_FOUND;
+            _response.Data = null;
+            _response.Message = "O anúncio informado não existe";
+            return NotFound(_response);
+        }
+
+        await _anuncioService.UpdatePetFinder(id, dto);
+
+        _response.Code = ResponseEnum.SUCCESS;
+        _response.Data = null;
+        _response.Message = "PetFinder atualizado com sucesso (admin)";
         return Ok(_response);
     }
 
@@ -335,6 +435,53 @@ public class AnuncioController : Controller
         _response.Code = ResponseEnum.SUCCESS;
         _response.Data = null;
         _response.Message = "PayPet atualizado com sucesso";
+        return Ok(_response);
+    }
+
+    [HttpPut("admin/{id}/paypet")]
+    public async Task<IActionResult> PutPayPetAdmin(int id, [FromBody] EditarPayPetDTO dto)
+    {
+        if (dto is null)
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "Dados do PayPet inválidos";
+            return BadRequest(_response);
+        }
+
+        var isDoacao = dto.TipoPayPet == 1;
+        var isVenda = dto.TipoPayPet == 2;
+
+        if (!isDoacao && !isVenda)
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "TipoPayPet inválido";
+            return BadRequest(_response);
+        }
+
+        if (isVenda && (dto.Valor == null || dto.Valor <= 0))
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "Para venda, informe um valor maior que 0";
+            return BadRequest(_response);
+        }
+
+        var existing = await _anuncioService.GetById(id);
+        if (existing is null)
+        {
+            _response.Code = ResponseEnum.NOT_FOUND;
+            _response.Data = null;
+            _response.Message = "O anúncio informado não existe";
+            return NotFound(_response);
+        }
+
+        await _anuncioService.UpdatePayPet(id, dto);
+
+        _response.Code = ResponseEnum.SUCCESS;
+        _response.Data = null;
+        _response.Message = "PayPet atualizado com sucesso (admin)";
         return Ok(_response);
     }
 

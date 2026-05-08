@@ -6,6 +6,7 @@ import {
   updateFuncionario,
 } from "@/src/api/funcionarioService";
 import { AuthContext } from "@/src/context/AuthContext";
+import { parseDecimalInput } from "@/src/utils/numberUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -118,7 +119,7 @@ export default function ListaFuncionarios() {
   }
 
   function parseSalario(value: string) {
-    const parsed = Number(value.replace(".", "").replace(",", "."));
+    const parsed = parseDecimalInput(value);
     return Number.isNaN(parsed) ? 0 : parsed;
   }
 
@@ -286,7 +287,7 @@ export default function ListaFuncionarios() {
               style={styles.input}
               placeholder="Salário (ex: 2500,00)"
               placeholderTextColor="#98abc9"
-              keyboardType="numeric"
+              keyboardType="decimal-pad"
               value={form.salario}
               onChangeText={(value) => setForm((prev) => ({ ...prev, salario: value }))}
             />

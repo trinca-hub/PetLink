@@ -1,4 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
@@ -7,14 +10,19 @@ namespace PetLink_BackEnd.Controllers;
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize]
 public class ItemPedidoController : Controller
 {
     private readonly IItemPedidoService _itempedidoService;
+    private readonly IAdministradorService _administradorService;
     private readonly Response _response;
 
-    public ItemPedidoController(IItemPedidoService itempedidoService)
+    public ItemPedidoController(
+        IItemPedidoService itempedidoService,
+        IAdministradorService administradorService)
     {
         _itempedidoService = itempedidoService;
+        _administradorService = administradorService;
         _response = new Response();
     }
 
@@ -167,7 +175,7 @@ public class ItemPedidoController : Controller
                 return NotFound(_response);
             }
 
-            await _itempedidoService.Remove(id);
+            await _itempedidoService.RemoveWithRestock(id);
 
             _response.Code = ResponseEnum.SUCCESS;
             _response.Data = null;
@@ -186,5 +194,54 @@ public class ItemPedidoController : Controller
             };
             return StatusCode(StatusCodes.Status500InternalServerError, _response);
         }
+    }
+
+    [HttpGet("admin")]
+    public async Task<IActionResult> GetAllAdmin()
+    {
+        if (!await IsAdminAuthenticated())
+            return Forbid();
+
+        return await GetAll();
+    }
+
+    [HttpGet("admin/pedido/{pedidoId}")]
+    public async Task<IActionResult> GetByPedidoIdAdmin(int pedidoId)
+    {
+        if (!await IsAdminAuthenticated())
+            return Forbid();
+
+        return await GetByPedidoId(pedidoId);
+    }
+
+    [HttpPost("admin")]
+    public async Task<IActionResult> PostAdmin(ItemPedidoDTO itempedidoDTO)
+    {
+        if (!await IsAdminAuthenticated())
+            return Forbid();
+
+        return await Post(itempedidoDTO);
+    }
+
+    [HttpDelete("admin/{id}")]
+    public async Task<IActionResult> DeleteAdmin(int id)
+    {
+        if (!await IsAdminAuthenticated())
+            return Forbid();
+
+        return await Delete(id);
+    }
+
+    private async Task<bool> IsAdminAuthenticated()
+    {
+        var email = User.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
+            ?.Value;
+
+        if (string.IsNullOrEmpty(email))
+            return false;
+
+        var admin = await _administradorService.GetByEmail(email);
+        return admin is not null;
     }
 }

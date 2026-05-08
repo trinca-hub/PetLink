@@ -4,7 +4,10 @@ export type AdminRoute =
   | "/adm-usuarios"
   | "/adm-produtos"
   | "/adm-anuncios"
-  | "/adm-cadastro-adm";
+  | "/adm-cadastro-adm"
+  | "/adm-pets"
+  | "/adm-pedidos"
+  | "/adm-servicos";
 
 export type AdminMenuItem = {
   title: string;
@@ -37,6 +40,24 @@ export const ADMIN_MENU: AdminMenuItem[] = [
     subtitle: "Catálogo e disponibilidade de produtos",
     icon: "cube-outline",
     route: "/adm-produtos",
+  },
+  {
+    title: "Gerenciar Pets",
+    subtitle: "Cadastro e manutenção de pets vinculados",
+    icon: "paw-outline",
+    route: "/adm-pets",
+  },
+  {
+    title: "Gerenciar Pedidos",
+    subtitle: "Criar pedidos e cancelar com estorno de estoque",
+    icon: "receipt-outline",
+    route: "/adm-pedidos",
+  },
+  {
+    title: "Gerenciar Serviços",
+    subtitle: "CRUD de serviços vinculados aos pets",
+    icon: "construct-outline",
+    route: "/adm-servicos",
   },
   {
     title: "Gerenciar Anúncios",

@@ -10,17 +10,17 @@ export default function HomeGestao() {
     {
       label: "Logar como Administrador",
       icon: "shield-checkmark-outline" as const,
-      route: "/login-adm",
+      route: "/login-adm" as const,
     },
     {
       label: "Logar como Veterinário",
       icon: "medkit-outline" as const,
-      route: "/login-vet",
+      route: "/login-vet" as const,
     },
     {
       label: "Logar como Funcionário",
       icon: "briefcase-outline" as const,
-      route: "/login-func",
+      route: "/login-func" as const,
     },
   ];
 
