@@ -35,6 +35,20 @@ export default function HomeVet() {
           <Text style={styles.sectionTitle}>Ações disponíveis</Text>
 
           <AdminActionCard
+            title="Minha Agenda"
+            subtitle="Configurar disponibilidade e ver slots"
+            icon="calendar-outline"
+            onPress={() => router.push("/vet-agenda")}
+          />
+
+          <AdminActionCard
+            title="Solicitações de Consulta"
+            subtitle="Enviar e acompanhar solicitações"
+            icon="chatbubbles-outline"
+            onPress={() => router.push("/vet-solicitacoes")}
+          />
+
+          <AdminActionCard
             title="Criar Serviços"
             subtitle="Cadastrar novos serviços vinculados aos pets"
             icon="construct-outline"

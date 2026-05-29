@@ -57,11 +57,11 @@ export default function Register() {
 
     console.log("➡️ Resposta da API:", result);
 
-    if (result.code === 1) {
+    if (result.ok) {
       alert("Conta criada!");
       router.replace("/login");
     } else {
-      alert(result.message || "Erro ao cadastrar!");
+      alert("Erro ao cadastrar!");
     }
   }
 

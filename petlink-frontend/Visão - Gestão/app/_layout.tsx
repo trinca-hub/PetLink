@@ -52,7 +52,7 @@ function RoleRouteGuard() {
         "/adm-servicos",
       ],
       func: ["/home-func", "/adm-produtos", "/adm-pets", "/adm-pedidos", "/adm-servicos"],
-      vet: ["/home-vet", "/adm-servicos"],
+      vet: ["/home-vet", "/adm-servicos", "/vet-agenda", "/vet-solicitacoes"],
     };
 
     const allowedRoutes = allowedByPerfil[perfil];

@@ -47,9 +47,9 @@ export function AuthProvider({ children }: any) {
   async function login(perfilLogin: PerfilGestao, email: string, senha: string) {
     const result: any = await loginGestaoService(perfilLogin, email, senha);
 
-    if (result?.ok && result?.data?.code === 1) {
-      const tokenRecebido = result.data?.data?.token;
-      const userRecebido = resolveUserFromPayload(result.data?.data);
+    if (result?.ok) {
+      const tokenRecebido = result.data?.data?.token ?? result.data?.token;
+      const userRecebido = resolveUserFromPayload(result.data?.data ?? result.data);
 
       if (!tokenRecebido || !userRecebido) {
         return { code: 0, message: "Resposta de login inválida" };

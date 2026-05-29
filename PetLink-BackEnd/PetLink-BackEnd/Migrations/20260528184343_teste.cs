@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class pussynigga : Migration
+    public partial class teste : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -177,6 +177,35 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "agendaveterinario",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    veterinarioid = table.Column<int>(type: "integer", nullable: false),
+                    diassemanaativos = table.Column<int>(type: "integer", nullable: false),
+                    horainiciomanha = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    horafimmanha = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    horainiciotarde = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    horafimtarde = table.Column<TimeSpan>(type: "interval", nullable: false),
+                    duracaominutos = table.Column<int>(type: "integer", nullable: false),
+                    datacriacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_agendaveterinario", x => x.id);
+                    table.CheckConstraint("CK_agendaveterinario_dias", "diassemanaativos > 0");
+                    table.CheckConstraint("CK_agendaveterinario_duracao", "duracaominutos = 60");
+                    table.CheckConstraint("CK_agendaveterinario_horarios", "horainiciomanha < horafimmanha AND horainiciotarde < horafimtarde");
+                    table.ForeignKey(
+                        name: "FK_agendaveterinario_veterinario_veterinarioid",
+                        column: x => x.veterinarioid,
+                        principalTable: "veterinario",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "itempedido",
                 columns: table => new
                 {
@@ -201,6 +230,52 @@ namespace PetLink_BackEnd.Migrations
                         principalTable: "produto",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "agendamentoconsulta",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    veterinarioid = table.Column<int>(type: "integer", nullable: false),
+                    petid = table.Column<int>(type: "integer", nullable: false),
+                    usuarioid = table.Column<int>(type: "integer", nullable: false),
+                    datahorainicio = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    datahorafim = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    status = table.Column<int>(type: "integer", nullable: false),
+                    tiposervico = table.Column<int>(type: "integer", nullable: false),
+                    observacao = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    motivocancelamento = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    datacriacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    dataconfirmacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    datacancelamento = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    rowversion = table.Column<byte[]>(type: "bytea", rowVersion: true, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_agendamentoconsulta", x => x.id);
+                    table.CheckConstraint("CK_agendamentoconsulta_horario", "(datahorainicio IS NULL AND datahorafim IS NULL) OR (datahorainicio < datahorafim)");
+                    table.CheckConstraint("CK_agendamentoconsulta_status_datas", "(status <> 2 OR dataconfirmacao IS NOT NULL) AND (status <> 3 OR datacancelamento IS NOT NULL)");
+                    table.CheckConstraint("CK_agendamentoconsulta_status_pendente", "(status <> 1 OR (datahorainicio IS NULL AND datahorafim IS NULL))");
+                    table.ForeignKey(
+                        name: "FK_agendamentoconsulta_pet_petid",
+                        column: x => x.petid,
+                        principalTable: "pet",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_agendamentoconsulta_usuario_usuarioid",
+                        column: x => x.usuarioid,
+                        principalTable: "usuario",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_agendamentoconsulta_veterinario_veterinarioid",
+                        column: x => x.veterinarioid,
+                        principalTable: "veterinario",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -393,6 +468,37 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateIndex(
+                name: "IX_agendamentoconsulta_pendente",
+                table: "agendamentoconsulta",
+                columns: new[] { "veterinarioid", "petid", "usuarioid", "status" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_agendamentoconsulta_petid",
+                table: "agendamentoconsulta",
+                column: "petid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_agendamentoconsulta_usuarioid",
+                table: "agendamentoconsulta",
+                column: "usuarioid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_agendamentoconsulta_vet_horario",
+                table: "agendamentoconsulta",
+                columns: new[] { "veterinarioid", "datahorainicio", "datahorafim" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_agendamentoconsulta_vet_inicio",
+                table: "agendamentoconsulta",
+                columns: new[] { "veterinarioid", "datahorainicio" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_agendaveterinario_veterinarioid",
+                table: "agendaveterinario",
+                column: "veterinarioid",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_anuncio_usuarioid",
                 table: "anuncio",
                 column: "usuarioid");
@@ -449,6 +555,12 @@ namespace PetLink_BackEnd.Migrations
         {
             migrationBuilder.DropTable(
                 name: "administrador");
+
+            migrationBuilder.DropTable(
+                name: "agendamentoconsulta");
+
+            migrationBuilder.DropTable(
+                name: "agendaveterinario");
 
             migrationBuilder.DropTable(
                 name: "anuncio_paypet");
