@@ -5,7 +5,13 @@ export type ApiResponse<T> = {
 };
 
 export type StatusAgendamento = "Pendente" | "Confirmado" | "Cancelado";
-export type TipoServico = "Consulta" | string;
+export type TipoServico = 1 | 2 | 3;
+
+export const TIPO_SERVICO_LABEL: Record<number, string> = {
+  1: "Consulta",
+  2: "Banho",
+  3: "Tosa",
+};
 
 export type AgendaVeterinario = {
   id: number;

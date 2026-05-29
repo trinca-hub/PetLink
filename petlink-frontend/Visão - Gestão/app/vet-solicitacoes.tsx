@@ -1,12 +1,14 @@
 import { AuthContext } from "@/src/context/AuthContext";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
-import { getAdminPets, Pet } from "@/src/api/petService";
+import { getPetsByUsuario, Pet } from "@/src/api/petService";
 import {
   AgendamentoConsulta,
   StatusAgendamento,
-  createAgendamento,
+  TipoServico,
+  createAgendamentoVeterinario,
   getAgendamentosVeterinario,
 } from "@/src/api/agendamentoService";
+import { getUsuarios, Usuario } from "@/src/api/usuarioService";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -43,18 +45,32 @@ function statusColor(status: StatusAgendamento) {
   return "#f6c453";
 }
 
+const TIPO_SERVICO_LABEL: Record<number, string> = {
+  1: "Consulta",
+  2: "Banho",
+  3: "Tosa",
+};
+
+function formatTipoServico(value?: TipoServico | null) {
+  if (!value) return "-";
+  return TIPO_SERVICO_LABEL[value] || `Tipo ${value}`;
+}
+
 export default function VetSolicitacoes() {
   const router = useRouter();
   const { token, user } = useContext(AuthContext);
 
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [pets, setPets] = useState<Pet[]>([]);
   const [agendamentos, setAgendamentos] = useState<AgendamentoConsulta[]>([]);
+  const [selectedUsuarioId, setSelectedUsuarioId] = useState<string>("");
   const [selectedPetId, setSelectedPetId] = useState<string>("");
   const [observacao, setObservacao] = useState("");
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [openUsuarioSelect, setOpenUsuarioSelect] = useState(false);
   const [openPetSelect, setOpenPetSelect] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusAgendamento | "Todos">("Todos");
 
@@ -66,14 +82,32 @@ export default function VetSolicitacoes() {
     return map;
   }, [pets]);
 
+  const usersById = useMemo(() => {
+    const map: Record<number, Usuario> = {};
+    usuarios.forEach((usuario) => {
+      map[usuario.id] = usuario;
+    });
+    return map;
+  }, [usuarios]);
+
+  const usuarioOptions = useMemo<SelectOption[]>(
+    () =>
+      usuarios.map((usuario) => ({
+        value: String(usuario.id),
+        label: usuario.nome,
+        subtitle: `ID ${usuario.id} • ${usuario.email}`,
+      })),
+    [usuarios]
+  );
+
   const petOptions = useMemo<SelectOption[]>(
     () =>
       pets.map((pet) => ({
         value: String(pet.id),
         label: pet.nome,
-        subtitle: `ID ${pet.id} • Tutor ${pet.usuarioId}`,
+        subtitle: `ID ${pet.id} • Tutor ${usersById[pet.usuarioId]?.nome || pet.usuarioId}`,
       })),
-    [pets]
+    [pets, usersById]
   );
 
   const filteredAgendamentos = useMemo(() => {
@@ -87,15 +121,15 @@ export default function VetSolicitacoes() {
     setLoading(true);
     setError(null);
 
-    const [petsResult, agendamentosResult] = await Promise.all([
-      getAdminPets(token),
+    const [usuariosResult, agendamentosResult] = await Promise.all([
+      getUsuarios(token),
       getAgendamentosVeterinario(token),
     ]);
 
-    if (petsResult.ok && Array.isArray(petsResult?.data?.data)) {
-      setPets(petsResult.data.data);
+    if (usuariosResult.ok && Array.isArray(usuariosResult?.data?.data)) {
+      setUsuarios(usuariosResult.data.data);
     } else {
-      setError(getApiErrorMessage(petsResult?.data, "Não foi possível carregar pets."));
+      setError(getApiErrorMessage(usuariosResult?.data, "Não foi possível carregar usuários."));
     }
 
     if (agendamentosResult.ok && Array.isArray(agendamentosResult?.data?.data)) {
@@ -107,9 +141,35 @@ export default function VetSolicitacoes() {
     setLoading(false);
   }, [token]);
 
+  const loadPetsForUsuario = useCallback(
+    async (usuarioId: number) => {
+      if (!token) return;
+
+      const petsResult = await getPetsByUsuario(usuarioId, token);
+      if (petsResult.ok && Array.isArray(petsResult?.data?.data)) {
+        setPets(petsResult.data.data);
+      } else if (!petsResult.ok) {
+        setPets([]);
+        setError(getApiErrorMessage(petsResult?.data, "Não foi possível carregar pets do tutor."));
+      }
+    },
+    [token]
+  );
+
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    const parsed = Number(selectedUsuarioId);
+    if (!parsed || Number.isNaN(parsed)) {
+      setPets([]);
+      setSelectedPetId("");
+      return;
+    }
+
+    loadPetsForUsuario(parsed);
+  }, [selectedUsuarioId, loadPetsForUsuario]);
 
   async function onRefresh() {
     setRefreshing(true);
@@ -120,6 +180,12 @@ export default function VetSolicitacoes() {
   async function handleCreate() {
     if (!token || !user?.id) return;
 
+    const parsedUsuarioId = Number(selectedUsuarioId);
+    if (!parsedUsuarioId || Number.isNaN(parsedUsuarioId)) {
+      setError("Selecione um tutor para solicitar a consulta.");
+      return;
+    }
+
     if (!selectedPetId) {
       setError("Selecione um pet para solicitar a consulta.");
       return;
@@ -129,13 +195,13 @@ export default function VetSolicitacoes() {
     setError(null);
 
     const payload = {
-      veterinarioId: Number(user.id),
+      usuarioId: parsedUsuarioId,
       petId: Number(selectedPetId),
-      tipoServico: "Consulta",
+      tipoServico: 1 as TipoServico,
       observacao: observacao.trim() || undefined,
     };
 
-    const result = await createAgendamento(payload, token);
+    const result = await createAgendamentoVeterinario(payload, token);
     setSaving(false);
 
     if (!result.ok) {
@@ -145,10 +211,12 @@ export default function VetSolicitacoes() {
 
     Alert.alert("Solicitação enviada", "O tutor poderá confirmar o agendamento.");
     setObservacao("");
+    setSelectedUsuarioId("");
     setSelectedPetId("");
     await loadData();
   }
 
+  const selectedUsuario = usersById[Number(selectedUsuarioId)];
   const selectedPet = petById[Number(selectedPetId)];
 
   return (
@@ -172,9 +240,27 @@ export default function VetSolicitacoes() {
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Nova solicitação</Text>
 
-          <TouchableOpacity style={styles.selectButton} onPress={() => setOpenPetSelect(true)}>
+          <TouchableOpacity style={styles.selectButton} onPress={() => setOpenUsuarioSelect(true)}>
+            <Text style={styles.selectLabel}>Tutor</Text>
+            <Text style={styles.selectValue}>
+              {selectedUsuario ? `${selectedUsuario.nome} (ID ${selectedUsuario.id})` : "Selecionar tutor"}
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.selectButton}
+            onPress={() => {
+              if (!selectedUsuarioId) {
+                setError("Selecione um tutor antes de escolher o pet.");
+                return;
+              }
+              setOpenPetSelect(true);
+            }}
+          >
             <Text style={styles.selectLabel}>Pet</Text>
-            <Text style={styles.selectValue}>{selectedPet ? `${selectedPet.nome} (ID ${selectedPet.id})` : "Selecionar pet"}</Text>
+            <Text style={styles.selectValue}>
+              {selectedPet ? `${selectedPet.nome} (ID ${selectedPet.id})` : "Selecionar pet"}
+            </Text>
           </TouchableOpacity>
 
           <View style={styles.selectButton}>
@@ -226,8 +312,10 @@ export default function VetSolicitacoes() {
                   <View style={{ flex: 1, gap: 4 }}>
                     <Text style={styles.itemTitle}>Solicitação #{item.id}</Text>
                     <Text style={styles.itemSubtitle}>Pet: {petById[item.petId]?.nome || `ID ${item.petId}`}</Text>
-                    <Text style={styles.itemSubtitle}>Tutor ID: {item.usuarioId}</Text>
-                    <Text style={styles.itemSubtitle}>Tipo: {item.tipoServico}</Text>
+                    <Text style={styles.itemSubtitle}>
+                      Tutor: {usersById[item.usuarioId]?.nome || `ID ${item.usuarioId}`}
+                    </Text>
+                    <Text style={styles.itemSubtitle}>Tipo: {formatTipoServico(item.tipoServico)}</Text>
                     <Text style={styles.itemSubtitle}>Status: {item.status}</Text>
                     <Text style={styles.itemSubtitle}>Horário: {formatDateTime(item.dataHoraInicio)}</Text>
                     {item.observacao ? (
@@ -244,6 +332,17 @@ export default function VetSolicitacoes() {
           )}
         </View>
       </ScrollView>
+
+      <SearchableSelectModal
+        visible={openUsuarioSelect}
+        title="Selecionar tutor"
+        options={usuarioOptions}
+        onClose={() => setOpenUsuarioSelect(false)}
+        onSelect={(option) => {
+          setSelectedUsuarioId(option.value);
+          setSelectedPetId("");
+        }}
+      />
 
       <SearchableSelectModal
         visible={openPetSelect}

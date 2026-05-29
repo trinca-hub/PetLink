@@ -5,6 +5,7 @@ namespace PetLink_BackEnd.Services.Interfaces
     public interface IAgendamentoService
     {
         Task<AgendamentoConsultaDTO> CriarSolicitacao(CriarSolicitacaoConsultaDTO dto, int usuarioId);
+        Task<AgendamentoConsultaDTO> CriarSolicitacaoVeterinario(CriarSolicitacaoVeterinarioDTO dto, int veterinarioId);
         Task<IEnumerable<AgendamentoConsultaDTO>> ListarSolicitacoesTutor(int usuarioId);
         Task<IEnumerable<AgendamentoConsultaDTO>> ListarSolicitacoesVeterinario(int veterinarioId);
         Task<AgendamentoConsultaDTO> BuscarPorId(int id);

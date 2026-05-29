@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using PetLink_BackEnd.Data.Interfaces;
 using PetLink_BackEnd.Data;
 using PetLink_BackEnd.Objects.Dtos.Entities.AgendamentoConsulta;
@@ -41,6 +42,39 @@ namespace PetLink_BackEnd.Services.Entities
                 VeterinarioId = dto.VeterinarioId,
                 PetId = dto.PetId,
                 UsuarioId = usuarioId,
+                Status = StatusAgendamento.Pendente,
+                TipoServico = dto.TipoServico,
+                Observacao = dto.Observacao,
+                DataCriacao = DateTime.UtcNow
+            };
+
+            await _agendamentoRepository.Add(agendamento);
+            return _mapper.Map<AgendamentoConsultaDTO>(agendamento);
+        }
+
+        public async Task<AgendamentoConsultaDTO> CriarSolicitacaoVeterinario(CriarSolicitacaoVeterinarioDTO dto, int veterinarioId)
+        {
+            if (dto.UsuarioId <= 0 || dto.PetId <= 0)
+                throw new InvalidOperationException("Dados inválidos.");
+
+            if (await _agendamentoRepository.ExistsPendenteDuplicado(veterinarioId, dto.PetId, dto.UsuarioId))
+                throw new InvalidOperationException("Já existe solicitação pendente para este pet e veterinário.");
+
+            if (!Enum.IsDefined(typeof(TipoServico), dto.TipoServico))
+                throw new InvalidOperationException("Tipo de serviço inválido.");
+
+            var petPertence = await _context.Set<Pet>()
+                .AsNoTracking()
+                .AnyAsync(p => p.Id == dto.PetId && p.UsuarioId == dto.UsuarioId);
+
+            if (!petPertence)
+                throw new InvalidOperationException("Pet não pertence ao usuário informado.");
+
+            var agendamento = new AgendamentoConsulta
+            {
+                VeterinarioId = veterinarioId,
+                PetId = dto.PetId,
+                UsuarioId = dto.UsuarioId,
                 Status = StatusAgendamento.Pendente,
                 TipoServico = dto.TipoServico,
                 Observacao = dto.Observacao,

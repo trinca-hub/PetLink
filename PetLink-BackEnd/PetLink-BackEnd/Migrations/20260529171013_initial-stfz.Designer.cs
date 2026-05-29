@@ -12,8 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260528184343_teste")]
-    partial class teste
+    [Migration("20260529171013_initial-stfz")]
+    partial class initialstfz
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

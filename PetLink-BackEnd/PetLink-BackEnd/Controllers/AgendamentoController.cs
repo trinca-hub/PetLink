@@ -50,6 +50,31 @@ namespace PetLink_BackEnd.Controllers
             }
         }
 
+        [HttpPost("veterinario")]
+        public async Task<IActionResult> PostVeterinario([FromBody] CriarSolicitacaoVeterinarioDTO dto)
+        {
+            try
+            {
+                var veterinarioId = await GetVeterinarioId();
+                if (!veterinarioId.HasValue)
+                {
+                    return Unauthorized(ApiResponseFactory.Failure<object>("Veterinário não autenticado"));
+                }
+
+                if (dto.UsuarioId <= 0 || dto.PetId <= 0)
+                {
+                    return BadRequest(ApiResponseFactory.Failure<object>("Dados inválidos"));
+                }
+
+                var agendamento = await _agendamentoService.CriarSolicitacaoVeterinario(dto, veterinarioId.Value);
+                return Ok(ApiResponseFactory.Success("Solicitação criada com sucesso", agendamento));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponseFactory.Failure<object>("Erro ao criar solicitação", ex.Message));
+            }
+        }
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {

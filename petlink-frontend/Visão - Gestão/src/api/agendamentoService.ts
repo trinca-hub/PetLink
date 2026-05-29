@@ -1,7 +1,7 @@
 import { api } from "@/src/api/api";
 
 export type StatusAgendamento = "Pendente" | "Confirmado" | "Cancelado";
-export type TipoServico = "Consulta" | string;
+export type TipoServico = 1 | 2 | 3;
 
 export type AgendamentoConsulta = {
   id: number;
@@ -27,8 +27,26 @@ export type CreateAgendamentoPayload = {
   observacao?: string;
 };
 
+export type CreateAgendamentoVeterinarioPayload = {
+  usuarioId: number;
+  petId: number;
+  tipoServico: TipoServico;
+  observacao?: string;
+};
+
+export type CancelarAgendamentoPayload = {
+  motivo?: string;
+};
+
 export function createAgendamento(payload: CreateAgendamentoPayload, token: string) {
   return api("Agendamento", "POST", payload, token);
+}
+
+export function createAgendamentoVeterinario(
+  payload: CreateAgendamentoVeterinarioPayload,
+  token: string
+) {
+  return api("Agendamento/veterinario", "POST", payload, token);
 }
 
 export function getAgendamentosVeterinario(token: string) {
@@ -37,4 +55,12 @@ export function getAgendamentosVeterinario(token: string) {
 
 export function getAgendamentoById(id: number, token: string) {
   return api(`Agendamento/${id}`, "GET", null, token);
+}
+
+export function cancelarAgendamento(
+  id: number,
+  payload: CancelarAgendamentoPayload | null,
+  token: string
+) {
+  return api(`Agendamento/${id}/cancelar`, "PUT", payload, token);
 }

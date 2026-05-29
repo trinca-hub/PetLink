@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class teste : Migration
+    public partial class initialstfz : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
