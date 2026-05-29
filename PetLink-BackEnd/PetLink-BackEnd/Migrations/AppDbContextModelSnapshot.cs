@@ -84,6 +84,153 @@ namespace PetLink_BackEnd.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendaVeterinario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datacriacao");
+
+                    b.Property<int>("DiasSemanaAtivos")
+                        .HasColumnType("integer")
+                        .HasColumnName("diassemanaativos");
+
+                    b.Property<int>("DuracaoMinutos")
+                        .HasColumnType("integer")
+                        .HasColumnName("duracaominutos");
+
+                    b.Property<TimeSpan>("HoraFimManha")
+                        .HasColumnType("interval")
+                        .HasColumnName("horafimmanha");
+
+                    b.Property<TimeSpan>("HoraFimTarde")
+                        .HasColumnType("interval")
+                        .HasColumnName("horafimtarde");
+
+                    b.Property<TimeSpan>("HoraInicioManha")
+                        .HasColumnType("interval")
+                        .HasColumnName("horainiciomanha");
+
+                    b.Property<TimeSpan>("HoraInicioTarde")
+                        .HasColumnType("interval")
+                        .HasColumnName("horainiciotarde");
+
+                    b.Property<int>("VeterinarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("veterinarioid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VeterinarioId")
+                        .IsUnique();
+
+                    b.ToTable("agendaveterinario", t =>
+                        {
+                            t.HasCheckConstraint("CK_agendaveterinario_dias", "diassemanaativos > 0");
+
+                            t.HasCheckConstraint("CK_agendaveterinario_duracao", "duracaominutos = 60");
+
+                            t.HasCheckConstraint("CK_agendaveterinario_horarios", "horainiciomanha < horafimmanha AND horainiciotarde < horafimtarde");
+                        });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendamentoConsulta", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DataCancelamento")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datacancelamento");
+
+                    b.Property<DateTime?>("DataConfirmacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("dataconfirmacao");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datacriacao");
+
+                    b.Property<DateTime?>("DataHoraFim")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datahorafim");
+
+                    b.Property<DateTime?>("DataHoraInicio")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datahorainicio");
+
+                    b.Property<string>("MotivoCancelamento")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("motivocancelamento");
+
+                    b.Property<string>("Observacao")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("observacao");
+
+                    b.Property<int>("PetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("petid");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("bytea")
+                        .HasColumnName("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<int>("TipoServico")
+                        .HasColumnType("integer")
+                        .HasColumnName("tiposervico");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuarioid");
+
+                    b.Property<int>("VeterinarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("veterinarioid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PetId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("VeterinarioId", "DataHoraInicio")
+                        .HasDatabaseName("IX_agendamentoconsulta_vet_inicio");
+
+                    b.HasIndex("VeterinarioId", "DataHoraInicio", "DataHoraFim")
+                        .HasDatabaseName("IX_agendamentoconsulta_vet_horario");
+
+                    b.HasIndex("VeterinarioId", "PetId", "UsuarioId", "Status")
+                        .HasDatabaseName("IX_agendamentoconsulta_pendente");
+
+                    b.ToTable("agendamentoconsulta", t =>
+                        {
+                            t.HasCheckConstraint("CK_agendamentoconsulta_horario", "(datahorainicio IS NULL AND datahorafim IS NULL) OR (datahorainicio < datahorafim)");
+
+                            t.HasCheckConstraint("CK_agendamentoconsulta_status_datas", "(status <> 2 OR dataconfirmacao IS NOT NULL) AND (status <> 3 OR datacancelamento IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_agendamentoconsulta_status_pendente", "(status <> 1 OR (datahorainicio IS NULL AND datahorafim IS NULL))");
+                        });
+                });
+
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Anuncio", b =>
                 {
                     b.Property<int>("Id")
@@ -814,6 +961,44 @@ namespace PetLink_BackEnd.Migrations
                             Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 1
                         });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendaVeterinario", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Veterinario", "Veterinario")
+                        .WithMany()
+                        .HasForeignKey("VeterinarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Veterinario");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendamentoConsulta", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Pet", "Pet")
+                        .WithMany()
+                        .HasForeignKey("PetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Veterinario", "Veterinario")
+                        .WithMany()
+                        .HasForeignKey("VeterinarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Pet");
+
+                    b.Navigation("Usuario");
+
+                    b.Navigation("Veterinario");
                 });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Anuncio", b =>

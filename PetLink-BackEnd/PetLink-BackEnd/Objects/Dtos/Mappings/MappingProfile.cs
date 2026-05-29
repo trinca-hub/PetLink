@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using PetLink_BackEnd.Objects.Dtos.Entities;
+using PetLink_BackEnd.Objects.Dtos.Entities.AgendaVeterinario;
+using PetLink_BackEnd.Objects.Dtos.Entities.AgendamentoConsulta;
 using PetLink_BackEnd.Objects.Models;
 
 namespace PetLink_BackEnd.Objects.Dtos.Mappings
@@ -38,6 +40,8 @@ namespace PetLink_BackEnd.Objects.Dtos.Mappings
             CreateMap<AnuncioPayPet, AnuncioPayPetDTO>().ReverseMap();
             CreateMap<AnuncioPetFinder, AnuncioPetFinderDTO>().ReverseMap();
             CreateMap<AnuncioPeTinder, AnuncioPeTinderDTO>().ReverseMap();
+            CreateMap<AgendaVeterinario, AgendaDTO>().ReverseMap();
+            CreateMap<AgendamentoConsulta, AgendamentoConsultaDTO>().ReverseMap();
         }
     }
 }

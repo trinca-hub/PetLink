@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -10,12 +10,14 @@ import {
 } from "react-native";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 
 import { AuthContext } from "@/src/context/AuthContext";
 import { api } from "@/src/api/api";
+import { useSideMenu } from "@/src/context/SideMenuContext";
 
 type Pet = {
   id: number;
@@ -34,6 +36,7 @@ function formatIdade(idade?: string) {
 export default function Home() {
   const { token } = useContext(AuthContext);
   const router = useRouter();
+  const { openMenu } = useSideMenu();
 
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
@@ -72,9 +75,11 @@ export default function Home() {
     }
   };
 
-  useEffect(() => {
-    loadPets();
-  }, [token]);
+  useFocusEffect(
+    useCallback(() => {
+      loadPets();
+    }, [token])
+  );
 
   const headerTitle = useMemo(() => "PetLink", []);
   const pageTitle = useMemo(() => "Meus Pets", []);
@@ -109,7 +114,7 @@ export default function Home() {
           }}
         >
           <Pressable
-            onPress={() => { }}
+            onPress={openMenu}
             style={{
               width: 40,
               height: 40,

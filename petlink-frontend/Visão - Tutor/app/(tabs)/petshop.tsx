@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -15,10 +15,12 @@ import {
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, Feather } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { AuthContext } from "@/src/context/AuthContext";
 import { getProdutoById, getProdutos } from "@/src/api/produtoService";
 import { getFavoriteProductIds, toggleFavoriteProduct } from "@/src/storage/favoritesProducts";
+import { useSideMenu } from "@/src/context/SideMenuContext";
 
 import { getCartProducts, setCartProducts, CartProductItem, removeCartProduct } from "@/src/storage/cartProducts";
 import { checkoutFromItems } from "@/src/services/checkoutService";
@@ -41,6 +43,7 @@ function formatMoneyBR(valor?: number) {
 export default function Produtos() {
   const { token, user } = useContext(AuthContext);
   const { width } = useWindowDimensions();
+  const { openMenu } = useSideMenu();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -96,13 +99,19 @@ export default function Produtos() {
     }
   }
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      await load();
-      setLoading(false);
-    })();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      (async () => {
+        setLoading(true);
+        await load();
+        if (isActive) setLoading(false);
+      })();
+      return () => {
+        isActive = false;
+      };
+    }, [token, user?.id])
+  );
 
   async function onRefresh() {
     setRefreshing(true);
@@ -162,6 +171,11 @@ export default function Produtos() {
     setCartItems(withStock);
     setSelectedIds(withStock.filter((x) => !isUnavailable(x)).map((x) => x.produtoId));
     setCartOpen(true);
+  }
+
+  function goToCartScreen() {
+    setCartOpen(false);
+    router.push("/carrinho");
   }
 
   // ✅ − e + no carrinho (com trava no estoque)
@@ -412,7 +426,7 @@ export default function Produtos() {
         }}
       >
         <Pressable
-          onPress={() => { }}
+          onPress={openMenu}
           style={{
             width: 40,
             height: 40,
@@ -933,18 +947,18 @@ export default function Produtos() {
               </View>
 
               <Pressable
-                disabled={buying || selectedIds.length === 0}
-                onPress={finalizarCompraSelecionados}
+                disabled={cartItems.length === 0}
+                onPress={goToCartScreen}
                 style={{
                   marginTop: 10,
-                  backgroundColor: buying || selectedIds.length === 0 ? "rgba(11,59,145,0.35)" : "#0B3B91",
+                  backgroundColor: cartItems.length === 0 ? "rgba(11,59,145,0.35)" : "#0B3B91",
                   borderRadius: 999,
                   paddingVertical: 12,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                {buying ? <ActivityIndicator color="#fff" /> : <Text style={{ color: "#fff", fontWeight: "900" }}>Finalizar compra</Text>}
+                <Text style={{ color: "#fff", fontWeight: "900" }}>Ir para o carrinho</Text>
               </Pressable>
             </View>
           </Pressable>

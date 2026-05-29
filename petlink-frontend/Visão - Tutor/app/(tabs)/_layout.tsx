@@ -1,5 +1,5 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Feather, FontAwesome, Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
@@ -32,28 +32,27 @@ export default function TabLayout() {
           switch (route.name) {
             case 'index':
               return <Ionicons name="home-outline" size={24} color={color} />;
-            case 'petinder':
-              return <FontAwesome name="heart-o" size={22} color={color} />;
-            case 'petfinder':
-              return <Feather name="search" size={22} color={color} />; // antes: compass
-            case 'paypet':
-              return <Feather name="tag" size={22} color={color} />;
             case 'petshop':
-              return <MaterialIcons name="shopping-cart" size={22} color={color} />;
-            case 'perfil':
-              return <Ionicons name="person-outline" size={24} color={color} />;
+              return <Ionicons name="storefront-outline" size={22} color={color} />;
+            case 'carrinho':
+              return <Ionicons name="cart-outline" size={22} color={color} />;
+            case 'favoritos':
+              return <Ionicons name="heart-outline" size={22} color={color} />;
             default:
               return null;
           }
         },
       })}
     >
-      <Tabs.Screen name="index" options={{ title: 'Início' }} />
-      <Tabs.Screen name="petinder" options={{ title: 'PeTinder' }} />
-      <Tabs.Screen name="petfinder" options={{ title: 'PetFinder' }} />
-      <Tabs.Screen name="paypet" options={{ title: 'PayPet' }} />
-      <Tabs.Screen name="petshop" options={{ title: 'PetShop' }} />
-      <Tabs.Screen name="perfil" options={{ title: 'Perfil' }} />
+      <Tabs.Screen name="index" options={{ title: 'Home' }} />
+      <Tabs.Screen name="petshop" options={{ title: 'Loja' }} />
+      <Tabs.Screen name="carrinho" options={{ title: 'Carrinho' }} />
+      <Tabs.Screen name="favoritos" options={{ title: 'Favoritos' }} />
+      <Tabs.Screen name="petinder" options={{ href: null }} />
+      <Tabs.Screen name="petfinder" options={{ href: null }} />
+      <Tabs.Screen name="paypet" options={{ href: null }} />
+      <Tabs.Screen name="perfil" options={{ href: null }} />
+      <Tabs.Screen name="explore" options={{ href: null }} />
     </Tabs>
   );
 }

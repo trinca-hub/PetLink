@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useCallback, useContext, useState } from "react";
 import {
   ActivityIndicator,
   FlatList,
@@ -10,6 +10,7 @@ import {
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Feather, Ionicons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { AuthContext } from "@/src/context/AuthContext";
 import { getItensPorPedido, getPedidosByUsuario } from "@/src/api/pedidoService";
@@ -93,13 +94,19 @@ export default function PedidosScreen() {
     setPedidos(summaries);
   }
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      await loadPedidos();
-      setLoading(false);
-    })();
-  }, [user?.id, token]);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      (async () => {
+        setLoading(true);
+        await loadPedidos();
+        if (isActive) setLoading(false);
+      })();
+      return () => {
+        isActive = false;
+      };
+    }, [user?.id, token])
+  );
 
   async function onRefresh() {
     setRefreshing(true);

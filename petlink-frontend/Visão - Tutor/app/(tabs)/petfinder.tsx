@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -13,9 +13,11 @@ import {
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { AuthContext } from "@/src/context/AuthContext";
 import { getFeedPetfinder } from "@/src/api/anuncioService";
+import { useSideMenu } from "@/src/context/SideMenuContext";
 
 type PetfinderFeedDTO = {
   anuncioId: number;
@@ -56,6 +58,7 @@ function clampText(text?: string, max = 120) {
 
 export default function Petfinder() {
   const { token } = useContext(AuthContext);
+  const { openMenu } = useSideMenu();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -121,13 +124,19 @@ export default function Petfinder() {
     setAnuncios(list);
   }
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      await load();
-      setLoading(false);
-    })();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      (async () => {
+        setLoading(true);
+        await load();
+        if (isActive) setLoading(false);
+      })();
+      return () => {
+        isActive = false;
+      };
+    }, [token])
+  );
 
   async function onRefresh() {
     setRefreshing(true);
@@ -237,7 +246,7 @@ export default function Petfinder() {
         }}
       >
         <Pressable
-          onPress={() => { }}
+          onPress={openMenu}
           style={{
             width: 40,
             height: 40,

@@ -12,11 +12,17 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using PetLink_BackEnd.WebAPI.Data.Repositories;
+using PetLink_BackEnd.Data.Interfaces;
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase;
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+    });
 builder.Services.AddDbContext<AppDbContext>(opt =>
 {
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -97,6 +103,8 @@ builder.Services.AddScoped<IAnuncioRepository, AnuncioRepository>();
 builder.Services.AddScoped<IAnuncioPayPetRepository, AnuncioPayPetRepository>();
 builder.Services.AddScoped<IAnuncioPetFinderRepository, AnuncioPetFinderRepository>();
 builder.Services.AddScoped<IAnuncioPeTinderRepository, AnuncioPeTinderRepository>();
+builder.Services.AddScoped<IAgendaVeterinarioRepository, AgendaVeterinarioRepository>();
+builder.Services.AddScoped<IAgendamentoConsultaRepository, AgendamentoConsultaRepository>();
 
 builder.Services.AddScoped<IProdutoService, ProdutoService>();
 builder.Services.AddScoped<IUsuarioService, UsuarioService>();
@@ -109,6 +117,8 @@ builder.Services.AddScoped<IPetService, PetService>();
 builder.Services.AddScoped<IServicoService, ServicoService>();
 builder.Services.AddScoped<IAnuncioService, AnuncioService>();
 builder.Services.AddScoped<IAnuncioPayPetService, AnuncioPayPetService>();
+builder.Services.AddScoped<IAgendaVeterinarioService, AgendaVeterinarioService>();
+builder.Services.AddScoped<IAgendamentoService, AgendamentoService>();
 
 
 

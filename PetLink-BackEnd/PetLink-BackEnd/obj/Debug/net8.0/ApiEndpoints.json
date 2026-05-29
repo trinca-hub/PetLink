@@ -1,84 +1,5 @@
 [
   {
-    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
-    "Method": "GetAll",
-    "RelativePath": "api/Servico",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
-    "Method": "Post",
-    "RelativePath": "api/Servico",
-    "HttpMethod": "POST",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "servicoDTO",
-        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ServicoDTO",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
-    "Method": "GetById",
-    "RelativePath": "api/Servico/{id}",
-    "HttpMethod": "GET",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
-    "Method": "Put",
-    "RelativePath": "api/Servico/{id}",
-    "HttpMethod": "PUT",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      },
-      {
-        "Name": "servicoDTO",
-        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ServicoDTO",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
-    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
-    "Method": "Delete",
-    "RelativePath": "api/Servico/{id}",
-    "HttpMethod": "DELETE",
-    "IsController": true,
-    "Order": 0,
-    "Parameters": [
-      {
-        "Name": "id",
-        "Type": "System.Int32",
-        "IsRequired": true
-      }
-    ],
-    "ReturnTypes": []
-  },
-  {
     "ContainingType": "PetLink_BackEnd.Controllers.AdministradorController",
     "Method": "GetAll",
     "RelativePath": "api/v1/Administrador",
@@ -153,6 +74,200 @@
         "Name": "id",
         "Type": "System.Int32",
         "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AdministradorController",
+    "Method": "Login",
+    "RelativePath": "api/v1/Administrador/Login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "login",
+        "Type": "PetLink_BackEnd.Objects.Contracts.Login",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AdministradorController",
+    "Method": "Me",
+    "RelativePath": "api/v1/Administrador/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AgendamentoController",
+    "Method": "Post",
+    "RelativePath": "api/v1/Agendamento",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.AgendamentoConsulta.CriarSolicitacaoConsultaDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AgendamentoController",
+    "Method": "GetById",
+    "RelativePath": "api/v1/Agendamento/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AgendamentoController",
+    "Method": "Cancelar",
+    "RelativePath": "api/v1/Agendamento/{id}/cancelar",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.AgendamentoConsulta.CancelarConsultaDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AgendamentoController",
+    "Method": "Confirmar",
+    "RelativePath": "api/v1/Agendamento/{id}/confirmar",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.AgendamentoConsulta.ConfirmarConsultaDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AgendamentoController",
+    "Method": "GetTutor",
+    "RelativePath": "api/v1/Agendamento/tutor",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AgendamentoController",
+    "Method": "GetVeterinario",
+    "RelativePath": "api/v1/Agendamento/veterinario",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AgendaVeterinarioController",
+    "Method": "Post",
+    "RelativePath": "api/v1/AgendaVeterinario",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.AgendaVeterinario.CriarAgendaDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AgendaVeterinarioController",
+    "Method": "Put",
+    "RelativePath": "api/v1/AgendaVeterinario/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.AgendaVeterinario.AtualizarAgendaDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AgendaVeterinarioController",
+    "Method": "GetByVeterinarioId",
+    "RelativePath": "api/v1/AgendaVeterinario/{veterinarioId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "veterinarioId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AgendaVeterinarioController",
+    "Method": "GetSlots",
+    "RelativePath": "api/v1/AgendaVeterinario/{veterinarioId}/slots",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "veterinarioId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dataInicio",
+        "Type": "System.Nullable\u00601[[System.DateTime, System.Private.CoreLib, Version=8.0.0.0, Culture=neutral, PublicKeyToken=7cec85d7bea7798e]]",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -280,6 +395,95 @@
   },
   {
     "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "PutAdmin",
+    "RelativePath": "api/v1/Anuncio/admin/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "anuncioDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.AnuncioDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "DeleteAdmin",
+    "RelativePath": "api/v1/Anuncio/admin/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "PutPayPetAdmin",
+    "RelativePath": "api/v1/Anuncio/admin/{id}/paypet",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.EditarPayPetDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "PutPetFinderAdmin",
+    "RelativePath": "api/v1/Anuncio/admin/{id}/petfinder",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.EditarPetFinderDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
+    "Method": "FeedAdmin",
+    "RelativePath": "api/v1/Anuncio/admin/feed",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
     "Method": "FeedPaypet",
     "RelativePath": "api/v1/Anuncio/feed/paypet",
     "HttpMethod": "GET",
@@ -302,6 +506,111 @@
     "ContainingType": "PetLink_BackEnd.Controllers.AnuncioController",
     "Method": "FeedPetinder",
     "RelativePath": "api/v1/Anuncio/feed/petinder",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.FuncionarioController",
+    "Method": "GetAll",
+    "RelativePath": "api/v1/Funcionario",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.FuncionarioController",
+    "Method": "Post",
+    "RelativePath": "api/v1/Funcionario",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "funcionarioDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.FuncionarioDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.FuncionarioController",
+    "Method": "GetById",
+    "RelativePath": "api/v1/Funcionario/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.FuncionarioController",
+    "Method": "Put",
+    "RelativePath": "api/v1/Funcionario/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "funcionarioDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.FuncionarioDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.FuncionarioController",
+    "Method": "Delete",
+    "RelativePath": "api/v1/Funcionario/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.FuncionarioController",
+    "Method": "Login",
+    "RelativePath": "api/v1/Funcionario/Login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "login",
+        "Type": "PetLink_BackEnd.Objects.Contracts.Login",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.FuncionarioController",
+    "Method": "Me",
+    "RelativePath": "api/v1/Funcionario/me",
     "HttpMethod": "GET",
     "IsController": true,
     "Order": 0,
@@ -381,6 +690,64 @@
     "Parameters": [
       {
         "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ItemPedidoController",
+    "Method": "GetAllAdmin",
+    "RelativePath": "api/v1/ItemPedido/admin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ItemPedidoController",
+    "Method": "PostAdmin",
+    "RelativePath": "api/v1/ItemPedido/admin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "itempedidoDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ItemPedidoDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ItemPedidoController",
+    "Method": "DeleteAdmin",
+    "RelativePath": "api/v1/ItemPedido/admin/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ItemPedidoController",
+    "Method": "GetByPedidoIdAdmin",
+    "RelativePath": "api/v1/ItemPedido/admin/pedido/{pedidoId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "pedidoId",
         "Type": "System.Int32",
         "IsRequired": true
       }
@@ -470,6 +837,48 @@
     "ContainingType": "PetLink_BackEnd.Controllers.PedidoController",
     "Method": "Delete",
     "RelativePath": "api/v1/Pedido/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.PedidoController",
+    "Method": "GetAllAdmin",
+    "RelativePath": "api/v1/Pedido/admin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.PedidoController",
+    "Method": "PostAdmin",
+    "RelativePath": "api/v1/Pedido/admin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.AdminCreatePedidoDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.PedidoController",
+    "Method": "CancelAdmin",
+    "RelativePath": "api/v1/Pedido/admin/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -579,6 +988,69 @@
   },
   {
     "ContainingType": "PetLink_BackEnd.Controllers.PetController",
+    "Method": "GetAllAdmin",
+    "RelativePath": "api/v1/Pet/admin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.PetController",
+    "Method": "PostAdmin",
+    "RelativePath": "api/v1/Pet/admin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "petDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.PetDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.PetController",
+    "Method": "PutAdmin",
+    "RelativePath": "api/v1/Pet/admin/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "petDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.PetDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.PetController",
+    "Method": "DeleteAdmin",
+    "RelativePath": "api/v1/Pet/admin/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.PetController",
     "Method": "GetMeusPets",
     "RelativePath": "api/v1/Pet/meus",
     "HttpMethod": "GET",
@@ -670,6 +1142,148 @@
     "ContainingType": "PetLink_BackEnd.Controllers.ProdutoController",
     "Method": "Delete",
     "RelativePath": "api/v1/Produto/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "GetAll",
+    "RelativePath": "api/v1/Servico",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "Post",
+    "RelativePath": "api/v1/Servico",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "servicoDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ServicoDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "GetById",
+    "RelativePath": "api/v1/Servico/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "Put",
+    "RelativePath": "api/v1/Servico/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "servicoDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ServicoDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "Delete",
+    "RelativePath": "api/v1/Servico/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "GetAllAdmin",
+    "RelativePath": "api/v1/Servico/admin",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "PostAdmin",
+    "RelativePath": "api/v1/Servico/admin",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "servicoDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ServicoDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "PutAdmin",
+    "RelativePath": "api/v1/Servico/admin/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "servicoDTO",
+        "Type": "PetLink_BackEnd.Objects.Dtos.Entities.ServicoDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.ServicoController",
+    "Method": "DeleteAdmin",
+    "RelativePath": "api/v1/Servico/admin/{id}",
     "HttpMethod": "DELETE",
     "IsController": true,
     "Order": 0,
@@ -864,6 +1478,32 @@
         "IsRequired": true
       }
     ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.VeterinarioController",
+    "Method": "Login",
+    "RelativePath": "api/v1/Veterinario/Login",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "login",
+        "Type": "PetLink_BackEnd.Objects.Contracts.Login",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "PetLink_BackEnd.Controllers.VeterinarioController",
+    "Method": "Me",
+    "RelativePath": "api/v1/Veterinario/me",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
     "ReturnTypes": []
   }
 ]
