@@ -1,10 +1,11 @@
 import { deleteUsuario, getUsuarios, Usuario } from "@/src/api/usuarioService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
+import ListControls, { SortState, TextFilter } from "@/components/ListControls";
 import { AuthContext } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
-import { useCallback, useContext, useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Alert, Modal, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export default function ListaUsuarios() {
@@ -14,6 +15,46 @@ export default function ListaUsuarios() {
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState>({ field: "", direction: "none" });
+  const [nomeFilter, setNomeFilter] = useState("");
+  const [cidadeFilter, setCidadeFilter] = useState("");
+
+  const filteredUsuarios = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedNome = nomeFilter.trim().toLowerCase();
+    const normalizedCidade = cidadeFilter.trim().toLowerCase();
+
+    const result = usuarios.filter((item) => {
+      const searchable = [item.nome, item.email, item.telefone, item.cidade, item.uf, item.rua, String(item.id)]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return (
+        (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+        (!normalizedNome || (item.nome || "").toLowerCase().includes(normalizedNome)) &&
+        (!normalizedCidade || (item.cidade || "").toLowerCase().includes(normalizedCidade))
+      );
+    });
+
+    if (sort.direction === "none") return result;
+
+    return [...result].sort((a, b) => {
+      const direction = sort.direction === "asc" ? 1 : -1;
+      if (sort.field === "id") return (a.id - b.id) * direction;
+      if (sort.field === "cidade") return (a.cidade || "").localeCompare(b.cidade || "") * direction;
+      return (a.nome || "").localeCompare(b.nome || "") * direction;
+    });
+  }, [usuarios, search, nomeFilter, cidadeFilter, sort]);
+
+  const textFilters = useMemo<TextFilter[]>(
+    () => [
+      { label: "Nome", value: nomeFilter, onChange: setNomeFilter, placeholder: "Pesquisar por nome do tutor" },
+      { label: "Cidade", value: cidadeFilter, onChange: setCidadeFilter, placeholder: "Pesquisar por cidade" },
+    ],
+    [nomeFilter, cidadeFilter]
+  );
 
   const loadUsuarios = useCallback(async () => {
     if (!token) return;
@@ -67,13 +108,29 @@ export default function ListaUsuarios() {
           </TouchableOpacity>
         </View>
 
+        <ListControls
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar por tutor, email, telefone..."
+          sort={sort}
+          onSortChange={setSort}
+          sortFields={[
+            { label: "Nome", value: "nome", type: "text" },
+            { label: "Cidade", value: "cidade", type: "text" },
+            { label: "ID", value: "id", type: "number" },
+          ]}
+          textFilters={textFilters}
+          resultCount={filteredUsuarios.length}
+          totalCount={usuarios.length}
+        />
+
         <View style={styles.listCard}>
           {loading ? (
             <Text style={styles.infoText}>Carregando usuários...</Text>
-          ) : usuarios.length === 0 ? (
+          ) : filteredUsuarios.length === 0 ? (
             <Text style={styles.infoText}>Nenhum usuário cadastrado.</Text>
           ) : (
-            usuarios.map((item) => (
+            filteredUsuarios.map((item) => (
               <View key={item.id} style={styles.itemCard}>
                 <View style={styles.itemMain}>
                   <Text style={styles.itemTitle}>{item.nome}</Text>

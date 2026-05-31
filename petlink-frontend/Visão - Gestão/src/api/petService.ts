@@ -10,7 +10,7 @@ export type Pet = {
   peso: number;
   castrado: boolean;
   foto?: string | null;
-  tipoPet: number;
+  tipoPet: number | string;
   usuarioId: number;
 };
 

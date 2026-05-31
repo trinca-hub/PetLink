@@ -27,4 +27,9 @@
     <Folder Include="Migrations\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Tools\SeedTestData\**\*.cs" />
+    <None Include="Tools\SeedTestData\**\*" Exclude="Tools\SeedTestData\**\bin\**;Tools\SeedTestData\**\obj\**" />
+  </ItemGroup>
+
 </Project>

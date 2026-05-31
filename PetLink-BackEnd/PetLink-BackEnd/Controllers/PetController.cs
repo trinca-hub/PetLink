@@ -18,6 +18,7 @@ public class PetController : Controller
     private readonly IPetService _petService;
     private readonly IUsuarioService _usuarioService;
     private readonly IAdministradorService _administradorService;
+    private readonly IFuncionarioService _funcionarioService;
     private readonly AppDbContext _context;
     private readonly Response _response;
 
@@ -25,11 +26,13 @@ public class PetController : Controller
         IPetService petService,
         IUsuarioService usuarioService,
         IAdministradorService administradorService,
+        IFuncionarioService funcionarioService,
         AppDbContext context)
     {
         _petService = petService;
         _usuarioService = usuarioService;
         _administradorService = administradorService;
+        _funcionarioService = funcionarioService;
         _context = context;
         _response = new Response();
     }
@@ -239,7 +242,7 @@ public class PetController : Controller
     [HttpGet("admin")]
     public async Task<IActionResult> GetAllAdmin()
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         return await GetAll();
@@ -248,7 +251,7 @@ public class PetController : Controller
     [HttpPost("admin")]
     public async Task<IActionResult> PostAdmin(PetDTO petDTO)
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         if (petDTO is null)
@@ -274,7 +277,7 @@ public class PetController : Controller
     [HttpPut("admin/{id}")]
     public async Task<IActionResult> PutAdmin(int id, PetDTO petDTO)
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         if (petDTO is null)
@@ -300,13 +303,13 @@ public class PetController : Controller
     [HttpDelete("admin/{id}")]
     public async Task<IActionResult> DeleteAdmin(int id)
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         return await Delete(id);
     }
 
-    private async Task<bool> IsAdminAuthenticated()
+    private async Task<bool> IsGestaoAuthenticated()
     {
         var email = User.Claims
             .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
@@ -316,6 +319,10 @@ public class PetController : Controller
             return false;
 
         var admin = await _administradorService.GetByEmail(email);
-        return admin is not null;
+        if (admin is not null)
+            return true;
+
+        var funcionario = await _funcionarioService.GetByEmail(email);
+        return funcionario is not null;
     }
 }

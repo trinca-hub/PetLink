@@ -43,6 +43,8 @@ namespace PetLink_BackEnd.Services.Entities
 
             // ✅ Atualiza SOMENTE os campos do DTO em cima do objeto existente
             _mapper.Map(entityDTO, existingEntity);
+            var idProperty = typeof(T).GetProperty("Id");
+            idProperty?.SetValue(existingEntity, id);
 
             // ✅ Salva o objeto existente (que ainda tem a senha intacta)
             await _repository.Update(existingEntity);

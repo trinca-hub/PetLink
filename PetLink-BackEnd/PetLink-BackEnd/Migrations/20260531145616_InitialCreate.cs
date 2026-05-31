@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class initialstfz : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -250,7 +250,7 @@ namespace PetLink_BackEnd.Migrations
                     datacriacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     dataconfirmacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     datacancelamento = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
-                    rowversion = table.Column<byte[]>(type: "bytea", rowVersion: true, nullable: false)
+                    rowversion = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {

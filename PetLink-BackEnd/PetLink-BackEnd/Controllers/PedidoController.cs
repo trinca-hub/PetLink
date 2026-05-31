@@ -18,16 +18,19 @@ public class PedidoController : Controller
 {
     private readonly IPedidoService _pedidoService;
     private readonly IAdministradorService _administradorService;
+    private readonly IFuncionarioService _funcionarioService;
     private readonly AppDbContext _context;
     private readonly Response _response;
 
     public PedidoController(
         IPedidoService pedidoService,
         IAdministradorService administradorService,
+        IFuncionarioService funcionarioService,
         AppDbContext context)
     {
         _pedidoService = pedidoService;
         _administradorService = administradorService;
+        _funcionarioService = funcionarioService;
         _context = context;
         _response = new Response();
     }
@@ -204,7 +207,7 @@ public class PedidoController : Controller
     [HttpGet("admin")]
     public async Task<IActionResult> GetAllAdmin()
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         return await GetAll();
@@ -213,7 +216,7 @@ public class PedidoController : Controller
     [HttpPost("admin")]
     public async Task<IActionResult> PostAdmin(AdminCreatePedidoDTO dto)
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         if (dto is null)
@@ -254,13 +257,21 @@ public class PedidoController : Controller
                 usuarioId = dto.UsuarioId.Value;
             }
 
-            var pedidoDTO = new PedidoDTO
+            int id;
+            if (dto.Itens is { Count: > 0 })
             {
-                UsuarioId = usuarioId,
-                DataPedido = dto.DataPedido ?? DateTime.UtcNow
-            };
+                id = await CreatePedidoWithItems(usuarioId, dto.DataPedido ?? DateTime.UtcNow, dto.Itens);
+            }
+            else
+            {
+                var pedidoDTO = new PedidoDTO
+                {
+                    UsuarioId = usuarioId,
+                    DataPedido = dto.DataPedido ?? DateTime.UtcNow
+                };
 
-            var id = await _pedidoService.CreateAndReturnId(pedidoDTO);
+                id = await _pedidoService.CreateAndReturnId(pedidoDTO);
+            }
 
             _response.Code = ResponseEnum.SUCCESS;
             _response.Data = new { id, usuarioId };
@@ -291,13 +302,13 @@ public class PedidoController : Controller
     [HttpDelete("admin/{id}")]
     public async Task<IActionResult> CancelAdmin(int id)
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         return await Delete(id);
     }
 
-    private async Task<bool> IsAdminAuthenticated()
+    private async Task<bool> IsGestaoAuthenticated()
     {
         var email = User.Claims
             .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
@@ -307,7 +318,11 @@ public class PedidoController : Controller
             return false;
 
         var admin = await _administradorService.GetByEmail(email);
-        return admin is not null;
+        if (admin is not null)
+            return true;
+
+        var funcionario = await _funcionarioService.GetByEmail(email);
+        return funcionario is not null;
     }
 
     private async Task<int> GetOrCreateAdminOperationalUserId()
@@ -343,5 +358,50 @@ public class PedidoController : Controller
         await _context.SaveChangesAsync();
 
         return usuario.Id;
+    }
+
+    private async Task<int> CreatePedidoWithItems(
+        int usuarioId,
+        DateTime dataPedido,
+        List<AdminCreatePedidoItemDTO> itens)
+    {
+        if (itens.Any(i => i.ProdutoId <= 0 || i.Quantidade <= 0))
+            throw new ArgumentException("ProdutoId e Quantidade devem ser válidos.");
+
+        await using var tx = await _context.Database.BeginTransactionAsync();
+
+        var pedido = new Pedido
+        {
+            UsuarioId = usuarioId,
+            DataPedido = DateTime.SpecifyKind(dataPedido, DateTimeKind.Utc)
+        };
+
+        _context.Pedidos.Add(pedido);
+        await _context.SaveChangesAsync();
+
+        foreach (var item in itens)
+        {
+            var linhasAfetadas = await _context.Database.ExecuteSqlInterpolatedAsync(
+                $@"UPDATE produto
+                   SET quantidade = quantidade - {item.Quantidade}
+                   WHERE id = {item.ProdutoId}
+                     AND quantidade >= {item.Quantidade}"
+            );
+
+            if (linhasAfetadas == 0)
+                throw new ArgumentException($"Estoque insuficiente para o produto {item.ProdutoId}.");
+
+            _context.ItemPedidos.Add(new ItemPedido
+            {
+                PedidoId = pedido.Id,
+                ProdutoId = item.ProdutoId,
+                Quantidade = item.Quantidade
+            });
+        }
+
+        await _context.SaveChangesAsync();
+        await tx.CommitAsync();
+
+        return pedido.Id;
     }
 }

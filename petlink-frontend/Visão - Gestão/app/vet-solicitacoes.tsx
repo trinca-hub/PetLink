@@ -9,6 +9,7 @@ import {
   getAgendamentosVeterinario,
 } from "@/src/api/agendamentoService";
 import { getUsuarios, Usuario } from "@/src/api/usuarioService";
+import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -73,6 +74,10 @@ export default function VetSolicitacoes() {
   const [openUsuarioSelect, setOpenUsuarioSelect] = useState(false);
   const [openPetSelect, setOpenPetSelect] = useState(false);
   const [statusFilter, setStatusFilter] = useState<StatusAgendamento | "Todos">("Todos");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState>({ field: "", direction: "none" });
+  const [tutorFilter, setTutorFilter] = useState("");
+  const [petFilter, setPetFilter] = useState("");
 
   const petById = useMemo(() => {
     const map: Record<number, Pet> = {};
@@ -111,9 +116,69 @@ export default function VetSolicitacoes() {
   );
 
   const filteredAgendamentos = useMemo(() => {
-    if (statusFilter === "Todos") return agendamentos;
-    return agendamentos.filter((item) => item.status === statusFilter);
-  }, [agendamentos, statusFilter]);
+    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedTutor = tutorFilter.trim().toLowerCase();
+    const normalizedPet = petFilter.trim().toLowerCase();
+
+    const result = agendamentos.filter((item) => {
+      const petNome = petById[item.petId]?.nome || "";
+      const tutorNome = usersById[item.usuarioId]?.nome || "";
+      const searchable = [
+        String(item.id),
+        petNome,
+        String(item.petId),
+        tutorNome,
+        String(item.usuarioId),
+        formatTipoServico(item.tipoServico),
+        item.status,
+        item.observacao,
+        item.dataHoraInicio,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return (
+        (statusFilter === "Todos" || item.status === statusFilter) &&
+        (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+        (!normalizedTutor || tutorNome.toLowerCase().includes(normalizedTutor) || String(item.usuarioId).includes(normalizedTutor)) &&
+        (!normalizedPet || petNome.toLowerCase().includes(normalizedPet) || String(item.petId).includes(normalizedPet))
+      );
+    });
+
+    if (sort.direction === "none") return result;
+
+    return [...result].sort((a, b) => {
+      const direction = sort.direction === "asc" ? 1 : -1;
+      if (sort.field === "id") return (a.id - b.id) * direction;
+      if (sort.field === "data") {
+        return ((new Date(a.dataHoraInicio || "").getTime() || 0) - (new Date(b.dataHoraInicio || "").getTime() || 0)) * direction;
+      }
+      if (sort.field === "status") return (a.status || "").localeCompare(b.status || "") * direction;
+      if (sort.field === "tutor") return (usersById[a.usuarioId]?.nome || "").localeCompare(usersById[b.usuarioId]?.nome || "") * direction;
+      return (petById[a.petId]?.nome || "").localeCompare(petById[b.petId]?.nome || "") * direction;
+    });
+  }, [agendamentos, statusFilter, search, tutorFilter, petFilter, sort, petById, usersById]);
+
+  const textFilters = useMemo<TextFilter[]>(
+    () => [
+      { label: "Tutor", value: tutorFilter, onChange: setTutorFilter, placeholder: "Pesquisar por tutor" },
+      { label: "Pet", value: petFilter, onChange: setPetFilter, placeholder: "Pesquisar por pet" },
+    ],
+    [tutorFilter, petFilter]
+  );
+
+  const filters = useMemo<FilterGroup[]>(
+    () => [
+      {
+        label: "Status",
+        value: statusFilter,
+        onChange: (value) => setStatusFilter(value as StatusAgendamento | "Todos"),
+        options: STATUS_FILTERS.map((status) => ({ label: status, value: status })),
+      },
+    ],
+    [statusFilter]
+  );
 
   const loadData = useCallback(async () => {
     if (!token) return;
@@ -286,6 +351,26 @@ export default function VetSolicitacoes() {
 
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Solicitações recentes</Text>
+          <ListControls
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Buscar por tutor, pet, status..."
+            sort={sort}
+            onSortChange={setSort}
+            sortFields={[
+              { label: "Data", value: "data", type: "date" },
+              { label: "Tutor", value: "tutor", type: "text" },
+              { label: "Pet", value: "pet", type: "text" },
+              { label: "Status", value: "status", type: "text" },
+              { label: "ID", value: "id", type: "number" },
+            ]}
+            textFilters={textFilters}
+            filters={filters}
+            resultCount={filteredAgendamentos.length}
+            totalCount={agendamentos.length}
+          />
+
+          {false && (
           <View style={styles.filterRow}>
             {STATUS_FILTERS.map((status) => {
               const active = statusFilter === status;
@@ -300,6 +385,7 @@ export default function VetSolicitacoes() {
               );
             })}
           </View>
+          )}
 
           {loading ? (
             <Text style={styles.infoText}>Carregando solicitações...</Text>

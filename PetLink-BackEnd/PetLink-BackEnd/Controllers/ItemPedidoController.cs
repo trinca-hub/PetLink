@@ -15,14 +15,17 @@ public class ItemPedidoController : Controller
 {
     private readonly IItemPedidoService _itempedidoService;
     private readonly IAdministradorService _administradorService;
+    private readonly IFuncionarioService _funcionarioService;
     private readonly Response _response;
 
     public ItemPedidoController(
         IItemPedidoService itempedidoService,
-        IAdministradorService administradorService)
+        IAdministradorService administradorService,
+        IFuncionarioService funcionarioService)
     {
         _itempedidoService = itempedidoService;
         _administradorService = administradorService;
+        _funcionarioService = funcionarioService;
         _response = new Response();
     }
 
@@ -199,7 +202,7 @@ public class ItemPedidoController : Controller
     [HttpGet("admin")]
     public async Task<IActionResult> GetAllAdmin()
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         return await GetAll();
@@ -208,7 +211,7 @@ public class ItemPedidoController : Controller
     [HttpGet("admin/pedido/{pedidoId}")]
     public async Task<IActionResult> GetByPedidoIdAdmin(int pedidoId)
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         return await GetByPedidoId(pedidoId);
@@ -217,7 +220,7 @@ public class ItemPedidoController : Controller
     [HttpPost("admin")]
     public async Task<IActionResult> PostAdmin(ItemPedidoDTO itempedidoDTO)
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         return await Post(itempedidoDTO);
@@ -226,13 +229,13 @@ public class ItemPedidoController : Controller
     [HttpDelete("admin/{id}")]
     public async Task<IActionResult> DeleteAdmin(int id)
     {
-        if (!await IsAdminAuthenticated())
+        if (!await IsGestaoAuthenticated())
             return Forbid();
 
         return await Delete(id);
     }
 
-    private async Task<bool> IsAdminAuthenticated()
+    private async Task<bool> IsGestaoAuthenticated()
     {
         var email = User.Claims
             .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
@@ -242,6 +245,10 @@ public class ItemPedidoController : Controller
             return false;
 
         var admin = await _administradorService.GetByEmail(email);
-        return admin is not null;
+        if (admin is not null)
+            return true;
+
+        var funcionario = await _funcionarioService.GetByEmail(email);
+        return funcionario is not null;
     }
 }

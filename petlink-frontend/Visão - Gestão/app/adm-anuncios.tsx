@@ -6,6 +6,7 @@ import {
   updateAdminAnuncioPaypet,
   updateAdminAnuncioPetfinder,
 } from "@/src/api/anuncioService";
+import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
@@ -84,6 +85,10 @@ export default function ListaAnuncios() {
   const [loading, setLoading] = useState(true);
   const [tipoFiltro, setTipoFiltro] = useState<TipoFiltro>("all");
   const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState>({ field: "", direction: "none" });
+  const [petFilter, setPetFilter] = useState("");
+  const [tutorFilter, setTutorFilter] = useState("");
+  const [cidadeFilter, setCidadeFilter] = useState("");
 
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [editing, setEditing] = useState<AdminAnuncio | null>(null);
@@ -121,11 +126,12 @@ export default function ListaAnuncios() {
 
   const anunciosFiltrados = useMemo(() => {
     const query = search.trim().toLowerCase();
+    const normalizedPet = petFilter.trim().toLowerCase();
+    const normalizedTutor = tutorFilter.trim().toLowerCase();
+    const normalizedCidade = cidadeFilter.trim().toLowerCase();
 
-    return anuncios.filter((item) => {
+    const result = anuncios.filter((item) => {
       if (tipoFiltro !== "all" && item.tipoAnuncio !== tipoFiltro) return false;
-
-      if (!query) return true;
 
       const target = [
         item.nomePet,
@@ -141,9 +147,54 @@ export default function ListaAnuncios() {
         .join(" ")
         .toLowerCase();
 
-      return target.includes(query);
+      return (
+        (!query || target.includes(query)) &&
+        (!normalizedPet || (item.nomePet || "").toLowerCase().includes(normalizedPet)) &&
+        (!normalizedTutor || (item.nomeUsuario || "").toLowerCase().includes(normalizedTutor)) &&
+        (!normalizedCidade || (item.cidade || "").toLowerCase().includes(normalizedCidade))
+      );
     });
-  }, [anuncios, tipoFiltro, search]);
+
+    if (sort.direction === "none") return result;
+
+    return [...result].sort((a, b) => {
+      const direction = sort.direction === "asc" ? 1 : -1;
+      if (sort.field === "id") return (a.anuncioId - b.anuncioId) * direction;
+      if (sort.field === "valor") return (Number(a.valor || 0) - Number(b.valor || 0)) * direction;
+      if (sort.field === "data") {
+        return ((new Date(a.dataCriacao).getTime() || 0) - (new Date(b.dataCriacao).getTime() || 0)) * direction;
+      }
+      if (sort.field === "tutor") return (a.nomeUsuario || "").localeCompare(b.nomeUsuario || "") * direction;
+      if (sort.field === "cidade") return (a.cidade || "").localeCompare(b.cidade || "") * direction;
+      return (a.nomePet || "").localeCompare(b.nomePet || "") * direction;
+    });
+  }, [anuncios, tipoFiltro, search, petFilter, tutorFilter, cidadeFilter, sort]);
+
+  const textFilters = useMemo<TextFilter[]>(
+    () => [
+      { label: "Pet", value: petFilter, onChange: setPetFilter, placeholder: "Pesquisar por pet" },
+      { label: "Tutor", value: tutorFilter, onChange: setTutorFilter, placeholder: "Pesquisar por tutor" },
+      { label: "Cidade", value: cidadeFilter, onChange: setCidadeFilter, placeholder: "Pesquisar por cidade" },
+    ],
+    [petFilter, tutorFilter, cidadeFilter]
+  );
+
+  const filters = useMemo<FilterGroup[]>(
+    () => [
+      {
+        label: "Tipo",
+        value: String(tipoFiltro),
+        onChange: (value) => setTipoFiltro(value === "all" ? "all" : Number(value) as TipoFiltro),
+        options: [
+          { label: "Todos", value: "all" },
+          { label: "PeTinder", value: "1" },
+          { label: "PetFinder", value: "2" },
+          { label: "PayPet", value: "3" },
+        ],
+      },
+    ],
+    [tipoFiltro]
+  );
 
   function openEditModal(item: AdminAnuncio) {
     setEditing(item);
@@ -289,6 +340,27 @@ export default function ListaAnuncios() {
           </TouchableOpacity>
         </View>
 
+        <ListControls
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar por pet, tutor, cidade ou descricao..."
+          sort={sort}
+          onSortChange={setSort}
+          sortFields={[
+            { label: "Pet", value: "pet", type: "text" },
+            { label: "Tutor", value: "tutor", type: "text" },
+            { label: "Cidade", value: "cidade", type: "text" },
+            { label: "Criacao", value: "data", type: "date" },
+            { label: "Valor", value: "valor", type: "number" },
+            { label: "ID", value: "id", type: "number" },
+          ]}
+          textFilters={textFilters}
+          filters={filters}
+          resultCount={anunciosFiltrados.length}
+          totalCount={anuncios.length}
+        />
+
+        {false && (
         <View style={styles.filterCard}>
           <TextInput
             style={styles.searchInput}
@@ -328,6 +400,8 @@ export default function ListaAnuncios() {
             </TouchableOpacity>
           </View>
         </View>
+
+        )}
 
         <View style={styles.listCard}>
           {loading ? (
