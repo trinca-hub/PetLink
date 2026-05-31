@@ -1,4 +1,5 @@
 import { AuthContext } from "@/src/context/AuthContext";
+import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -7,7 +8,7 @@ import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Alert, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { createAdminPedido, cancelAdminPedido, getAdminPedidos, Pedido } from "@/src/api/pedidoService";
-import { createAdminItemPedido, getAdminItensByPedido, ItemPedido } from "@/src/api/itemPedidoService";
+import { getAdminItensByPedido, ItemPedido } from "@/src/api/itemPedidoService";
 import { getUsuarios, Usuario } from "@/src/api/usuarioService";
 import { getProdutos, Produto } from "@/src/api/produtoService";
 import { parseIntInput } from "@/src/utils/numberUtils";
@@ -21,6 +22,13 @@ const INITIAL_ITEM: NewItem = {
   produtoId: "",
   quantidade: "1",
 };
+
+function formatMoney(value: number | undefined) {
+  return (value ?? 0).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  });
+}
 
 export default function AdmPedidos() {
   const router = useRouter();
@@ -41,6 +49,10 @@ export default function AdmPedidos() {
   const [formError, setFormError] = useState("");
   const [openUsuarioSelect, setOpenUsuarioSelect] = useState(false);
   const [openProdutoSelect, setOpenProdutoSelect] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState>({ field: "", direction: "none" });
+  const [usuarioTextFilter, setUsuarioTextFilter] = useState("");
+  const [itensFilter, setItensFilter] = useState("todos");
 
   const [confirmCancelId, setConfirmCancelId] = useState<number | null>(null);
 
@@ -75,7 +87,7 @@ export default function AdmPedidos() {
       produtos.map((produto) => ({
         value: String(produto.id),
         label: produto.nome,
-        subtitle: `ID ${produto.id} • Estoque ${produto.quantidade}`,
+        subtitle: `ID ${produto.id} • Estoque ${produto.quantidade} • ${formatMoney(produto.preco)}`,
       })),
     [produtos]
   );
@@ -88,6 +100,105 @@ export default function AdmPedidos() {
   const selectedProduto = useMemo(
     () => produtos.find((produto) => produto.id === parseIntInput(newItem.produtoId)),
     [produtos, newItem.produtoId]
+  );
+
+  const getLineTotal = useCallback(
+    (produtoId: number, quantidade: number) => (productById[produtoId]?.preco ?? 0) * quantidade,
+    [productById]
+  );
+
+  const pendingTotal = useMemo(
+    () => pendingItems.reduce((total, item) => total + getLineTotal(item.produtoId, item.quantidade), 0),
+    [pendingItems, getLineTotal]
+  );
+
+  const pendingQuantityByProduto = useMemo(() => {
+    const map: Record<number, number> = {};
+    pendingItems.forEach((item) => {
+      map[item.produtoId] = (map[item.produtoId] || 0) + item.quantidade;
+    });
+    return map;
+  }, [pendingItems]);
+
+  const canCreatePedido = pendingItems.length > 0 && !saving && (emNomeProprio || !!selectedUsuario);
+
+  function getPedidoTotal(itens: ItemPedido[]) {
+    return itens.reduce((total, item) => total + getLineTotal(item.produtoId, item.quantidade), 0);
+  }
+
+  const filteredPedidos = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    const normalizedUsuarioFilter = usuarioTextFilter.trim().toLowerCase();
+
+    const result = pedidos
+      .filter((pedido) => {
+        const usuario = usersById[pedido.usuarioId];
+        const itens = itensMap[pedido.id] || [];
+        const produtosPedido = itens.map((item) => productById[item.produtoId]?.nome || `Produto ${item.produtoId}`);
+        const searchable = [
+          `pedido ${pedido.id}`,
+          String(pedido.id),
+          usuario?.nome,
+          usuario?.email,
+          String(pedido.usuarioId),
+          ...produtosPedido,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return (
+          (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+          (!normalizedUsuarioFilter ||
+            (usuario?.nome || "").toLowerCase().includes(normalizedUsuarioFilter) ||
+            (usuario?.email || "").toLowerCase().includes(normalizedUsuarioFilter)) &&
+          (itensFilter === "todos" ||
+            (itensFilter === "com-itens" ? itens.length > 0 : itens.length === 0))
+        );
+      });
+
+    if (sort.direction === "none") return result;
+
+    return [...result].sort((a, b) => {
+      const direction = sort.direction === "asc" ? 1 : -1;
+      const itensA = itensMap[a.id] || [];
+      const itensB = itensMap[b.id] || [];
+
+      if (sort.field === "id") return (a.id - b.id) * direction;
+      if (sort.field === "total") return (getPedidoTotal(itensA) - getPedidoTotal(itensB)) * direction;
+      if (sort.field === "usuario") return (usersById[a.usuarioId]?.nome || "").localeCompare(usersById[b.usuarioId]?.nome || "") * direction;
+      if (sort.field === "data") return (new Date(a.dataPedido).getTime() - new Date(b.dataPedido).getTime()) * direction;
+      return 0;
+    });
+  }, [pedidos, usersById, itensMap, productById, search, usuarioTextFilter, itensFilter, sort]);
+
+  const pedidoTextFilters = useMemo<TextFilter[]>(
+    () => [
+      {
+        label: "Usuário",
+        value: usuarioTextFilter,
+        onChange: setUsuarioTextFilter,
+        placeholder: "Pesquisar por nome ou email do usuário",
+      },
+    ],
+    [usuarioTextFilter]
+  );
+
+  const pedidoFilters = useMemo<FilterGroup[]>(
+    () => [
+      {
+        label: "Itens",
+        value: itensFilter,
+        onChange: setItensFilter,
+        options: [
+          { label: "Todos", value: "todos" },
+          { label: "Com itens", value: "com-itens" },
+          { label: "Sem itens", value: "sem-itens" },
+        ],
+      },
+    ],
+    [itensFilter]
   );
 
   const loadData = useCallback(async () => {
@@ -157,8 +268,9 @@ export default function AdmPedidos() {
     setFormError("");
     const produtoId = parseIntInput(newItem.produtoId);
     const quantidade = parseIntInput(newItem.quantidade);
+    const produto = productById[produtoId];
 
-    if (Number.isNaN(produtoId) || produtoId <= 0 || !productById[produtoId]) {
+    if (Number.isNaN(produtoId) || produtoId <= 0 || !produto) {
       setFormError("Selecione um produto válido.");
       return;
     }
@@ -168,7 +280,20 @@ export default function AdmPedidos() {
       return;
     }
 
-    setPendingItems((prev) => [...prev, { produtoId, quantidade }]);
+    const quantidadeAtual = pendingQuantityByProduto[produtoId] || 0;
+    if (quantidadeAtual + quantidade > produto.quantidade) {
+      setFormError(`Estoque insuficiente. Disponível: ${produto.quantidade}. Já separado: ${quantidadeAtual}.`);
+      return;
+    }
+
+    setPendingItems((prev) => {
+      const existingIndex = prev.findIndex((item) => item.produtoId === produtoId);
+      if (existingIndex < 0) return [...prev, { produtoId, quantidade }];
+
+      return prev.map((item, index) =>
+        index === existingIndex ? { ...item, quantidade: item.quantidade + quantidade } : item
+      );
+    });
     setNewItem(INITIAL_ITEM);
   }
 
@@ -194,12 +319,20 @@ export default function AdmPedidos() {
       return;
     }
 
+    const stockError = pendingItems.find((item) => item.quantidade > (productById[item.produtoId]?.quantidade ?? 0));
+    if (stockError) {
+      const produto = productById[stockError.produtoId];
+      setFormError(`Estoque insuficiente para ${produto?.nome || `Produto ${stockError.produtoId}`}.`);
+      return;
+    }
+
     setSaving(true);
 
     const createResult = await createAdminPedido(
       {
         emNomeProprio,
         usuarioId: emNomeProprio ? undefined : parseIntInput(usuarioId),
+        itens: pendingItems,
       },
       token
     );
@@ -210,38 +343,13 @@ export default function AdmPedidos() {
       return;
     }
 
-    const pedidoId = createResult?.data?.data?.id;
-    if (!pedidoId) {
+    if (!createResult?.data?.data?.id) {
       setSaving(false);
       setFormError("Resposta inválida ao criar pedido.");
       return;
     }
 
-    const failures: string[] = [];
-
-    for (const item of pendingItems) {
-      const itemResult = await createAdminItemPedido(
-        {
-          pedidoId,
-          produtoId: item.produtoId,
-          quantidade: item.quantidade,
-        },
-        token
-      );
-
-      if (!itemResult.ok) {
-        failures.push(`Produto ${item.produtoId}: ${getApiErrorMessage(itemResult?.data, "falha ao incluir")}`);
-      }
-    }
-
     setSaving(false);
-
-    if (failures.length > 0) {
-      setFormError(`Pedido criado, mas houve falha em alguns itens:\n${failures.join("\n")}`);
-      await loadData();
-      return;
-    }
-
     closeModal();
     await loadData();
   }
@@ -280,29 +388,58 @@ export default function AdmPedidos() {
           </TouchableOpacity>
         </View>
 
-        <TouchableOpacity style={styles.primaryButton} onPress={openModal}>
-          <Ionicons name="add-circle-outline" size={18} color="#fff" />
-          <Text style={styles.primaryButtonText}>Novo pedido</Text>
-        </TouchableOpacity>
+        <View style={styles.toolbar}>
+          <TouchableOpacity style={styles.primaryButton} onPress={openModal}>
+            <Ionicons name="add-circle-outline" size={18} color="#fff" />
+            <Text style={styles.primaryButtonText}>Novo pedido</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.refreshButton} onPress={loadData} disabled={loading}>
+            <Ionicons name="refresh-outline" size={17} color="#dbe9ff" />
+          </TouchableOpacity>
+        </View>
+
+        <ListControls
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar por pedido, usuário, produto..."
+          sort={sort}
+          onSortChange={setSort}
+          sortFields={[
+            { label: "Data", value: "data", type: "date" },
+            { label: "Total", value: "total", type: "number" },
+            { label: "Usuário", value: "usuario", type: "text" },
+            { label: "ID", value: "id", type: "number" },
+          ]}
+          textFilters={pedidoTextFilters}
+          filters={pedidoFilters}
+          resultCount={filteredPedidos.length}
+          totalCount={pedidos.length}
+        />
 
         <View style={styles.listCard}>
           {loading ? (
             <Text style={styles.infoText}>Carregando pedidos...</Text>
-          ) : pedidos.length === 0 ? (
+          ) : filteredPedidos.length === 0 ? (
             <Text style={styles.infoText}>Nenhum pedido encontrado.</Text>
           ) : (
-            pedidos.map((pedido) => {
+            filteredPedidos.map((pedido) => {
               const usuario = usersById[pedido.usuarioId];
               const itens = itensMap[pedido.id] || [];
+              const totalPedido = getPedidoTotal(itens);
               return (
                 <View key={pedido.id} style={styles.itemCard}>
                   <View style={{ flex: 1, gap: 3 }}>
-                    <Text style={styles.itemTitle}>Pedido #{pedido.id}</Text>
+                    <View style={styles.itemHeader}>
+                      <Text style={styles.itemTitle}>Pedido #{pedido.id}</Text>
+                      <Text style={styles.totalBadge}>{formatMoney(totalPedido)}</Text>
+                    </View>
                     <Text style={styles.itemSubtitle}>Usuário: {usuario ? `${usuario.nome} (${usuario.id})` : pedido.usuarioId}</Text>
                     <Text style={styles.itemSubtitle}>Data: {new Date(pedido.dataPedido).toLocaleString("pt-BR")}</Text>
                     <Text style={styles.itemSubtitle}>Itens: {itens.length}</Text>
                     {itens.map((item) => (
-                      <Text key={item.id} style={styles.itemDetail}>• {productById[item.produtoId]?.nome || `Produto ${item.produtoId}`} x {item.quantidade}</Text>
+                      <Text key={item.id} style={styles.itemDetail}>
+                        • {productById[item.produtoId]?.nome || `Produto ${item.produtoId}`} x {item.quantidade} · {formatMoney(getLineTotal(item.produtoId, item.quantidade))}
+                      </Text>
                     ))}
                   </View>
 
@@ -321,7 +458,7 @@ export default function AdmPedidos() {
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>Novo pedido</Text>
 
-            <TouchableOpacity style={styles.toggleButton} onPress={() => setEmNomeProprio((v) => !v)}>
+            <TouchableOpacity style={styles.toggleButton} onPress={() => setEmNomeProprio((v) => !v)} disabled={saving}>
               <Text style={styles.toggleText}>Criar em nome próprio: {emNomeProprio ? "Sim" : "Não"}</Text>
             </TouchableOpacity>
 
@@ -337,6 +474,12 @@ export default function AdmPedidos() {
               <Text style={styles.selectLabel}>Produto</Text>
               <Text style={styles.selectValue}>{selectedProduto ? `${selectedProduto.nome} (${selectedProduto.id})` : "Selecionar produto"}</Text>
             </TouchableOpacity>
+            {selectedProduto && (
+              <View style={styles.productMetaRow}>
+                <Text style={styles.productMeta}>Estoque {selectedProduto.quantidade}</Text>
+                <Text style={styles.productMeta}>{formatMoney(selectedProduto.preco)}</Text>
+              </View>
+            )}
             <TextInput
               style={styles.input}
               placeholder="Quantidade"
@@ -345,16 +488,26 @@ export default function AdmPedidos() {
               value={newItem.quantidade}
               onChangeText={(v) => setNewItem((p) => ({ ...p, quantidade: v }))}
             />
-            <TouchableOpacity style={styles.secondaryButton} onPress={addPendingItem}>
-              <Text style={styles.secondaryButtonText}>Adicionar item à lista</Text>
+            <TouchableOpacity style={styles.secondaryButton} onPress={addPendingItem} disabled={saving}>
+              <Ionicons name="add-outline" size={16} color="#eaf2ff" />
+              <Text style={styles.secondaryButtonText}>Adicionar item</Text>
             </TouchableOpacity>
 
             {pendingItems.length > 0 && (
               <View style={styles.pendingBox}>
+                <View style={styles.pendingSummary}>
+                  <Text style={styles.sectionTitle}>Itens do pedido</Text>
+                  <Text style={styles.totalBadge}>{formatMoney(pendingTotal)}</Text>
+                </View>
                 {pendingItems.map((item, index) => (
                   <View key={`${item.produtoId}-${index}`} style={styles.pendingRow}>
-                    <Text style={styles.pendingText}>{productById[item.produtoId]?.nome || `Produto ${item.produtoId}`} x {item.quantidade}</Text>
-                    <TouchableOpacity onPress={() => removePendingItem(index)}>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.pendingText}>{productById[item.produtoId]?.nome || `Produto ${item.produtoId}`} x {item.quantidade}</Text>
+                      <Text style={styles.pendingSubtext}>
+                        Estoque {productById[item.produtoId]?.quantidade ?? 0} • {formatMoney(getLineTotal(item.produtoId, item.quantidade))}
+                      </Text>
+                    </View>
+                    <TouchableOpacity onPress={() => removePendingItem(index)} disabled={saving}>
                       <Ionicons name="close-circle-outline" size={18} color="#ffb0b0" />
                     </TouchableOpacity>
                   </View>
@@ -365,10 +518,14 @@ export default function AdmPedidos() {
             {!!formError && <Text style={styles.errorText}>{formError}</Text>}
 
             <View style={styles.modalActions}>
-              <TouchableOpacity style={styles.modalCancel} onPress={closeModal}>
+              <TouchableOpacity style={styles.modalCancel} onPress={closeModal} disabled={saving}>
                 <Text style={styles.modalCancelText}>Cancelar</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.modalSave} onPress={handleCreatePedido} disabled={saving}>
+              <TouchableOpacity
+                style={[styles.modalSave, !canCreatePedido && { opacity: 0.55 }]}
+                onPress={handleCreatePedido}
+                disabled={!canCreatePedido}
+              >
                 <Text style={styles.modalSaveText}>{saving ? "Salvando..." : "Criar pedido"}</Text>
               </TouchableOpacity>
             </View>
@@ -421,12 +578,16 @@ const styles = StyleSheet.create({
   subtitle: { color: "#b7c8e8", marginTop: 4, fontSize: 14, lineHeight: 20 },
   backButton: { flexDirection: "row", alignItems: "center", gap: 5, backgroundColor: "rgba(26, 72, 130, 0.6)", borderWidth: 1, borderColor: "rgba(138, 180, 248, 0.4)", borderRadius: 12, paddingVertical: 8, paddingHorizontal: 10 },
   backButtonText: { color: "#dbe9ff", fontWeight: "700", fontSize: 13 },
+  toolbar: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   primaryButton: { flexDirection: "row", alignItems: "center", gap: 6, backgroundColor: "#1d67e0", borderRadius: 12, paddingVertical: 10, paddingHorizontal: 14, alignSelf: "flex-start" },
   primaryButtonText: { color: "#fff", fontWeight: "700", fontSize: 13 },
+  refreshButton: { width: 38, height: 38, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(26, 72, 130, 0.6)", borderWidth: 1, borderColor: "rgba(138, 180, 248, 0.35)" },
   listCard: { borderWidth: 1, borderColor: "rgba(138,180,248,0.20)", backgroundColor: "rgba(13, 32, 53, 0.88)", borderRadius: 16, padding: 14, gap: 10 },
   infoText: { color: "#b7c8e8", fontSize: 14 },
   itemCard: { borderWidth: 1, borderColor: "rgba(138,180,248,0.20)", backgroundColor: "rgba(20, 56, 99, 0.55)", borderRadius: 12, padding: 12, flexDirection: "row", justifyContent: "space-between", gap: 10 },
+  itemHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   itemTitle: { color: "#f4f8ff", fontSize: 15, fontWeight: "700" },
+  totalBadge: { color: "#ecf7ff", fontSize: 12, fontWeight: "700", borderRadius: 10, overflow: "hidden", backgroundColor: "rgba(34, 125, 106, 0.42)", paddingHorizontal: 9, paddingVertical: 4 },
   itemSubtitle: { color: "#b7c8e8", fontSize: 12 },
   itemDetail: { color: "#9fc0f6", fontSize: 12 },
   iconAction: { width: 34, height: 34, borderRadius: 10, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(38, 92, 167, 0.45)", borderWidth: 1, borderColor: "rgba(138,180,248,0.25)" },
@@ -439,13 +600,17 @@ const styles = StyleSheet.create({
   selectButton: { borderWidth: 1, borderColor: "rgba(138,180,248,0.25)", borderRadius: 10, paddingHorizontal: 12, paddingVertical: 10, backgroundColor: "rgba(20, 56, 99, 0.45)", gap: 2 },
   selectLabel: { color: "#9fc0f6", fontSize: 11, fontWeight: "700" },
   selectValue: { color: "#eaf2ff", fontSize: 13 },
+  productMetaRow: { flexDirection: "row", gap: 8, alignItems: "center" },
+  productMeta: { color: "#b7c8e8", fontSize: 12, borderWidth: 1, borderColor: "rgba(138,180,248,0.20)", borderRadius: 9, paddingHorizontal: 8, paddingVertical: 4 },
   toggleButton: { borderRadius: 10, borderWidth: 1, borderColor: "rgba(138,180,248,0.35)", backgroundColor: "rgba(20, 56, 99, 0.35)", paddingVertical: 10, paddingHorizontal: 12 },
   toggleText: { color: "#dbe9ff", fontWeight: "700", fontSize: 12 },
-  secondaryButton: { borderRadius: 10, borderWidth: 1, borderColor: "rgba(138,180,248,0.35)", backgroundColor: "rgba(33, 87, 155, 0.45)", paddingVertical: 10, paddingHorizontal: 12, alignItems: "center" },
+  secondaryButton: { borderRadius: 10, borderWidth: 1, borderColor: "rgba(138,180,248,0.35)", backgroundColor: "rgba(33, 87, 155, 0.45)", paddingVertical: 10, paddingHorizontal: 12, alignItems: "center", justifyContent: "center", flexDirection: "row", gap: 6 },
   secondaryButtonText: { color: "#eaf2ff", fontWeight: "700", fontSize: 12 },
   pendingBox: { borderWidth: 1, borderColor: "rgba(138,180,248,0.22)", borderRadius: 10, padding: 8, gap: 6, backgroundColor: "rgba(20, 56, 99, 0.35)" },
+  pendingSummary: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 },
   pendingRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center" },
   pendingText: { color: "#cddcf5", fontSize: 12 },
+  pendingSubtext: { color: "#8fb1e0", fontSize: 11, marginTop: 2 },
   errorText: { color: "#ffb0b0", fontSize: 13, lineHeight: 18 },
   modalActions: { marginTop: 4, flexDirection: "row", justifyContent: "flex-end", gap: 10 },
   modalCancel: { borderRadius: 10, borderWidth: 1, borderColor: "rgba(138,180,248,0.35)", paddingVertical: 10, paddingHorizontal: 14, backgroundColor: "rgba(20, 56, 99, 0.35)" },

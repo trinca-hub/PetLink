@@ -12,7 +12,7 @@ namespace PetLink_BackEnd.Data.Builders
             modelBuilder.Entity<Produto>().Property(p => p.Preco).IsRequired();
             modelBuilder.Entity<Produto>().Property(p => p.Descricao).IsRequired().HasMaxLength(256);
             modelBuilder.Entity<Produto>().Property(p => p.Quantidade).IsRequired();
-            modelBuilder.Entity<Pet>().Property(p => p.Foto).HasColumnName("foto").HasMaxLength(1000).IsRequired(false);
+            modelBuilder.Entity<Produto>().Property(p => p.Foto).HasColumnName("foto").HasMaxLength(1000).IsRequired(false);
 
             modelBuilder.Entity<Produto>()
                 .HasData(new List<Produto>

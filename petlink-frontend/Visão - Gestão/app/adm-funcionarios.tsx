@@ -5,6 +5,7 @@ import {
   getFuncionarios,
   updateFuncionario,
 } from "@/src/api/funcionarioService";
+import ListControls, { SortState, TextFilter } from "@/components/ListControls";
 import { AuthContext } from "@/src/context/AuthContext";
 import { parseDecimalInput } from "@/src/utils/numberUtils";
 import { Ionicons } from "@expo/vector-icons";
@@ -69,8 +70,48 @@ export default function ListaFuncionarios() {
   const [form, setForm] = useState<FormState>(INITIAL_FORM);
   const [formError, setFormError] = useState("");
   const [deletingId, setDeletingId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState>({ field: "", direction: "none" });
+  const [nomeFilter, setNomeFilter] = useState("");
+  const [emailFilter, setEmailFilter] = useState("");
 
   const isEdit = useMemo(() => editId !== null, [editId]);
+
+  const filteredFuncionarios = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedNome = nomeFilter.trim().toLowerCase();
+    const normalizedEmail = emailFilter.trim().toLowerCase();
+
+    const result = funcionarios.filter((item) => {
+      const searchable = [item.nome, item.email, String(item.id), String(item.salario)]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return (
+        (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+        (!normalizedNome || (item.nome || "").toLowerCase().includes(normalizedNome)) &&
+        (!normalizedEmail || (item.email || "").toLowerCase().includes(normalizedEmail))
+      );
+    });
+
+    if (sort.direction === "none") return result;
+
+    return [...result].sort((a, b) => {
+      const direction = sort.direction === "asc" ? 1 : -1;
+      if (sort.field === "id") return (a.id - b.id) * direction;
+      if (sort.field === "salario") return (Number(a.salario || 0) - Number(b.salario || 0)) * direction;
+      return (a.nome || "").localeCompare(b.nome || "") * direction;
+    });
+  }, [funcionarios, search, nomeFilter, emailFilter, sort]);
+
+  const textFilters = useMemo<TextFilter[]>(
+    () => [
+      { label: "Nome", value: nomeFilter, onChange: setNomeFilter, placeholder: "Pesquisar por nome" },
+      { label: "Email", value: emailFilter, onChange: setEmailFilter, placeholder: "Pesquisar por email" },
+    ],
+    [nomeFilter, emailFilter]
+  );
 
   const loadFuncionarios = useCallback(async () => {
     if (!token) return;
@@ -229,13 +270,29 @@ export default function ListaFuncionarios() {
           </TouchableOpacity>
         </View>
 
+        <ListControls
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar por funcionário, email..."
+          sort={sort}
+          onSortChange={setSort}
+          sortFields={[
+            { label: "Nome", value: "nome", type: "text" },
+            { label: "Salário", value: "salario", type: "number" },
+            { label: "ID", value: "id", type: "number" },
+          ]}
+          textFilters={textFilters}
+          resultCount={filteredFuncionarios.length}
+          totalCount={funcionarios.length}
+        />
+
         <View style={styles.listCard}>
           {loading ? (
             <Text style={styles.infoText}>Carregando funcionários...</Text>
-          ) : funcionarios.length === 0 ? (
+          ) : filteredFuncionarios.length === 0 ? (
             <Text style={styles.infoText}>Nenhum funcionário cadastrado.</Text>
           ) : (
-            funcionarios.map((item) => (
+            filteredFuncionarios.map((item) => (
               <View key={item.id} style={styles.itemCard}>
                 <View style={styles.itemMain}>
                   <Text style={styles.itemTitle}>{item.nome}</Text>

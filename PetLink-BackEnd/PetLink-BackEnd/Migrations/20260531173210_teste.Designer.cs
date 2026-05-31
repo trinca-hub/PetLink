@@ -12,8 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260529171013_initial-stfz")]
-    partial class initialstfz
+    [Migration("20260531173210_teste")]
+    partial class teste
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -189,7 +189,6 @@ namespace PetLink_BackEnd.Migrations
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .IsRequired()
-                        .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("bytea")
                         .HasColumnName("rowversion");
 
@@ -667,7 +666,8 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnName("descricao");
 
                     b.Property<string>("Foto")
-                        .HasColumnType("text")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
                         .HasColumnName("foto");
 
                     b.Property<string>("Nome")

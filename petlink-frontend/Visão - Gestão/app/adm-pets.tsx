@@ -7,10 +7,11 @@ import {
   updateAdminPet,
 } from "@/src/api/petService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
+import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { AuthContext } from "@/src/context/AuthContext";
 import { getUsuarios, Usuario } from "@/src/api/usuarioService";
-import { validateImageUrl } from "@/src/utils/imageUrlUtils";
+import { isLikelyHttpUrl, validateImageUrl } from "@/src/utils/imageUrlUtils";
 import { parseDecimalInput, parseIntInput } from "@/src/utils/numberUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -56,6 +57,16 @@ const INITIAL_FORM: FormState = {
 
 type ImageStatus = "idle" | "loading" | "ok" | "error";
 
+function normalizeTipoPetValue(tipoPet: Pet["tipoPet"] | string | null | undefined) {
+  if (tipoPet === 1 || tipoPet === "1" || tipoPet === "GATO") return "1";
+  if (tipoPet === 2 || tipoPet === "2" || tipoPet === "CACHORRO") return "2";
+  return "1";
+}
+
+function getTipoPetLabel(tipoPet: Pet["tipoPet"] | string | null | undefined) {
+  return normalizeTipoPetValue(tipoPet) === "1" ? "Gato" : "Cachorro";
+}
+
 export default function AdmPets() {
   const router = useRouter();
   const { token } = useContext(AuthContext);
@@ -74,6 +85,13 @@ export default function AdmPets() {
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [openTutorSelect, setOpenTutorSelect] = useState(false);
   const [openTipoSelect, setOpenTipoSelect] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState>({ field: "", direction: "none" });
+  const [sexoFilter, setSexoFilter] = useState("todos");
+  const [tipoFilter, setTipoFilter] = useState("todos");
+  const [castradoFilter, setCastradoFilter] = useState("todos");
+  const [nomeFilter, setNomeFilter] = useState("");
+  const [tutorFilter, setTutorFilter] = useState("");
 
   const selectedUser = useMemo(
     () => usuarios.find((u) => u.id === parseIntInput(form.usuarioId)),
@@ -99,6 +117,106 @@ export default function AdmPets() {
     { value: "1", label: "Gato", subtitle: "TipoPet = 1" },
     { value: "2", label: "Cachorro", subtitle: "TipoPet = 2" },
   ];
+
+  const filteredPets = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    const normalizedNomeFilter = nomeFilter.trim().toLowerCase();
+    const normalizedTutorFilter = tutorFilter.trim().toLowerCase();
+
+    const result = pets
+      .filter((pet) => {
+        const tutor = usuarios.find((usuario) => usuario.id === pet.usuarioId);
+        const searchable = [
+          pet.nome,
+          pet.raca,
+          pet.sexo,
+          pet.rga,
+          pet.idade,
+          String(pet.usuarioId),
+          tutor?.nome,
+          getTipoPetLabel(pet.tipoPet),
+          pet.castrado ? "castrado" : "nao castrado",
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        const sexo = (pet.sexo || "").toLowerCase();
+        const tipo = normalizeTipoPetValue(pet.tipoPet);
+        const nome = (pet.nome || "").toLowerCase();
+        const tutorNome = (tutor?.nome || "").toLowerCase();
+
+        return (
+          (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+          (!normalizedNomeFilter || nome.includes(normalizedNomeFilter)) &&
+          (!normalizedTutorFilter || tutorNome.includes(normalizedTutorFilter)) &&
+          (sexoFilter === "todos" || sexo.includes(sexoFilter)) &&
+          (tipoFilter === "todos" || tipo === tipoFilter) &&
+          (castradoFilter === "todos" ||
+            (castradoFilter === "sim" ? pet.castrado : !pet.castrado))
+        );
+      });
+
+    if (sort.direction === "none") return result;
+
+    return [...result].sort((a, b) => {
+      const direction = sort.direction === "asc" ? 1 : -1;
+
+      if (sort.field === "id") return (a.id - b.id) * direction;
+      if (sort.field === "tutor") {
+        const tutorA = usuarios.find((usuario) => usuario.id === a.usuarioId)?.nome || "";
+        const tutorB = usuarios.find((usuario) => usuario.id === b.usuarioId)?.nome || "";
+        return tutorA.localeCompare(tutorB) * direction;
+      }
+      if (sort.field === "tipo") return getTipoPetLabel(a.tipoPet).localeCompare(getTipoPetLabel(b.tipoPet)) * direction;
+      return (a.nome || "").localeCompare(b.nome || "") * direction;
+    });
+  }, [pets, usuarios, search, nomeFilter, tutorFilter, sexoFilter, tipoFilter, castradoFilter, sort]);
+
+  const petTextFilters = useMemo<TextFilter[]>(
+    () => [
+      { label: "Nome", value: nomeFilter, onChange: setNomeFilter, placeholder: "Pesquisar por nome do pet" },
+      { label: "Tutor", value: tutorFilter, onChange: setTutorFilter, placeholder: "Pesquisar por nome do tutor" },
+    ],
+    [nomeFilter, tutorFilter]
+  );
+
+  const petFilters = useMemo<FilterGroup[]>(
+    () => [
+      {
+        label: "Sexo",
+        value: sexoFilter,
+        onChange: setSexoFilter,
+        options: [
+          { label: "Todos", value: "todos" },
+          { label: "Machos", value: "macho" },
+          { label: "Fêmeas", value: "fêmea" },
+        ],
+      },
+      {
+        label: "Tipo",
+        value: tipoFilter,
+        onChange: setTipoFilter,
+        options: [
+          { label: "Todos", value: "todos" },
+          { label: "Gatos", value: "1" },
+          { label: "Cachorros", value: "2" },
+        ],
+      },
+      {
+        label: "Castrado",
+        value: castradoFilter,
+        onChange: setCastradoFilter,
+        options: [
+          { label: "Todos", value: "todos" },
+          { label: "Sim", value: "sim" },
+          { label: "Não", value: "nao" },
+        ],
+      },
+    ],
+    [sexoFilter, tipoFilter, castradoFilter]
+  );
 
   const isEdit = editId !== null;
 
@@ -153,16 +271,12 @@ export default function AdmPets() {
       peso: String(pet.peso ?? ""),
       castrado: !!pet.castrado,
       foto: pet.foto || "",
-      tipoPet: String(pet.tipoPet ?? 1),
+      tipoPet: normalizeTipoPetValue(pet.tipoPet),
       usuarioId: String(pet.usuarioId ?? ""),
     });
     setFormError("");
-    setImageStatus("idle");
+    setImageStatus(pet.foto && isLikelyHttpUrl(pet.foto) ? "ok" : "idle");
     setOpenModal(true);
-
-    if (pet.foto) {
-      void validateImageUrl(pet.foto);
-    }
   }
 
   function closeModal() {
@@ -210,6 +324,11 @@ export default function AdmPets() {
       !form.usuarioId.trim()
     ) {
       setFormError("Preencha todos os atributos obrigatórios do pet.");
+      return;
+    }
+
+    if (form.rga.trim().length > 7) {
+      setFormError("RGA deve ter no máximo 7 caracteres.");
       return;
     }
 
@@ -311,13 +430,31 @@ export default function AdmPets() {
           <Text style={styles.primaryButtonText}>Novo pet</Text>
         </TouchableOpacity>
 
+        <ListControls
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar por nome, raça, sexo, tutor..."
+          sort={sort}
+          onSortChange={setSort}
+          sortFields={[
+            { label: "Nome", value: "nome", type: "text" },
+            { label: "ID", value: "id", type: "number" },
+            { label: "Tutor", value: "tutor", type: "text" },
+            { label: "Tipo", value: "tipo", type: "text" },
+          ]}
+          textFilters={petTextFilters}
+          filters={petFilters}
+          resultCount={filteredPets.length}
+          totalCount={pets.length}
+        />
+
         <View style={styles.listCard}>
           {loading ? (
             <Text style={styles.infoText}>Carregando pets...</Text>
-          ) : pets.length === 0 ? (
+          ) : filteredPets.length === 0 ? (
             <Text style={styles.infoText}>Nenhum pet encontrado.</Text>
           ) : (
-            pets.map((pet) => (
+            filteredPets.map((pet) => (
               <View key={pet.id} style={styles.itemCard}>
                 <View style={{ flexDirection: "row", gap: 12, flex: 1 }}>
                   {!!pet.foto ? (
@@ -332,7 +469,7 @@ export default function AdmPets() {
                     <Text style={styles.itemTitle}>{pet.nome}</Text>
                     <Text style={styles.itemSubtitle}>{pet.raca} • {pet.sexo} • {pet.idade}</Text>
                     <Text style={styles.itemSubtitle}>Tutor ID: {pet.usuarioId}</Text>
-                    <Text style={styles.itemSubtitle}>Peso: {pet.peso}kg • Tipo: {pet.tipoPet === 1 ? "Gato" : "Cachorro"}</Text>
+                    <Text style={styles.itemSubtitle}>Peso: {pet.peso}kg • Tipo: {getTipoPetLabel(pet.tipoPet)}</Text>
                     <Text style={styles.itemSubtitle}>Castrado: {pet.castrado ? "Sim" : "Não"}</Text>
                   </View>
                 </View>

@@ -1,4 +1,5 @@
 import { AuthContext } from "@/src/context/AuthContext";
+import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -46,6 +47,11 @@ export default function AdmServicos() {
   const [openTipoSelect, setOpenTipoSelect] = useState(false);
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState>({ field: "", direction: "none" });
+  const [descricaoFilter, setDescricaoFilter] = useState("");
+  const [petFilter, setPetFilter] = useState("");
+  const [tipoFilter, setTipoFilter] = useState("todos");
 
   const petById = useMemo(() => {
     const map: Record<number, Pet> = {};
@@ -79,6 +85,74 @@ export default function AdmServicos() {
   const selectedTipo = useMemo(
     () => tipoOptions.find((tipo) => tipo.value === form.tipo),
     [form.tipo]
+  );
+
+  const filteredServicos = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedDescricao = descricaoFilter.trim().toLowerCase();
+    const normalizedPet = petFilter.trim().toLowerCase();
+
+    const result = servicos.filter((servico) => {
+      const petNome = petById[servico.petId]?.nome || "";
+      const tipoLabel = servico.tipo === 1 ? "Consulta" : servico.tipo === 2 ? "Banho" : "Tosa";
+      const searchable = [
+        String(servico.id),
+        servico.descricao,
+        tipoLabel,
+        String(servico.valor),
+        petNome,
+        String(servico.petId),
+        servico.dataServico,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return (
+        (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+        (!normalizedDescricao || (servico.descricao || "").toLowerCase().includes(normalizedDescricao)) &&
+        (!normalizedPet || petNome.toLowerCase().includes(normalizedPet) || String(servico.petId).includes(normalizedPet)) &&
+        (tipoFilter === "todos" || String(servico.tipo) === tipoFilter)
+      );
+    });
+
+    if (sort.direction === "none") return result;
+
+    return [...result].sort((a, b) => {
+      const direction = sort.direction === "asc" ? 1 : -1;
+      if (sort.field === "id") return (a.id - b.id) * direction;
+      if (sort.field === "valor") return (Number(a.valor || 0) - Number(b.valor || 0)) * direction;
+      if (sort.field === "data") {
+        return ((new Date(a.dataServico).getTime() || 0) - (new Date(b.dataServico).getTime() || 0)) * direction;
+      }
+      if (sort.field === "pet") return (petById[a.petId]?.nome || "").localeCompare(petById[b.petId]?.nome || "") * direction;
+      return (a.descricao || "").localeCompare(b.descricao || "") * direction;
+    });
+  }, [servicos, petById, search, descricaoFilter, petFilter, tipoFilter, sort]);
+
+  const textFilters = useMemo<TextFilter[]>(
+    () => [
+      { label: "Descricao", value: descricaoFilter, onChange: setDescricaoFilter, placeholder: "Pesquisar por descricao" },
+      { label: "Pet", value: petFilter, onChange: setPetFilter, placeholder: "Pesquisar por pet" },
+    ],
+    [descricaoFilter, petFilter]
+  );
+
+  const filters = useMemo<FilterGroup[]>(
+    () => [
+      {
+        label: "Tipo",
+        value: tipoFilter,
+        onChange: setTipoFilter,
+        options: [
+          { label: "Todos", value: "todos" },
+          { label: "Consulta", value: "1" },
+          { label: "Banho", value: "2" },
+          { label: "Tosa", value: "3" },
+        ],
+      },
+    ],
+    [tipoFilter]
   );
 
   const loadData = useCallback(async () => {
@@ -237,13 +311,32 @@ export default function AdmServicos() {
           </TouchableOpacity>
         )}
 
+        <ListControls
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar por servico, pet, tipo..."
+          sort={sort}
+          onSortChange={setSort}
+          sortFields={[
+            { label: "Descricao", value: "descricao", type: "text" },
+            { label: "Pet", value: "pet", type: "text" },
+            { label: "Data", value: "data", type: "date" },
+            { label: "Valor", value: "valor", type: "number" },
+            { label: "ID", value: "id", type: "number" },
+          ]}
+          textFilters={textFilters}
+          filters={filters}
+          resultCount={filteredServicos.length}
+          totalCount={servicos.length}
+        />
+
         <View style={styles.listCard}>
           {loading ? (
             <Text style={styles.infoText}>Carregando serviços...</Text>
-          ) : servicos.length === 0 ? (
+          ) : filteredServicos.length === 0 ? (
             <Text style={styles.infoText}>Nenhum serviço encontrado.</Text>
           ) : (
-            servicos.map((servico) => (
+            filteredServicos.map((servico) => (
               <View key={servico.id} style={styles.itemCard}>
                 <View style={{ flex: 1, gap: 2 }}>
                   <Text style={styles.itemTitle}>Serviço #{servico.id}</Text>

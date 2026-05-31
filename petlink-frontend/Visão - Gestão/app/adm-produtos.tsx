@@ -6,8 +6,9 @@ import {
   updateProduto,
 } from "@/src/api/produtoService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
+import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
 import { AuthContext } from "@/src/context/AuthContext";
-import { validateImageUrl } from "@/src/utils/imageUrlUtils";
+import { isLikelyHttpUrl, validateImageUrl } from "@/src/utils/imageUrlUtils";
 import { parseDecimalInput, parseIntInput } from "@/src/utils/numberUtils";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -56,8 +57,86 @@ export default function ListaProdutos() {
   const [formError, setFormError] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [imageStatus, setImageStatus] = useState<ImageStatus>("idle");
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState>({ field: "", direction: "none" });
+  const [stockFilter, setStockFilter] = useState("todos");
+  const [priceFilter, setPriceFilter] = useState("todos");
+  const [nomeFilter, setNomeFilter] = useState("");
+  const [descricaoFilter, setDescricaoFilter] = useState("");
 
   const isEdit = useMemo(() => editId !== null, [editId]);
+
+  const filteredProdutos = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+
+    const normalizedNomeFilter = nomeFilter.trim().toLowerCase();
+    const normalizedDescricaoFilter = descricaoFilter.trim().toLowerCase();
+
+    const result = produtos
+      .filter((produto) => {
+        const preco = Number(produto.preco || 0);
+        const searchable = [produto.nome, produto.descricao, String(produto.id)]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return (
+          (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+          (!normalizedNomeFilter || (produto.nome || "").toLowerCase().includes(normalizedNomeFilter)) &&
+          (!normalizedDescricaoFilter || (produto.descricao || "").toLowerCase().includes(normalizedDescricaoFilter)) &&
+          (stockFilter === "todos" ||
+            (stockFilter === "disponivel" ? produto.quantidade > 0 : produto.quantidade === 0)) &&
+          (priceFilter === "todos" ||
+            (priceFilter === "ate-50" ? preco <= 50 : priceFilter === "50-100" ? preco > 50 && preco <= 100 : preco > 100))
+        );
+      });
+
+    if (sort.direction === "none") return result;
+
+    return [...result].sort((a, b) => {
+      const direction = sort.direction === "asc" ? 1 : -1;
+
+      if (sort.field === "id") return (a.id - b.id) * direction;
+      if (sort.field === "preco") return (Number(a.preco || 0) - Number(b.preco || 0)) * direction;
+      if (sort.field === "estoque") return (a.quantidade - b.quantidade) * direction;
+      return (a.nome || "").localeCompare(b.nome || "") * direction;
+    });
+  }, [produtos, search, nomeFilter, descricaoFilter, stockFilter, priceFilter, sort]);
+
+  const produtoTextFilters = useMemo<TextFilter[]>(
+    () => [
+      { label: "Nome", value: nomeFilter, onChange: setNomeFilter, placeholder: "Pesquisar por nome do produto" },
+      { label: "Descrição", value: descricaoFilter, onChange: setDescricaoFilter, placeholder: "Pesquisar por descrição" },
+    ],
+    [nomeFilter, descricaoFilter]
+  );
+
+  const produtoFilters = useMemo<FilterGroup[]>(
+    () => [
+      {
+        label: "Estoque",
+        value: stockFilter,
+        onChange: setStockFilter,
+        options: [
+          { label: "Todos", value: "todos" },
+          { label: "Disponível", value: "disponivel" },
+          { label: "Sem estoque", value: "sem-estoque" },
+        ],
+      },
+      {
+        label: "Preço",
+        value: priceFilter,
+        onChange: setPriceFilter,
+        options: [
+          { label: "Todos", value: "todos" },
+          { label: "Até R$ 50", value: "ate-50" },
+          { label: "R$ 50-100", value: "50-100" },
+          { label: "Acima R$ 100", value: "acima-100" },
+        ],
+      },
+    ],
+    [stockFilter, priceFilter]
+  );
 
   const loadProdutos = useCallback(async () => {
     if (!token) return;
@@ -99,12 +178,8 @@ export default function ListaProdutos() {
       quantidade: String(item.quantidade ?? ""),
       foto: item.foto || "",
     });
-    setImageStatus("idle");
+    setImageStatus(item.foto && isLikelyHttpUrl(item.foto) ? "ok" : "idle");
     setOpenModal(true);
-
-    if (item.foto) {
-      void handleValidateImageUrl(item.foto);
-    }
   }
 
   function closeModal() {
@@ -236,13 +311,31 @@ export default function ListaProdutos() {
           </TouchableOpacity>
         </View>
 
+        <ListControls
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar por produto, descrição..."
+          sort={sort}
+          onSortChange={setSort}
+          sortFields={[
+            { label: "Nome", value: "nome", type: "text" },
+            { label: "Preço", value: "preco", type: "number" },
+            { label: "Estoque", value: "estoque", type: "number" },
+            { label: "ID", value: "id", type: "number" },
+          ]}
+          textFilters={produtoTextFilters}
+          filters={produtoFilters}
+          resultCount={filteredProdutos.length}
+          totalCount={produtos.length}
+        />
+
         <View style={styles.listCard}>
           {loading ? (
             <Text style={styles.infoText}>Carregando produtos...</Text>
-          ) : produtos.length === 0 ? (
+          ) : filteredProdutos.length === 0 ? (
             <Text style={styles.infoText}>Nenhum produto cadastrado.</Text>
           ) : (
-            produtos.map((item) => (
+            filteredProdutos.map((item) => (
               <View key={item.id} style={styles.itemCard}>
                 <View style={styles.itemLeftWrap}>
                   {item.foto ? (

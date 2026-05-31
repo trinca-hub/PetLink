@@ -5,6 +5,7 @@ import {
   updateVeterinario,
   Veterinario,
 } from "@/src/api/veterinarioService";
+import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
@@ -55,8 +56,68 @@ export default function ListaVeterinarios() {
   const [formError, setFormError] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [openStatusSelect, setOpenStatusSelect] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState>({ field: "", direction: "none" });
+  const [nomeFilter, setNomeFilter] = useState("");
+  const [crmvFilter, setCrmvFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("todos");
 
   const isEdit = useMemo(() => editId !== null, [editId]);
+
+  const filteredVeterinarios = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedNome = nomeFilter.trim().toLowerCase();
+    const normalizedCrmv = crmvFilter.trim().toLowerCase();
+
+    const result = veterinarios.filter((item) => {
+      const searchable = [item.nome, item.email, item.crmv, String(item.id), String(item.salario)]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      const status = String(item.status ?? 1);
+
+      return (
+        (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+        (!normalizedNome || (item.nome || "").toLowerCase().includes(normalizedNome)) &&
+        (!normalizedCrmv || (item.crmv || "").toLowerCase().includes(normalizedCrmv)) &&
+        (statusFilter === "todos" || status === statusFilter)
+      );
+    });
+
+    if (sort.direction === "none") return result;
+
+    return [...result].sort((a, b) => {
+      const direction = sort.direction === "asc" ? 1 : -1;
+      if (sort.field === "id") return (a.id - b.id) * direction;
+      if (sort.field === "salario") return (Number(a.salario || 0) - Number(b.salario || 0)) * direction;
+      if (sort.field === "crmv") return (a.crmv || "").localeCompare(b.crmv || "") * direction;
+      return (a.nome || "").localeCompare(b.nome || "") * direction;
+    });
+  }, [veterinarios, search, nomeFilter, crmvFilter, statusFilter, sort]);
+
+  const textFilters = useMemo<TextFilter[]>(
+    () => [
+      { label: "Nome", value: nomeFilter, onChange: setNomeFilter, placeholder: "Pesquisar por nome" },
+      { label: "CRMV", value: crmvFilter, onChange: setCrmvFilter, placeholder: "Pesquisar por CRMV" },
+    ],
+    [nomeFilter, crmvFilter]
+  );
+
+  const filters = useMemo<FilterGroup[]>(
+    () => [
+      {
+        label: "Status",
+        value: statusFilter,
+        onChange: setStatusFilter,
+        options: [
+          { label: "Todos", value: "todos" },
+          { label: "Ativo", value: "1" },
+          { label: "Desativado", value: "2" },
+        ],
+      },
+    ],
+    [statusFilter]
+  );
 
   const statusOptions: SelectOption[] = [
     { value: "1", label: "Ativo", subtitle: "Status = 1" },
@@ -204,13 +265,31 @@ export default function ListaVeterinarios() {
           </TouchableOpacity>
         </View>
 
+        <ListControls
+          search={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Buscar por veterinario, e-mail, CRMV..."
+          sort={sort}
+          onSortChange={setSort}
+          sortFields={[
+            { label: "Nome", value: "nome", type: "text" },
+            { label: "CRMV", value: "crmv", type: "text" },
+            { label: "Salario", value: "salario", type: "number" },
+            { label: "ID", value: "id", type: "number" },
+          ]}
+          textFilters={textFilters}
+          filters={filters}
+          resultCount={filteredVeterinarios.length}
+          totalCount={veterinarios.length}
+        />
+
         <View style={styles.listCard}>
           {loading ? (
             <Text style={styles.infoText}>Carregando veterinários...</Text>
-          ) : veterinarios.length === 0 ? (
+          ) : filteredVeterinarios.length === 0 ? (
             <Text style={styles.infoText}>Nenhum veterinário cadastrado.</Text>
           ) : (
-            veterinarios.map((item) => (
+            filteredVeterinarios.map((item) => (
               <View key={item.id} style={styles.itemCard}>
                 <View style={styles.itemMain}>
                   <Text style={styles.itemTitle}>{item.nome}</Text>

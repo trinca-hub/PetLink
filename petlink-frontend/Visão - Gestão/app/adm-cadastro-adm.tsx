@@ -4,6 +4,7 @@ import {
   deleteAdministrador,
   getAdministradores,
 } from "@/src/api/administradorService";
+import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
@@ -47,6 +48,11 @@ export default function CadastroAdministrador() {
   const [formError, setFormError] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [openStatusSelect, setOpenStatusSelect] = useState(false);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState<SortState>({ field: "", direction: "none" });
+  const [nomeFilter, setNomeFilter] = useState("");
+  const [emailFilter, setEmailFilter] = useState("");
+  const [statusFilter, setStatusFilter] = useState("todos");
 
   const statusOptions: SelectOption[] = [
     { value: "1", label: "Ativo", subtitle: "Status = 1" },
@@ -56,6 +62,60 @@ export default function CadastroAdministrador() {
   const selectedStatus = useMemo(
     () => statusOptions.find((option) => option.value === form.status),
     [form.status]
+  );
+
+  const filteredAdministradores = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
+    const normalizedNome = nomeFilter.trim().toLowerCase();
+    const normalizedEmail = emailFilter.trim().toLowerCase();
+
+    const result = administradores.filter((item) => {
+      const searchable = [item.nome, item.email, String(item.id), String(item.status)]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      const status = String(item.status ?? 1);
+
+      return (
+        (!normalizedSearch || searchable.includes(normalizedSearch)) &&
+        (!normalizedNome || (item.nome || "").toLowerCase().includes(normalizedNome)) &&
+        (!normalizedEmail || (item.email || "").toLowerCase().includes(normalizedEmail)) &&
+        (statusFilter === "todos" || status === statusFilter)
+      );
+    });
+
+    if (sort.direction === "none") return result;
+
+    return [...result].sort((a, b) => {
+      const direction = sort.direction === "asc" ? 1 : -1;
+      if (sort.field === "id") return (a.id - b.id) * direction;
+      if (sort.field === "email") return (a.email || "").localeCompare(b.email || "") * direction;
+      return (a.nome || "").localeCompare(b.nome || "") * direction;
+    });
+  }, [administradores, search, nomeFilter, emailFilter, statusFilter, sort]);
+
+  const textFilters = useMemo<TextFilter[]>(
+    () => [
+      { label: "Nome", value: nomeFilter, onChange: setNomeFilter, placeholder: "Pesquisar por nome" },
+      { label: "E-mail", value: emailFilter, onChange: setEmailFilter, placeholder: "Pesquisar por e-mail" },
+    ],
+    [nomeFilter, emailFilter]
+  );
+
+  const filters = useMemo<FilterGroup[]>(
+    () => [
+      {
+        label: "Status",
+        value: statusFilter,
+        onChange: setStatusFilter,
+        options: [
+          { label: "Todos", value: "todos" },
+          { label: "Ativo", value: "1" },
+          { label: "Desativado", value: "2" },
+        ],
+      },
+    ],
+    [statusFilter]
   );
 
   const loadAdministradores = useCallback(async () => {
@@ -192,12 +252,29 @@ export default function CadastroAdministrador() {
         <View style={styles.listCard}>
           <Text style={styles.sectionTitle}>Administradores cadastrados</Text>
 
+          <ListControls
+            search={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Buscar por administrador, e-mail..."
+            sort={sort}
+            onSortChange={setSort}
+            sortFields={[
+              { label: "Nome", value: "nome", type: "text" },
+              { label: "E-mail", value: "email", type: "text" },
+              { label: "ID", value: "id", type: "number" },
+            ]}
+            textFilters={textFilters}
+            filters={filters}
+            resultCount={filteredAdministradores.length}
+            totalCount={administradores.length}
+          />
+
           {loading ? (
             <Text style={styles.infoText}>Carregando administradores...</Text>
-          ) : administradores.length === 0 ? (
+          ) : filteredAdministradores.length === 0 ? (
             <Text style={styles.infoText}>Nenhum administrador encontrado.</Text>
           ) : (
-            administradores.map((item) => (
+            filteredAdministradores.map((item) => (
               <View key={item.id} style={styles.itemCard}>
                 <View style={styles.itemMain}>
                   <Text style={styles.itemTitle}>{item.nome}</Text>
