@@ -20,7 +20,11 @@ namespace PetLink_BackEnd.Data.Builders
             modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.DataCriacao).IsRequired();
             modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.DataConfirmacao).IsRequired(false);
             modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.DataCancelamento).IsRequired(false);
-            modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.RowVersion).IsRowVersion();
+            modelBuilder.Entity<AgendamentoConsulta>()
+                .Property(a => a.RowVersion)
+                .IsRequired()
+                .IsConcurrencyToken()
+                .ValueGeneratedNever();
 
             modelBuilder.Entity<AgendamentoConsulta>()
                 .HasOne(a => a.Veterinario)

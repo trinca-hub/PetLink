@@ -13,7 +13,7 @@ export type ConfirmarAgendamentoPayload = {
 };
 
 export type CancelarAgendamentoPayload = {
-  motivoCancelamento?: string;
+  motivo?: string;
 };
 
 export function createAgendamento(payload: CreateAgendamentoPayload, token: string) {

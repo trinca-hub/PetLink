@@ -31,6 +31,10 @@ export function getAdminPets(token: string) {
   return api("Pet/admin", "GET", null, token);
 }
 
+export function getPetsByUsuario(usuarioId: number, token: string) {
+  return api(`Pet/usuario/${usuarioId}`, "GET", null, token);
+}
+
 export function createAdminPet(payload: PetPayload, token: string) {
   return api("Pet/admin", "POST", payload, token);
 }

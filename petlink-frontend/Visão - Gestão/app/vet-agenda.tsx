@@ -71,6 +71,34 @@ function formatSlot(slot: SlotDisponivel) {
   return `${date} • ${startTime} - ${endTime}`;
 }
 
+function pad2(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function toDateKey(value?: string | null) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function formatDateKey(key: string) {
+  const [year, month, day] = key.split("-").map((p) => Number(p));
+  if (!year || !month || !day) return key;
+  const d = new Date(year, month - 1, day);
+  if (Number.isNaN(d.getTime())) return key;
+  return d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" });
+}
+
+function formatSlotTime(slot: SlotDisponivel) {
+  const start = new Date(slot.dataHoraInicio);
+  const end = new Date(slot.dataHoraFim);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "Horário inválido";
+  const startTime = start.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const endTime = end.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return `${startTime} - ${endTime}`;
+}
+
 export default function VetAgenda() {
   const router = useRouter();
   const { token, user } = useContext(AuthContext);
@@ -78,6 +106,7 @@ export default function VetAgenda() {
   const [agenda, setAgenda] = useState<AgendaVeterinario | null>(null);
   const [selectedDays, setSelectedDays] = useState<DiaSemana[]>([]);
   const [slots, setSlots] = useState<SlotDisponivel[]>([]);
+  const [selectedDateKey, setSelectedDateKey] = useState<string>("");
   const [loadingAgenda, setLoadingAgenda] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [loadingSlots, setLoadingSlots] = useState(false);
@@ -87,6 +116,35 @@ export default function VetAgenda() {
   const vetId = Number(user?.id || 0);
 
   const selectedDaySet = useMemo(() => new Set(selectedDays), [selectedDays]);
+
+  const slotsByDate = useMemo(() => {
+    const map: Record<string, SlotDisponivel[]> = {};
+    slots.forEach((slot) => {
+      const key = toDateKey(slot.dataHoraInicio);
+      if (!key) return;
+      if (!map[key]) map[key] = [];
+      map[key].push(slot);
+    });
+
+    Object.values(map).forEach((list) => {
+      list.sort((a, b) => (a.dataHoraInicio || "").localeCompare(b.dataHoraInicio || ""));
+    });
+
+    return map;
+  }, [slots]);
+
+  const dateKeys = useMemo(() => Object.keys(slotsByDate).sort(), [slotsByDate]);
+
+  useEffect(() => {
+    if (dateKeys.length === 0) {
+      setSelectedDateKey("");
+      return;
+    }
+
+    if (!selectedDateKey || !slotsByDate[selectedDateKey]) {
+      setSelectedDateKey(dateKeys[0]);
+    }
+  }, [dateKeys, selectedDateKey, slotsByDate]);
 
   const loadAgenda = useCallback(async () => {
     if (!token || !vetId) {
@@ -254,16 +312,41 @@ export default function VetAgenda() {
             </TouchableOpacity>
           </View>
 
-          {slots.length === 0 ? (
+          {dateKeys.length === 0 ? (
             <Text style={styles.infoText}>Nenhum slot disponível no momento.</Text>
           ) : (
             <View style={styles.slotList}>
-              {slots.map((slot, index) => (
-                <View key={`${slot.dataHoraInicio}-${index}`} style={styles.slotItem}>
-                  <Ionicons name="calendar-outline" size={16} color="#d8e7ff" />
-                  <Text style={styles.slotText}>{formatSlot(slot)}</Text>
-                </View>
-              ))}
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={{ gap: 8, paddingBottom: 4 }}
+              >
+                {dateKeys.map((key) => {
+                  const active = selectedDateKey === key;
+                  return (
+                    <TouchableOpacity
+                      key={key}
+                      style={[styles.dateChip, active && styles.dateChipActive]}
+                      onPress={() => setSelectedDateKey(key)}
+                    >
+                      <Text style={[styles.dateText, active && styles.dateTextActive]}>
+                        {formatDateKey(key)}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </ScrollView>
+
+              <View style={{ gap: 8, maxHeight: 220 }}>
+                <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                  {(slotsByDate[selectedDateKey] || []).map((slot, index) => (
+                    <View key={`${slot.dataHoraInicio}-${index}`} style={styles.slotItem}>
+                      <Ionicons name="time-outline" size={16} color="#d8e7ff" />
+                      <Text style={styles.slotText}>{formatSlotTime(slot)}</Text>
+                    </View>
+                  ))}
+                </ScrollView>
+              </View>
             </View>
           )}
         </View>
@@ -361,4 +444,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(20, 56, 99, 0.55)",
   },
   slotText: { color: "#e7f0ff", fontSize: 13, fontWeight: "600" },
+  dateChip: {
+    borderWidth: 1,
+    borderColor: "rgba(138,180,248,0.3)",
+    borderRadius: 999,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+  },
+  dateChipActive: { backgroundColor: "#1d67e0", borderColor: "#1d67e0" },
+  dateText: { color: "#cfe1ff", fontSize: 12, fontWeight: "700" },
+  dateTextActive: { color: "#fff" },
 });

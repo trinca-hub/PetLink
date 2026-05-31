@@ -3,6 +3,7 @@ import {
   ActivityIndicator,
   Modal,
   Pressable,
+  ScrollView,
   Text,
   TextInput,
   View,
@@ -20,13 +21,18 @@ import {
 import { getAgendaSlots } from "@/src/api/agendaVeterinarioService";
 import { getMyPetsService } from "@/src/api/authService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
-import { AgendamentoConsulta, SlotDisponivel } from "@/src/types/agendamento";
+import { AgendamentoConsulta, SlotDisponivel, TIPO_SERVICO_LABEL } from "@/src/types/agendamento";
 
 function formatDateTime(value?: string | null) {
   if (!value) return "-";
   const d = new Date(value);
   if (Number.isNaN(d.getTime())) return "-";
   return d.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+function formatTipoServico(value?: number | null) {
+  if (!value) return "-";
+  return TIPO_SERVICO_LABEL[value] || `Tipo ${value}`;
 }
 
 function slotLabel(slot: SlotDisponivel) {
@@ -39,6 +45,34 @@ function slotLabel(slot: SlotDisponivel) {
   return `${date} • ${startTime} - ${endTime}`;
 }
 
+function pad2(value: number) {
+  return String(value).padStart(2, "0");
+}
+
+function toDateKey(value?: string | null) {
+  if (!value) return "";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "";
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
+
+function formatDateKey(key: string) {
+  const [year, month, day] = key.split("-").map((p) => Number(p));
+  if (!year || !month || !day) return key;
+  const d = new Date(year, month - 1, day);
+  if (Number.isNaN(d.getTime())) return key;
+  return d.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "short" });
+}
+
+function formatSlotTime(slot: SlotDisponivel) {
+  const start = new Date(slot.dataHoraInicio);
+  const end = new Date(slot.dataHoraFim);
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) return "Horário inválido";
+  const startTime = start.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  const endTime = end.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+  return `${startTime} - ${endTime}`;
+}
+
 export default function AgendamentoDetalheScreen() {
   const { token } = useContext(AuthContext);
   const params = useLocalSearchParams<{ id?: string }>();
@@ -49,10 +83,42 @@ export default function AgendamentoDetalheScreen() {
   const [agendamento, setAgendamento] = useState<AgendamentoConsulta | null>(null);
   const [slots, setSlots] = useState<SlotDisponivel[]>([]);
   const [selectedSlot, setSelectedSlot] = useState<string>("");
+  const [selectedDateKey, setSelectedDateKey] = useState<string>("");
   const [petMap, setPetMap] = useState<Record<number, string>>({});
   const [saving, setSaving] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+
+  const slotsByDate = useMemo(() => {
+    const map: Record<string, SlotDisponivel[]> = {};
+    slots.forEach((slot) => {
+      const key = toDateKey(slot.dataHoraInicio);
+      if (!key) return;
+      if (!map[key]) map[key] = [];
+      map[key].push(slot);
+    });
+
+    Object.values(map).forEach((list) => {
+      list.sort((a, b) => (a.dataHoraInicio || "").localeCompare(b.dataHoraInicio || ""));
+    });
+
+    return map;
+  }, [slots]);
+
+  const dateKeys = useMemo(() => Object.keys(slotsByDate).sort(), [slotsByDate]);
+
+  useEffect(() => {
+    if (dateKeys.length === 0) {
+      setSelectedDateKey("");
+      setSelectedSlot("");
+      return;
+    }
+
+    if (!selectedDateKey || !slotsByDate[selectedDateKey]) {
+      setSelectedDateKey(dateKeys[0]);
+      setSelectedSlot("");
+    }
+  }, [dateKeys, selectedDateKey, slotsByDate]);
 
   async function load() {
     if (!token) {
@@ -149,7 +215,7 @@ export default function AgendamentoDetalheScreen() {
     setSaving(true);
     setError(null);
 
-    const payload = cancelReason.trim() ? { motivoCancelamento: cancelReason.trim() } : null;
+    const payload = cancelReason.trim() ? { motivo: cancelReason.trim() } : null;
     const result = await cancelarAgendamento(agendamento.id, payload, token);
 
     setSaving(false);
@@ -182,49 +248,50 @@ export default function AgendamentoDetalheScreen() {
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
     >
-      <View
-        style={{
-          paddingTop: 14,
-          paddingHorizontal: 16,
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <Pressable
-          onPress={() => router.back()}
-          style={{ width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" }}
-        >
-          <Feather name="arrow-left" size={22} color="#fff" />
-        </Pressable>
-
-        <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800" }}>PetLink</Text>
-
-        <View style={{ width: 40, height: 40 }} />
-      </View>
-
-      <View style={{ paddingHorizontal: 16, marginTop: 6 }}>
-        <Text
+      <ScrollView contentContainerStyle={{ paddingBottom: 28 }}>
+        <View
           style={{
-            color: "#fff",
-            fontSize: 18,
-            fontWeight: "900",
-            textAlign: "center",
-            textDecorationLine: "underline",
-            textDecorationColor: "#fff",
+            paddingTop: 14,
+            paddingHorizontal: 16,
+            flexDirection: "row",
+            alignItems: "center",
+            justifyContent: "space-between",
           }}
         >
-          Consulta #{agendamento?.id ?? id}
-        </Text>
-      </View>
+          <Pressable
+            onPress={() => router.back()}
+            style={{ width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" }}
+          >
+            <Feather name="arrow-left" size={22} color="#fff" />
+          </Pressable>
 
-      {!!error && (
-        <View style={{ paddingHorizontal: 16, marginTop: 10 }}>
-          <Text style={{ color: "#ffb4b4", fontWeight: "800" }}>{error}</Text>
+          <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800" }}>PetLink</Text>
+
+          <View style={{ width: 40, height: 40 }} />
         </View>
-      )}
 
-      <View style={{ paddingHorizontal: 16, marginTop: 12, gap: 12 }}>
+        <View style={{ paddingHorizontal: 16, marginTop: 6 }}>
+          <Text
+            style={{
+              color: "#fff",
+              fontSize: 18,
+              fontWeight: "900",
+              textAlign: "center",
+              textDecorationLine: "underline",
+              textDecorationColor: "#fff",
+            }}
+          >
+            Consulta #{agendamento?.id ?? id}
+          </Text>
+        </View>
+
+        {!!error && (
+          <View style={{ paddingHorizontal: 16, marginTop: 10 }}>
+            <Text style={{ color: "#ffb4b4", fontWeight: "800" }}>{error}</Text>
+          </View>
+        )}
+
+        <View style={{ paddingHorizontal: 16, marginTop: 12, gap: 12 }}>
         <View
           style={{
             backgroundColor: "rgba(255,255,255,0.12)",
@@ -236,7 +303,9 @@ export default function AgendamentoDetalheScreen() {
         >
           <Text style={{ color: "#fff", fontWeight: "800" }}>Pet: {petMap[agendamento?.petId ?? 0] || `ID ${agendamento?.petId}`}</Text>
           <Text style={{ color: "#fff", fontWeight: "800" }}>Status: {agendamento?.status}</Text>
-          <Text style={{ color: "#fff", fontWeight: "800" }}>Tipo: {agendamento?.tipoServico}</Text>
+          <Text style={{ color: "#fff", fontWeight: "800" }}>
+            Tipo: {formatTipoServico(agendamento?.tipoServico)}
+          </Text>
           <Text style={{ color: "#fff", fontWeight: "800" }}>Horário: {formatDateTime(agendamento?.dataHoraInicio)}</Text>
           {agendamento?.observacao ? (
             <Text style={{ color: "#fff", fontWeight: "800" }}>Obs: {agendamento.observacao}</Text>
@@ -257,34 +326,70 @@ export default function AgendamentoDetalheScreen() {
             }}
           >
             <Text style={{ color: "#fff", fontWeight: "900" }}>Horários disponíveis</Text>
-            {slots.length === 0 ? (
+
+            {dateKeys.length === 0 ? (
               <Text style={{ color: "rgba(255,255,255,0.75)", fontWeight: "700" }}>
                 Nenhum horário disponível no momento.
               </Text>
             ) : (
-              <View style={{ gap: 8 }}>
-                {slots.map((slot) => {
-                  const value = slot.dataHoraInicio;
-                  const active = selectedSlot === value;
-                  return (
-                    <Pressable
-                      key={value}
-                      onPress={() => setSelectedSlot(value)}
-                      style={{
-                        paddingVertical: 10,
-                        paddingHorizontal: 12,
-                        borderRadius: 12,
-                        borderWidth: 1,
-                        borderColor: active ? "#fff" : "rgba(255,255,255,0.35)",
-                        backgroundColor: active ? "#fff" : "transparent",
-                      }}
-                    >
-                      <Text style={{ color: active ? "#0B0B0F" : "#fff", fontWeight: "800" }}>
-                        {slotLabel(slot)}
-                      </Text>
-                    </Pressable>
-                  );
-                })}
+              <View style={{ gap: 12 }}>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{ gap: 8, paddingBottom: 4 }}
+                >
+                  {dateKeys.map((key) => {
+                    const active = selectedDateKey === key;
+                    return (
+                      <Pressable
+                        key={key}
+                        onPress={() => {
+                          setSelectedDateKey(key);
+                          setSelectedSlot("");
+                        }}
+                        style={{
+                          paddingVertical: 8,
+                          paddingHorizontal: 12,
+                          borderRadius: 999,
+                          borderWidth: 1,
+                          borderColor: active ? "#fff" : "rgba(255,255,255,0.35)",
+                          backgroundColor: active ? "#fff" : "transparent",
+                        }}
+                      >
+                        <Text style={{ color: active ? "#0B0B0F" : "#fff", fontWeight: "800", fontSize: 12 }}>
+                          {formatDateKey(key)}
+                        </Text>
+                      </Pressable>
+                    );
+                  })}
+                </ScrollView>
+
+                <View style={{ gap: 8, maxHeight: 220 }}>
+                  <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 8 }}>
+                    {(slotsByDate[selectedDateKey] || []).map((slot, index) => {
+                      const value = slot.dataHoraInicio;
+                      const active = selectedSlot === value;
+                      return (
+                        <Pressable
+                          key={value || `slot-${index}`}
+                          onPress={() => setSelectedSlot(value)}
+                          style={{
+                            paddingVertical: 10,
+                            paddingHorizontal: 12,
+                            borderRadius: 12,
+                            borderWidth: 1,
+                            borderColor: active ? "#fff" : "rgba(255,255,255,0.35)",
+                            backgroundColor: active ? "#fff" : "transparent",
+                          }}
+                        >
+                          <Text style={{ color: active ? "#0B0B0F" : "#fff", fontWeight: "800" }}>
+                            {formatSlotTime(slot)}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </ScrollView>
+                </View>
               </View>
             )}
 
@@ -322,7 +427,8 @@ export default function AgendamentoDetalheScreen() {
             </Pressable>
           </View>
         )}
-      </View>
+        </View>
+      </ScrollView>
 
       <Modal transparent visible={cancelModalOpen} animationType="fade" onRequestClose={() => setCancelModalOpen(false)}>
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "center", padding: 18 }}>

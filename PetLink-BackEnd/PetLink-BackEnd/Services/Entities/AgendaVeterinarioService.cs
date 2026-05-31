@@ -79,11 +79,11 @@ namespace PetLink_BackEnd.Services.Entities
             return _mapper.Map<AgendaDTO>(agenda);
         }
 
-        public async Task<IEnumerable<DateTime>> GerarSlotsDisponiveis(int veterinarioId, DateTime? dataInicio)
+        public async Task<IEnumerable<SlotDisponivelDTO>> GerarSlotsDisponiveis(int veterinarioId, DateTime? dataInicio)
         {
             var agenda = await _agendaRepository.GetByVeterinarioId(veterinarioId);
             if (agenda == null)
-                return Enumerable.Empty<DateTime>();
+            return Enumerable.Empty<SlotDisponivelDTO>();
 
             var inicio = dataInicio?.Date ?? DateTime.UtcNow.Date;
             if (inicio < DateTime.UtcNow.Date)
@@ -108,14 +108,18 @@ namespace PetLink_BackEnd.Services.Entities
                 AddSlotsPeriodo(slots, inicioTarde, fimTarde, duracao);
             }
 
-            return slots;
+            return slots.Select(s => new SlotDisponivelDTO
+            {
+                DataHoraInicio = s,
+                DataHoraFim = s.Add(duracao)
+            });
         }
 
-        public async Task<IEnumerable<DateTime>> GerarSlotsDisponiveisTutor(int veterinarioId, DateTime? dataInicio)
+        public async Task<IEnumerable<SlotDisponivelDTO>> GerarSlotsDisponiveisTutor(int veterinarioId, DateTime? dataInicio)
         {
             var agenda = await _agendaRepository.GetByVeterinarioId(veterinarioId);
             if (agenda == null)
-                return Enumerable.Empty<DateTime>();
+                return Enumerable.Empty<SlotDisponivelDTO>();
 
             var inicio = dataInicio?.Date ?? DateTime.UtcNow.Date;
             if (inicio < DateTime.UtcNow.Date)
@@ -127,7 +131,7 @@ namespace PetLink_BackEnd.Services.Entities
             var ocupados = new HashSet<DateTime>(confirmados.Where(c => c.DataHoraInicio.HasValue)
                 .Select(c => c.DataHoraInicio!.Value));
 
-            return slots.Where(s => !ocupados.Contains(s));
+            return slots.Where(s => !ocupados.Contains(s.DataHoraInicio));
         }
 
         private static void AddSlotsPeriodo(List<DateTime> slots, DateTime inicio, DateTime fim, TimeSpan duracao)

@@ -7,7 +7,7 @@ namespace PetLink_BackEnd.Services.Interfaces
         Task<AgendaDTO> CriarAgenda(CriarAgendaDTO dto, int? veterinarioId);
         Task<AgendaDTO> AtualizarAgenda(int id, AtualizarAgendaDTO dto, int? veterinarioId);
         Task<AgendaDTO> BuscarAgendaVeterinario(int veterinarioId);
-        Task<IEnumerable<DateTime>> GerarSlotsDisponiveis(int veterinarioId, DateTime? dataInicio);
-        Task<IEnumerable<DateTime>> GerarSlotsDisponiveisTutor(int veterinarioId, DateTime? dataInicio);
+        Task<IEnumerable<SlotDisponivelDTO>> GerarSlotsDisponiveis(int veterinarioId, DateTime? dataInicio);
+        Task<IEnumerable<SlotDisponivelDTO>> GerarSlotsDisponiveisTutor(int veterinarioId, DateTime? dataInicio);
     }
 }
