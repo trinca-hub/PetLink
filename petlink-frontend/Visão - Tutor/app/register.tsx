@@ -6,7 +6,6 @@ import {
   ImageBackground,
   TouchableOpacity,
   StyleSheet,
-  ScrollView,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
@@ -15,7 +14,7 @@ import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-
+import { TutorPalette } from "@/constants/theme";
 
 export default function Register() {
   const router = useRouter();
@@ -51,11 +50,7 @@ export default function Register() {
       senha: form.senha,
     };
 
-    console.log("➡️ Payload enviado:", payload);
-
     const result = await registerService(payload);
-
-    console.log("➡️ Resposta da API:", result);
 
     if (result.ok) {
       alert("Conta criada!");
@@ -71,32 +66,28 @@ export default function Register() {
       style={styles.background}
       resizeMode="cover"
     >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
-      >
+      <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <LinearGradient
-          colors={["rgba(0,0,0,0.6)", "#0a58ca"]}
+          colors={["rgba(7, 21, 43, 0.84)", "rgba(15, 33, 60, 0.94)", "rgba(47, 124, 246, 0.92)"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.card}
         >
-     <KeyboardAwareScrollView
-  extraScrollHeight={200}
-  keyboardOpeningTime={0}
-  enableOnAndroid={true}
-  showsVerticalScrollIndicator={false}
->
+          <KeyboardAwareScrollView
+            extraScrollHeight={220}
+            keyboardOpeningTime={0}
+            enableOnAndroid={true}
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.header}>
+              <View style={styles.badge}>
+                <Ionicons name="sparkles" size={18} color={TutorPalette.accent} />
+              </View>
+              <Text style={styles.title}>Criar conta</Text>
+              <Text style={styles.subtitle}>Personalize seu perfil e comece a usar o PetLink.</Text>
+            </View>
 
-
-            <Text style={styles.title}>Cadastro</Text>
-
-            <Ionicons
-              name="person-add-outline"
-              size={80}
-              color="#fff"
-              style={{ alignSelf: "center", marginBottom: 20 }}
-            />
+            <Ionicons name="person-add-outline" size={84} color="#fff" style={{ alignSelf: "center", marginBottom: 18 }} />
 
             {Object.keys(form).map((key) => (
               <View key={key} style={styles.inputGroup}>
@@ -106,7 +97,7 @@ export default function Register() {
                   onChangeText={(v) => handleChange(key, v)}
                   style={styles.input}
                   placeholder={`Digite ${key}`}
-                  placeholderTextColor="#ccc"
+                  placeholderTextColor="#9EB1C8"
                 />
               </View>
             ))}
@@ -116,13 +107,7 @@ export default function Register() {
             </TouchableOpacity>
 
             <Text style={styles.footerText}>
-              Já tem conta?{" "}
-              <Text
-                style={styles.link}
-                onPress={() => router.push("/login")}
-              >
-                Entrar
-              </Text>
+              Já tem conta? <Text style={styles.link} onPress={() => router.push("/login")}>Entrar</Text>
             </Text>
           </KeyboardAwareScrollView>
         </LinearGradient>
@@ -134,21 +119,40 @@ export default function Register() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    paddingHorizontal: 25,
+    paddingHorizontal: 24,
     justifyContent: "center",
   },
   card: {
     flex: 1,
-    borderRadius: 20,
-    padding: 25,
-    marginVertical: 40,
+    borderRadius: 24,
+    padding: 24,
+    marginVertical: 36,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.16)",
+  },
+  header: {
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  badge: {
+    width: 44,
+    height: 44,
+    borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.14)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
   },
   title: {
-    fontSize: 32,
+    fontSize: 28,
     color: "#fff",
-    fontWeight: "bold",
-    alignSelf: "center",
-    marginBottom: 10,
+    fontWeight: "800",
+    marginBottom: 4,
+  },
+  subtitle: {
+    color: "rgba(255,255,255,0.8)",
+    fontSize: 13,
+    textAlign: "center",
   },
   inputGroup: {
     width: "100%",
@@ -156,36 +160,43 @@ const styles = StyleSheet.create({
   },
   label: {
     color: "#fff",
-    marginBottom: 4,
-    fontSize: 14,
+    marginBottom: 6,
+    fontSize: 13,
+    fontWeight: "700",
   },
   input: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    height: 40,
+    backgroundColor: "rgba(245,247,255,0.95)",
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    height: 46,
+    color: TutorPalette.background,
   },
   button: {
     width: "100%",
-    backgroundColor: "#0d6efd",
-    borderRadius: 20,
-    paddingVertical: 12,
-    marginTop: 15,
+    backgroundColor: TutorPalette.primary,
+    borderRadius: 16,
+    paddingVertical: 13,
+    marginTop: 12,
+    shadowColor: TutorPalette.shadow,
+    shadowOpacity: 0.24,
+    shadowRadius: 10,
+    shadowOffset: { width: 0, height: 6 },
   },
   buttonText: {
     color: "#fff",
     textAlign: "center",
-    fontSize: 18,
-    fontWeight: "bold",
+    fontSize: 16,
+    fontWeight: "800",
   },
   footerText: {
     color: "#fff",
-    marginTop: 18,
+    marginTop: 16,
     alignSelf: "center",
+    fontSize: 13,
   },
   link: {
-    color: "#dceaff",
-    fontWeight: "bold",
+    color: "#DDEBFF",
+    fontWeight: "800",
     textDecorationLine: "underline",
   },
 });

@@ -18,6 +18,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "@/src/context/AuthContext";
 import { getFeedPetfinder } from "@/src/api/anuncioService";
 import { useSideMenu } from "@/src/context/SideMenuContext";
+import { TutorPalette } from "@/constants/theme";
 
 type PetfinderFeedDTO = {
   anuncioId: number;
@@ -229,12 +230,7 @@ export default function Petfinder() {
   }
 
   return (
-    <LinearGradient
-      colors={["#0B0B0F", "#0E2B5A"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <LinearGradient colors={[TutorPalette.background, TutorPalette.backgroundSecondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
       {/* Header (igual Petinder) */}
       <View
         style={{
@@ -248,11 +244,12 @@ export default function Petfinder() {
         <Pressable
           onPress={openMenu}
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
+            width: 42,
+            height: 42,
+            borderRadius: 14,
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: "rgba(255,255,255,0.10)",
           }}
         >
           <Feather name="menu" size={22} color="#fff" />
@@ -265,8 +262,8 @@ export default function Petfinder() {
         <Pressable
           onPress={() => router.push("/perfil")}
           style={{
-            width: 40,
-            height: 40,
+            width: 42,
+            height: 42,
             borderRadius: 999,
             backgroundColor: "rgba(255,255,255,0.12)",
             alignItems: "center",
@@ -278,26 +275,18 @@ export default function Petfinder() {
       </View>
 
       {/* Title */}
-      <View style={{ paddingHorizontal: 16, marginTop: 6 }}>
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 18,
-            fontWeight: "900",
-            textAlign: "center",
-            textDecorationLine: "underline",
-            textDecorationColor: "#fff",
-          }}
-        >
-          PetFinder
-        </Text>
+      <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
+        <View style={{ backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 20, padding: 14, borderWidth: 1, borderColor: TutorPalette.border }}>
+          <Text style={{ color: TutorPalette.text, fontSize: 18, fontWeight: "900" }}>PetFinder</Text>
+          <Text style={{ color: TutorPalette.muted, fontSize: 13, marginTop: 4 }}>Busca inteligente de pets desaparecidos, com leitura visual mais clara.</Text>
+        </View>
       </View>
 
       {/* Search + filtros */}
       <View style={{ paddingHorizontal: 16, marginTop: 12 }}>
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: "rgba(245,247,255,0.96)",
             borderRadius: 999,
             paddingHorizontal: 12,
             paddingVertical: 10,
@@ -306,13 +295,13 @@ export default function Petfinder() {
             gap: 8,
           }}
         >
-          <Ionicons name="search" size={18} color="#0E2B5A" />
+          <Ionicons name="search" size={18} color={TutorPalette.primary} />
           <TextInput
             value={search}
             onChangeText={setSearch}
             placeholder="Pesquisar"
             placeholderTextColor="#8E8E93"
-            style={{ flex: 1, color: "#111", fontWeight: "700" }}
+            style={{ flex: 1, color: TutorPalette.background, fontWeight: "700" }}
           />
         </View>
 
@@ -403,13 +392,16 @@ export default function Petfinder() {
             <Pressable
               onPress={() => router.push(`/anuncios/${item.anuncioId}`)}
               style={{
-                backgroundColor: "#fff",
+                backgroundColor: "rgba(15,29,58,0.92)",
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.10)",
                 borderRadius: 22,
                 padding: 14,
                 marginBottom: 14,
-                shadowOpacity: 0.12,
-                shadowRadius: 10,
-                shadowOffset: { width: 0, height: 6 },
+                shadowColor: TutorPalette.shadow,
+                shadowOpacity: 0.16,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 8 },
                 elevation: 4,
               }}
             >
@@ -451,7 +443,7 @@ export default function Petfinder() {
                     style={{
                       fontSize: 18,
                       fontWeight: "900",
-                      color: "#111",
+                      color: "#fff",
                       textAlign: "center",
                     }}
                   >
@@ -468,20 +460,20 @@ export default function Petfinder() {
                             : "dog"
                         }
                         size={16}
-                        color="#0E2B5A"
+                        color={TutorPalette.primary}
                       />
-                      <Text style={{ color: "#222", fontWeight: "800" }}>
+                      <Text style={{ color: "#e6ecff", fontWeight: "800" }}>
                         {item.racaPet || "R.N.D"}
                       </Text>
                     </View>
 
                     <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                      <Ionicons name="location" size={16} color="#0E2B5A" />
+                      <Ionicons name="location" size={16} color={TutorPalette.primary} />
                       <Text
                         numberOfLines={2}
                         ellipsizeMode="tail"
                         style={{
-                          color: "#222",
+                          color: "#e6ecff",
                           fontWeight: "800",
                           flex: 1,          // ocupa o espaço disponível sem estourar
                           paddingRight: 12, // ✅ “margem” no fim do card
@@ -497,8 +489,8 @@ export default function Petfinder() {
                   <View style={{ gap: 6 }}>
                     {!!item.idadePet && (
                       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                        <Ionicons name="calendar" size={16} color="#0E2B5A" />
-                        <Text style={{ color: "#222", fontWeight: "800" }}>
+                        <Ionicons name="calendar" size={16} color={TutorPalette.primary} />
+                        <Text style={{ color: "#e6ecff", fontWeight: "800" }}>
                           {item.idadePet}
                         </Text>
                       </View>
@@ -506,8 +498,8 @@ export default function Petfinder() {
 
                     {!!item.sexoPet && (
                       <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                        <MaterialCommunityIcons name="gender-male-female" size={16} color="#0E2B5A" />
-                        <Text style={{ color: "#222", fontWeight: "800" }}>
+                        <MaterialCommunityIcons name="gender-male-female" size={16} color={TutorPalette.primary} />
+                        <Text style={{ color: "#e6ecff", fontWeight: "800" }}>
                           {String(item.sexoPet).toLowerCase().startsWith("m") ? "Macho" : "Fêmea"}
                         </Text>
                       </View>
@@ -520,7 +512,7 @@ export default function Petfinder() {
                     onPress={() => router.push(`/anuncios/${item.anuncioId}`)}
                     style={{
                       alignSelf: "center",
-                      backgroundColor: "#0B3B91",
+                      backgroundColor: TutorPalette.primary,
                       paddingVertical: 8,
                       paddingHorizontal: 16,
                       borderRadius: 999,
@@ -539,7 +531,7 @@ export default function Petfinder() {
 
               {/* "Informações" + descrição */}
               <View style={{ marginTop: 12 }}>
-                <Text style={{ fontWeight: "900", color: "#111", textAlign: "center" }}>
+                <Text style={{ fontWeight: "900", color: "#fff", textAlign: "center" }}>
                   Informações
                 </Text>
 
@@ -557,7 +549,7 @@ export default function Petfinder() {
                   ellipsizeMode="tail"
                   style={{
                     marginTop: 8,
-                    color: "#333",
+                    color: "#e6ecff",
                     fontWeight: "700",
                     lineHeight: 20,
                     textAlign: "left",
@@ -571,7 +563,7 @@ export default function Petfinder() {
                     <Text
                       style={{
                         marginTop: 6,
-                        color: "#0B3B91",
+                        color: TutorPalette.primary,
                         fontWeight: "900",
                         textAlign: "right",
                       }}
@@ -582,7 +574,7 @@ export default function Petfinder() {
                 )}
 
                 {!!item.dataCriacao && (
-                  <Text style={{ marginTop: 8, color: "#666", fontWeight: "700", fontSize: 12 }}>
+                  <Text style={{ marginTop: 8, color: "#9fb0d1", fontWeight: "700", fontSize: 12 }}>
                     Publicado em: {formatarData(new Date(item.dataCriacao))}
                   </Text>
                 )}
@@ -764,7 +756,7 @@ export default function Petfinder() {
                 style={{
                   flex: 1,
                   borderWidth: 1,
-                  borderColor: "#ddd",
+                  borderColor: "#d7deea",
                   borderRadius: 12,
                   paddingVertical: 12,
                   alignItems: "center",
@@ -778,7 +770,7 @@ export default function Petfinder() {
                 onPress={() => setFiltersOpen(false)}
                 style={{
                   flex: 1,
-                  backgroundColor: "#0B3B91",
+                  backgroundColor: TutorPalette.primary,
                   borderRadius: 12,
                   paddingVertical: 12,
                   alignItems: "center",
@@ -802,7 +794,7 @@ export default function Petfinder() {
           width: 62,
           height: 62,
           borderRadius: 999,
-          backgroundColor: "#1C66FF",
+          backgroundColor: TutorPalette.primary,
           alignItems: "center",
           justifyContent: "center",
           shadowOpacity: 0.25,

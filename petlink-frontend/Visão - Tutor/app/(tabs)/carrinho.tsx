@@ -24,6 +24,7 @@ import {
   setCartProducts,
 } from "@/src/storage/cartProducts";
 import { checkoutFromItems } from "@/src/services/checkoutService";
+import { TutorPalette } from "@/constants/theme";
 
 type ProdutoDTO = {
   id: number;
@@ -241,86 +242,41 @@ export default function Carrinho() {
   }
 
   return (
-    <LinearGradient
-      colors={["#0B0B0F", "#0E2B5A"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <LinearGradient colors={[TutorPalette.background, TutorPalette.backgroundSecondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
       <SafeAreaView style={{ flex: 1 }}>
-        <View
-          style={{
-            paddingTop: 14,
-            paddingHorizontal: 16,
-            flexDirection: "row",
-            alignItems: "center",
-            justifyContent: "space-between",
-          }}
-        >
-          <Pressable
-            onPress={openMenu}
-            style={{ width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" }}
-          >
+        <View style={{ paddingTop: 14, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <Pressable onPress={openMenu} style={{ width: 42, height: 42, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.10)" }}>
             <Feather name="menu" size={22} color="#fff" />
           </Pressable>
 
           <Text style={{ color: "#fff", fontSize: 20, fontWeight: "800" }}>PetLink</Text>
 
-          <Pressable
-            onPress={() => router.push("/perfil")}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: 999,
-              backgroundColor: "rgba(255,255,255,0.12)",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
+          <Pressable onPress={() => router.push("/perfil")} style={{ width: 42, height: 42, borderRadius: 999, backgroundColor: "rgba(255,255,255,0.12)", alignItems: "center", justifyContent: "center" }}>
             <Ionicons name="person" size={20} color="#fff" />
           </Pressable>
         </View>
 
-        <View style={{ paddingHorizontal: 16, marginTop: 6 }}>
-          <Text
-            style={{
-              color: "#fff",
-              fontSize: 18,
-              fontWeight: "900",
-              textAlign: "center",
-              textDecorationLine: "underline",
-              textDecorationColor: "#fff",
-            }}
-          >
-            Carrinho
-          </Text>
+        <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
+          <View style={{ backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 20, padding: 14, borderWidth: 1, borderColor: TutorPalette.border }}>
+            <Text style={{ color: TutorPalette.text, fontSize: 18, fontWeight: "900" }}>Carrinho</Text>
+            <Text style={{ color: TutorPalette.muted, fontSize: 13, marginTop: 4 }}>Escolha o que comprar sem perder a praticidade.</Text>
+          </View>
         </View>
 
-        <View
-          style={{
-            marginTop: 14,
-            marginHorizontal: 16,
-            backgroundColor: "#fff",
-            borderRadius: 22,
-            padding: 14,
-            flex: 1,
-          }}
-        >
+        <View style={{ marginTop: 14, marginHorizontal: 16, backgroundColor: "rgba(245,247,255,0.96)", borderRadius: 22, padding: 14, flex: 1, shadowColor: TutorPalette.shadow, shadowOpacity: 0.16, shadowRadius: 12, shadowOffset: { width: 0, height: 8 }, elevation: 4 }}>
           {loading ? (
             <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-              <ActivityIndicator size="large" />
-              <Text style={{ marginTop: 10, fontWeight: "800" }}>Carregando carrinho...</Text>
+              <ActivityIndicator size="large" color={TutorPalette.primary} />
+              <Text style={{ marginTop: 10, fontWeight: "800", color: TutorPalette.surface }}>Carregando carrinho...</Text>
             </View>
           ) : error ? (
             <View style={{ paddingTop: 8 }}>
-              <Text style={{ color: "#B00020", fontWeight: "800" }}>{error}</Text>
+              <Text style={{ color: TutorPalette.danger, fontWeight: "800" }}>{error}</Text>
             </View>
           ) : cartItems.length === 0 ? (
             <View style={{ paddingTop: 16 }}>
-              <Text style={{ fontWeight: "900", color: "#111" }}>Seu carrinho está vazio.</Text>
-              <Text style={{ marginTop: 6, color: "#444", fontWeight: "700" }}>
-                Adicione produtos para comprar.
-              </Text>
+              <Text style={{ fontWeight: "900", color: TutorPalette.background }}>Seu carrinho está vazio.</Text>
+              <Text style={{ marginTop: 6, color: TutorPalette.muted, fontWeight: "700" }}>Adicione produtos para comprar.</Text>
             </View>
           ) : (
             <FlatList
@@ -334,56 +290,15 @@ export default function Carrinho() {
                 const travado = Number(item.quantidade) >= estoque;
 
                 return (
-                  <View
-                    style={{
-                      paddingVertical: 12,
-                      borderBottomWidth: 1,
-                      borderBottomColor: "rgba(0,0,0,0.06)",
-                    }}
-                  >
-                    <Pressable
-                      onPress={() => {
-                        if (indisponivel) return;
-                        toggleSelect(item.produtoId);
-                      }}
-                      style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
-                    >
-                      <View
-                        style={{
-                          width: 26,
-                          height: 26,
-                          borderRadius: 8,
-                          borderWidth: 2,
-                          borderColor: indisponivel
-                            ? "rgba(0,0,0,0.12)"
-                            : checked
-                            ? "#0B3B91"
-                            : "rgba(0,0,0,0.25)",
-                          backgroundColor: checked ? "rgba(11,59,145,0.12)" : "transparent",
-                          alignItems: "center",
-                          justifyContent: "center",
-                        }}
-                      >
-                        {checked && <Ionicons name="checkmark" size={18} color="#0B3B91" />}
+                  <View style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "rgba(0,0,0,0.06)" }}>
+                    <Pressable onPress={() => { if (indisponivel) return; toggleSelect(item.produtoId); }} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                      <View style={{ width: 26, height: 26, borderRadius: 8, borderWidth: 2, borderColor: indisponivel ? "rgba(0,0,0,0.12)" : checked ? TutorPalette.primary : "rgba(0,0,0,0.25)", backgroundColor: checked ? "rgba(47,124,246,0.12)" : "transparent", alignItems: "center", justifyContent: "center" }}>
+                        {checked && <Ionicons name="checkmark" size={18} color={TutorPalette.primary} />}
                       </View>
 
-                      <View
-                        style={{
-                          width: 56,
-                          height: 56,
-                          borderRadius: 12,
-                          overflow: "hidden",
-                          backgroundColor: "#F2F2F7",
-                          borderWidth: 1,
-                          borderColor: "rgba(0,0,0,0.06)",
-                        }}
-                      >
+                      <View style={{ width: 56, height: 56, borderRadius: 12, overflow: "hidden", backgroundColor: "#F2F2F7", borderWidth: 1, borderColor: "rgba(0,0,0,0.06)" }}>
                         {!!item.foto ? (
-                          <Image
-                            source={{ uri: item.foto }}
-                            style={{ width: "100%", height: "100%" }}
-                            resizeMode="contain"
-                          />
+                          <Image source={{ uri: item.foto }} style={{ width: "100%", height: "100%" }} resizeMode="contain" />
                         ) : (
                           <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                             <Ionicons name="image" size={18} color="#999" />
@@ -392,81 +307,35 @@ export default function Carrinho() {
                       </View>
 
                       <View style={{ flex: 1 }}>
-                        <Text numberOfLines={1} style={{ fontWeight: "900", color: "#111" }}>
-                          {item.nome}
-                        </Text>
-
-                        <Text style={{ marginTop: 4, fontWeight: "900", color: "#0B3B91" }}>
-                          {formatMoneyBR(item.preco)}
-                        </Text>
-
-                        <Text style={{ marginTop: 2, fontWeight: "700", color: "#444", fontSize: 12 }}>
-                          Em estoque: {estoque}
-                        </Text>
+                        <Text numberOfLines={1} style={{ fontWeight: "900", color: TutorPalette.background }}>{item.nome}</Text>
+                        <Text style={{ marginTop: 4, fontWeight: "900", color: TutorPalette.primary }}>{formatMoneyBR(item.preco)}</Text>
+                        <Text style={{ marginTop: 2, fontWeight: "700", color: TutorPalette.muted, fontSize: 12 }}>Em estoque: {estoque}</Text>
                       </View>
                     </Pressable>
 
                     <View style={{ marginTop: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                       <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-                        <Pressable
-                          onPress={() => decQty(item.produtoId)}
-                          disabled={indisponivel || Number(item.quantidade) <= 1}
-                          style={{
-                            width: 34,
-                            height: 34,
-                            borderRadius: 10,
-                            backgroundColor:
-                              indisponivel || Number(item.quantidade) <= 1
-                                ? "rgba(0,0,0,0.03)"
-                                : "rgba(0,0,0,0.06)",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            opacity: indisponivel || Number(item.quantidade) <= 1 ? 0.6 : 1,
-                          }}
-                        >
-                          <Ionicons name="remove" size={18} color="#0E2B5A" />
+                        <Pressable onPress={() => decQty(item.produtoId)} disabled={indisponivel || Number(item.quantidade) <= 1} style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: indisponivel || Number(item.quantidade) <= 1 ? "rgba(0,0,0,0.03)" : "rgba(47,124,246,0.12)", alignItems: "center", justifyContent: "center", opacity: indisponivel || Number(item.quantidade) <= 1 ? 0.6 : 1 }}>
+                          <Ionicons name="remove" size={18} color={TutorPalette.primary} />
                         </Pressable>
 
-                        <Text style={{ minWidth: 22, textAlign: "center", fontWeight: "900", color: "#111" }}>
-                          {item.quantidade}
-                        </Text>
+                        <Text style={{ minWidth: 22, textAlign: "center", fontWeight: "900", color: TutorPalette.background }}>{item.quantidade}</Text>
 
-                        <Pressable
-                          onPress={() => incQty(item.produtoId)}
-                          disabled={indisponivel || travado || estoque <= 0}
-                          style={{
-                            width: 34,
-                            height: 34,
-                            borderRadius: 10,
-                            backgroundColor: indisponivel || travado || estoque <= 0 ? "rgba(0,0,0,0.03)" : "rgba(28,102,255,0.14)",
-                            borderWidth: 1,
-                            borderColor: indisponivel || travado || estoque <= 0 ? "rgba(0,0,0,0.08)" : "rgba(28,102,255,0.35)",
-                            alignItems: "center",
-                            justifyContent: "center",
-                            opacity: indisponivel || travado || estoque <= 0 ? 0.6 : 1,
-                          }}
-                        >
-                          <Ionicons name="add" size={18} color="#0E2B5A" />
+                        <Pressable onPress={() => incQty(item.produtoId)} disabled={indisponivel || travado || estoque <= 0} style={{ width: 34, height: 34, borderRadius: 10, backgroundColor: indisponivel || travado || estoque <= 0 ? "rgba(0,0,0,0.03)" : "rgba(47,124,246,0.14)", borderWidth: 1, borderColor: indisponivel || travado || estoque <= 0 ? "rgba(0,0,0,0.08)" : "rgba(47,124,246,0.4)", alignItems: "center", justifyContent: "center", opacity: indisponivel || travado || estoque <= 0 ? 0.6 : 1 }}>
+                          <Ionicons name="add" size={18} color={TutorPalette.primary} />
                         </Pressable>
                       </View>
 
                       {indisponivel ? (
-                        <Text style={{ fontSize: 12, fontWeight: "800", color: "#B00020" }}>
-                          Indisponível
-                        </Text>
+                        <Text style={{ fontSize: 12, fontWeight: "800", color: TutorPalette.danger }}>Indisponível</Text>
                       ) : travado && estoque > 0 ? (
-                        <Text style={{ fontSize: 12, fontWeight: "800", color: "#B00020" }}>
-                          Limite do estoque
-                        </Text>
+                        <Text style={{ fontSize: 12, fontWeight: "800", color: TutorPalette.danger }}>Limite do estoque</Text>
                       ) : null}
                     </View>
 
-                    <Pressable
-                      onPress={() => removeItem(item.produtoId)}
-                      style={{ marginTop: 8, alignSelf: "flex-end", flexDirection: "row", alignItems: "center", gap: 6 }}
-                    >
-                      <Ionicons name="trash-outline" size={16} color="#B00020" />
-                      <Text style={{ color: "#B00020", fontWeight: "800", fontSize: 12 }}>Remover</Text>
+                    <Pressable onPress={() => removeItem(item.produtoId)} style={{ marginTop: 8, alignSelf: "flex-end", flexDirection: "row", alignItems: "center", gap: 6 }}>
+                      <Ionicons name="trash-outline" size={16} color={TutorPalette.danger} />
+                      <Text style={{ color: TutorPalette.danger, fontWeight: "800", fontSize: 12 }}>Remover</Text>
                     </Pressable>
                   </View>
                 );
@@ -474,40 +343,14 @@ export default function Carrinho() {
             />
           )}
 
-          <View
-            style={{
-              position: "absolute",
-              left: 14,
-              right: 14,
-              bottom: 14,
-              backgroundColor: "#fff",
-              paddingTop: 10,
-            }}
-          >
+          <View style={{ position: "absolute", left: 14, right: 14, bottom: 14, backgroundColor: "rgba(255,255,255,0.9)", paddingTop: 10, borderRadius: 16, paddingHorizontal: 12, paddingBottom: 12 }}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-              <Text style={{ fontWeight: "900", color: "#111" }}>Total selecionado</Text>
-              <Text style={{ fontWeight: "900", color: "#0B3B91", fontSize: 16 }}>
-                {formatMoneyBR(totalSelecionado)}
-              </Text>
+              <Text style={{ fontWeight: "900", color: TutorPalette.background }}>Total selecionado</Text>
+              <Text style={{ fontWeight: "900", color: TutorPalette.primary, fontSize: 16 }}>{formatMoneyBR(totalSelecionado)}</Text>
             </View>
 
-            <Pressable
-              disabled={buying || selectedIds.length === 0}
-              onPress={finalizarCompraSelecionados}
-              style={{
-                marginTop: 10,
-                backgroundColor: buying || selectedIds.length === 0 ? "rgba(11,59,145,0.35)" : "#0B3B91",
-                borderRadius: 999,
-                paddingVertical: 12,
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              {buying ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={{ color: "#fff", fontWeight: "900" }}>Finalizar compra</Text>
-              )}
+            <Pressable disabled={buying || selectedIds.length === 0} onPress={finalizarCompraSelecionados} style={{ marginTop: 10, backgroundColor: buying || selectedIds.length === 0 ? "rgba(47,124,246,0.35)" : TutorPalette.primary, borderRadius: 999, paddingVertical: 12, alignItems: "center", justifyContent: "center" }}>
+              {buying ? <ActivityIndicator color="#fff" /> : <Text style={{ color: "#fff", fontWeight: "900" }}>Finalizar compra</Text>}
             </Pressable>
           </View>
         </View>
