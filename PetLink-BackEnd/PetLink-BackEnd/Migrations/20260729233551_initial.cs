@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreate : Migration
+    public partial class initial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -56,7 +56,7 @@ namespace PetLink_BackEnd.Migrations
                     preco = table.Column<float>(type: "real", nullable: false),
                     descricao = table.Column<string>(type: "character varying(256)", maxLength: 256, nullable: false),
                     quantidade = table.Column<int>(type: "integer", nullable: false),
-                    foto = table.Column<string>(type: "text", nullable: true)
+                    foto = table.Column<string>(type: "character varying(1000)", maxLength: 1000, nullable: true)
                 },
                 constraints: table =>
                 {

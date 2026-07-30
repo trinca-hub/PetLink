@@ -14,6 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { AuthContext } from "@/src/context/AuthContext";
 import { updateUserService } from "@/src/api/authService";
 import { router } from "expo-router";
+import { TutorPalette } from "@/constants/theme";
 
 export default function Perfil() {
   const { user, token, logout } = useContext(AuthContext);
@@ -60,7 +61,6 @@ export default function Perfil() {
         numero: parseInt(form.numero),
       };
 
-      // Remover o campo senha se existir
       delete updatedUser.senha;
 
       await updateUserService(user.id, updatedUser, token);
@@ -94,12 +94,7 @@ export default function Perfil() {
   };
 
   return (
-    <LinearGradient
-      colors={["#0B0B0F", "#0E2B5A"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={styles.page}
-    >
+    <LinearGradient colors={[TutorPalette.background, TutorPalette.backgroundSecondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.page}>
       <SafeAreaView style={styles.safeArea}>
         <ScrollView contentContainerStyle={styles.scrollContent}>
           <View style={styles.header}>
@@ -110,71 +105,39 @@ export default function Perfil() {
             </View>
           </View>
 
+          <View style={styles.heroCard}>
+            <Text style={styles.heroTitle}>Dados do tutor</Text>
+            <Text style={styles.heroSubtitle}>Atualize suas informações sem perder o fluxo atual.</Text>
+          </View>
+
           <View style={styles.card}>
             <View style={styles.form}>
               <Text style={styles.label}>Nome</Text>
-              <TextInput
-                style={styles.input}
-                value={form.nome}
-                onChangeText={(v) => handleChange("nome", v)}
-              />
+              <TextInput style={styles.input} value={form.nome} onChangeText={(v) => handleChange("nome", v)} />
 
               <Text style={styles.label}>Email</Text>
-              <TextInput
-                style={[styles.input, styles.disabled]}
-                value={form.email}
-                editable={false}
-              />
+              <TextInput style={[styles.input, styles.disabled]} value={form.email} editable={false} />
 
               <Text style={styles.label}>Telefone</Text>
-              <TextInput
-                style={styles.input}
-                value={form.telefone}
-                onChangeText={(v) => handleChange("telefone", v)}
-              />
+              <TextInput style={styles.input} value={form.telefone} onChangeText={(v) => handleChange("telefone", v)} />
 
               <Text style={styles.label}>CEP</Text>
-              <TextInput
-                style={styles.input}
-                value={form.cep}
-                onChangeText={(v) => handleChange("cep", v)}
-              />
+              <TextInput style={styles.input} value={form.cep} onChangeText={(v) => handleChange("cep", v)} />
 
               <Text style={styles.label}>UF</Text>
-              <TextInput
-                style={styles.input}
-                value={form.uf}
-                onChangeText={(v) => handleChange("uf", v)}
-              />
+              <TextInput style={styles.input} value={form.uf} onChangeText={(v) => handleChange("uf", v)} />
 
               <Text style={styles.label}>Cidade</Text>
-              <TextInput
-                style={styles.input}
-                value={form.cidade}
-                onChangeText={(v) => handleChange("cidade", v)}
-              />
+              <TextInput style={styles.input} value={form.cidade} onChangeText={(v) => handleChange("cidade", v)} />
 
               <Text style={styles.label}>Bairro</Text>
-              <TextInput
-                style={styles.input}
-                value={form.bairro}
-                onChangeText={(v) => handleChange("bairro", v)}
-              />
+              <TextInput style={styles.input} value={form.bairro} onChangeText={(v) => handleChange("bairro", v)} />
 
               <Text style={styles.label}>Rua</Text>
-              <TextInput
-                style={styles.input}
-                value={form.rua}
-                onChangeText={(v) => handleChange("rua", v)}
-              />
+              <TextInput style={styles.input} value={form.rua} onChangeText={(v) => handleChange("rua", v)} />
 
               <Text style={styles.label}>Número</Text>
-              <TextInput
-                style={styles.input}
-                value={form.numero}
-                onChangeText={(v) => handleChange("numero", v)}
-                keyboardType="numeric"
-              />
+              <TextInput style={styles.input} value={form.numero} onChangeText={(v) => handleChange("numero", v)} keyboardType="numeric" />
             </View>
 
             <TouchableOpacity style={styles.primaryButton} onPress={handleSave}>
@@ -225,15 +188,34 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
+  heroCard: {
+    marginTop: 14,
+    padding: 14,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: TutorPalette.border,
+  },
+  heroTitle: {
+    color: TutorPalette.text,
+    fontSize: 16,
+    fontWeight: "800",
+  },
+  heroSubtitle: {
+    marginTop: 4,
+    color: TutorPalette.muted,
+    fontSize: 13,
+  },
   card: {
     marginTop: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(245,247,255,0.96)",
     borderRadius: 22,
     paddingHorizontal: 18,
     paddingVertical: 20,
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
+    shadowColor: TutorPalette.shadow,
+    shadowOpacity: 0.16,
+    shadowRadius: 12,
+    shadowOffset: { width: 0, height: 8 },
     elevation: 4,
   },
   form: {
@@ -241,27 +223,27 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 13,
-    color: "#6B7280",
+    color: TutorPalette.surface,
     fontWeight: "700",
   },
   input: {
     height: 48,
     borderWidth: 1,
-    borderColor: "#E5E7EB",
-    borderRadius: 12,
+    borderColor: "#DDE4F0",
+    borderRadius: 14,
     paddingHorizontal: 12,
     backgroundColor: "#fff",
-    color: "#111",
+    color: TutorPalette.background,
     fontWeight: "600",
   },
   disabled: {
-    backgroundColor: "#F3F4F6",
-    color: "#9CA3AF",
+    backgroundColor: "#F3F5FA",
+    color: TutorPalette.muted,
   },
   primaryButton: {
     marginTop: 22,
     height: 48,
-    backgroundColor: "#0B3B91",
+    backgroundColor: TutorPalette.primary,
     borderRadius: 999,
     alignItems: "center",
     justifyContent: "center",
@@ -278,8 +260,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   logoutText: {
-    color: "#E53935",
-    fontSize: 14,
-    fontWeight: "700",
+    color: TutorPalette.danger,
+    fontWeight: "800",
   },
 });

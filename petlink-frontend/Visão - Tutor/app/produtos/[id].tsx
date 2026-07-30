@@ -7,6 +7,7 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import { AuthContext } from "@/src/context/AuthContext";
 import { getProdutoById } from "@/src/api/produtoService";
 import { addToCartProducts } from "@/src/storage/cartProducts";
+import { TutorPalette } from "@/constants/theme";
 
 type ProdutoDTO = {
     id: number;
@@ -116,10 +117,10 @@ export default function ProdutoDetalhe() {
     }
 
     return (
-        <LinearGradient colors={["#0B0B0F", "#0E2B5A"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
+        <LinearGradient colors={[TutorPalette.background, TutorPalette.backgroundSecondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
             {/* Header */}
             <View style={{ paddingTop: 14, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                <Pressable onPress={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" }}>
+                <Pressable onPress={() => router.back()} style={{ width: 42, height: 42, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.10)" }}>
                     <Feather name="arrow-left" size={22} color="#fff" />
                 </Pressable>
                 <Text style={{ color: "#fff", fontSize: 18, fontWeight: "900" }}>Produto</Text>
@@ -156,20 +157,21 @@ export default function ProdutoDetalhe() {
                 <View
                     style={{
                         marginTop: 12,
-                        backgroundColor: "#fff",
+                        backgroundColor: "rgba(245,247,255,0.96)",
                         borderRadius: 18,
                         padding: 14,
                         borderWidth: 1,
                         borderColor: "rgba(0,0,0,0.06)",
-                        shadowOpacity: 0.10,
-                        shadowRadius: 10,
-                        shadowOffset: { width: 0, height: 6 },
+                        shadowColor: TutorPalette.shadow,
+                        shadowOpacity: 0.16,
+                        shadowRadius: 12,
+                        shadowOffset: { width: 0, height: 8 },
                         elevation: 3,
                     }}
                 >
                     <Text style={{ fontSize: 20, fontWeight: "900", color: "#111" }}>{data.nome}</Text>
 
-                    <Text style={{ marginTop: 8, fontSize: 18, fontWeight: "900", color: "#0B3B91" }}>
+                    <Text style={{ marginTop: 8, fontSize: 18, fontWeight: "900", color: TutorPalette.primary }}>
                         {formatMoneyBR(data.preco)}
                     </Text>
 
@@ -195,7 +197,7 @@ export default function ProdutoDetalhe() {
                                     justifyContent: "center",
                                 }}
                             >
-                                <Ionicons name="remove" size={18} color="#0E2B5A" />
+                                <Ionicons name="remove" size={18} color={TutorPalette.primary} />
                             </Pressable>
 
                             <Text style={{ minWidth: 22, textAlign: "center", fontWeight: "900", color: "#111" }}>
@@ -223,7 +225,7 @@ export default function ProdutoDetalhe() {
                                     opacity: semEstoque || buyQty >= Number(data.quantidade ?? 0) ? 0.6 : 1,
                                 }}
                             >
-                                <Ionicons name="add" size={18} color="#0E2B5A" />
+                                <Ionicons name="add" size={18} color={TutorPalette.primary} />
                             </Pressable>
                         </View>
                     </View>
@@ -233,7 +235,7 @@ export default function ProdutoDetalhe() {
                         onPress={addCarrinho}
                         style={{
                             marginTop: 16,
-                            backgroundColor: semEstoque ? "rgba(0,0,0,0.08)" : "#0B3B91",
+                            backgroundColor: semEstoque ? "rgba(0,0,0,0.08)" : TutorPalette.primary,
                             borderRadius: 999,
                             paddingVertical: 12,
                             alignItems: "center",

@@ -18,6 +18,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { AuthContext } from "@/src/context/AuthContext";
 import { getFeedPetinder } from "@/src/api/anuncioService";
 import { useSideMenu } from "@/src/context/SideMenuContext";
+import { TutorPalette } from "@/constants/theme";
 
 type AnuncioPetinder = {
   anuncioId: number;
@@ -246,12 +247,7 @@ export default function Petinder() {
   }
 
   return (
-    <LinearGradient
-      colors={["#0B0B0F", "#0E2B5A"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <LinearGradient colors={[TutorPalette.background, TutorPalette.backgroundSecondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
       {/* Header */}
       <View
         style={{
@@ -265,11 +261,12 @@ export default function Petinder() {
         <Pressable
           onPress={openMenu}
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
+            width: 42,
+            height: 42,
+            borderRadius: 14,
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: "rgba(255,255,255,0.10)",
           }}
         >
           <Feather name="menu" size={22} color="#fff" />
@@ -282,8 +279,8 @@ export default function Petinder() {
         <Pressable
           onPress={() => router.push("/perfil")}
           style={{
-            width: 40,
-            height: 40,
+            width: 42,
+            height: 42,
             borderRadius: 999,
             backgroundColor: "rgba(255,255,255,0.12)",
             alignItems: "center",
@@ -295,26 +292,18 @@ export default function Petinder() {
       </View>
 
       {/* Title */}
-      <View style={{ paddingHorizontal: 16, marginTop: 6 }}>
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 18,
-            fontWeight: "900",
-            textAlign: "center",
-            textDecorationLine: "underline",
-            textDecorationColor: "#fff",
-          }}
-        >
-          PeTinder
-        </Text>
+      <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
+        <View style={{ backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 20, padding: 14, borderWidth: 1, borderColor: TutorPalette.border }}>
+          <Text style={{ color: TutorPalette.text, fontSize: 18, fontWeight: "900" }}>PeTinder</Text>
+          <Text style={{ color: TutorPalette.muted, fontSize: 13, marginTop: 4 }}>Descubra conexões entre pets com um feed mais sofisticado.</Text>
+        </View>
       </View>
 
       {/* Search + filters */}
       <View style={{ paddingHorizontal: 16, marginTop: 12 }}>
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: "rgba(245,247,255,0.96)",
             borderRadius: 999,
             paddingHorizontal: 12,
             paddingVertical: 10,
@@ -323,13 +312,13 @@ export default function Petinder() {
             gap: 8,
           }}
         >
-          <Ionicons name="search" size={18} color="#0E2B5A" />
+          <Ionicons name="search" size={18} color={TutorPalette.primary} />
           <TextInput
             value={search}
             onChangeText={setSearch}
             placeholder="Pesquisar"
             placeholderTextColor="#8E8E93"
-            style={{ flex: 1, color: "#111", fontWeight: "700" }}
+            style={{ flex: 1, color: TutorPalette.background, fontWeight: "700" }}
           />
         </View>
 
@@ -416,16 +405,19 @@ export default function Petinder() {
           <Pressable
             onPress={() => router.push(`/anuncios/${item.anuncioId}`)}
             style={{
-              backgroundColor: "#fff",
+              backgroundColor: "rgba(15,29,58,0.92)",
+              borderWidth: 1,
+              borderColor: "rgba(255,255,255,0.10)",
               borderRadius: 22,
               paddingVertical: 16,
               paddingHorizontal: 16,
               marginBottom: 14,
               flexDirection: "row",
               alignItems: "center",
-              shadowOpacity: 0.12,
-              shadowRadius: 10,
-              shadowOffset: { width: 0, height: 6 },
+              shadowColor: TutorPalette.shadow,
+              shadowOpacity: 0.16,
+              shadowRadius: 12,
+              shadowOffset: { width: 0, height: 8 },
               elevation: 4,
             }}
           >
@@ -464,7 +456,7 @@ export default function Petinder() {
                 style={{
                   fontSize: 18,
                   fontWeight: "900",
-                  color: "#111",
+                  color: "#fff",
                   textAlign: "center",
                 }}
               >
@@ -478,9 +470,9 @@ export default function Petinder() {
                   <MaterialCommunityIcons
                     name={String(item.tipoPet).toUpperCase() === "GATO" ? "cat" : "dog"}
                     size={18}
-                    color="#0E2B5A"
+                    color={TutorPalette.primary}
                   />
-                  <Text style={{ color: "#222", fontWeight: "700" }}>
+                  <Text style={{ color: "#e6ecff", fontWeight: "700" }}>
                     {item.racaPet || "Não informado"}
                   </Text>
                 </View>
@@ -488,8 +480,8 @@ export default function Petinder() {
                 <View
                   style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
                 >
-                  <Ionicons name="calendar" size={18} color="#0E2B5A" />
-                  <Text style={{ color: "#222", fontWeight: "700" }}>
+                  <Ionicons name="calendar" size={18} color={TutorPalette.primary} />
+                  <Text style={{ color: "#e6ecff", fontWeight: "700" }}>
                     {item.idadePet || "Idade não informada"}
                   </Text>
                 </View>
@@ -497,12 +489,12 @@ export default function Petinder() {
                 <View
                   style={{ flexDirection: "row", alignItems: "center", gap: 10 }}
                 >
-                  <Ionicons name="location" size={18} color="#0E2B5A" />
+                  <Ionicons name="location" size={18} color={TutorPalette.primary} />
                   <Text
                     numberOfLines={3}
                     ellipsizeMode="tail"
                     style={{
-                      color: "#222",
+                      color: "#e6ecff",
                       fontWeight: "800",
                       flex: 1,          // ocupa o espaço disponível sem estourar
                       paddingRight: 12, // ✅ “margem” no fim do card
@@ -519,7 +511,7 @@ export default function Petinder() {
                 style={{
                   alignSelf: "center",
                   marginTop: 12,
-                  backgroundColor: "#0B3B91",
+                  backgroundColor: TutorPalette.primary,
                   paddingVertical: 10,
                   paddingHorizontal: 28,
                   borderRadius: 999,
@@ -720,7 +712,7 @@ export default function Petinder() {
                 style={{
                   flex: 1,
                   borderWidth: 1,
-                  borderColor: "#ddd",
+                  borderColor: "#d7deea",
                   borderRadius: 12,
                   paddingVertical: 12,
                   alignItems: "center",
@@ -734,7 +726,7 @@ export default function Petinder() {
                 onPress={() => setFiltersOpen(false)}
                 style={{
                   flex: 1,
-                  backgroundColor: "#0B3B91",
+                  backgroundColor: TutorPalette.primary,
                   borderRadius: 12,
                   paddingVertical: 12,
                   alignItems: "center",
@@ -758,7 +750,7 @@ export default function Petinder() {
           width: 62,
           height: 62,
           borderRadius: 999,
-          backgroundColor: "#1C66FF",
+          backgroundColor: TutorPalette.primary,
           alignItems: "center",
           justifyContent: "center",
           shadowOpacity: 0.25,

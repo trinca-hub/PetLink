@@ -1,32 +1,31 @@
-import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 import React from 'react';
 import { Platform } from 'react-native';
-
-const blue = '#007AFF';
-const gray = '#999';
+import { TutorPalette } from '@/constants/theme';
 
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-
   return (
     <Tabs
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: blue,
-        tabBarInactiveTintColor: gray,
+        tabBarActiveTintColor: TutorPalette.primary,
+        tabBarInactiveTintColor: TutorPalette.muted,
         tabBarLabelStyle: {
           fontSize: 12,
-          fontWeight: '500',
+          fontWeight: '700',
           marginBottom: Platform.OS === 'android' ? 4 : 0,
         },
         tabBarStyle: {
-          height: Platform.OS === 'android' ? 65 : 80,
+          height: Platform.OS === 'android' ? 66 : 82,
           paddingBottom: Platform.OS === 'android' ? 8 : 20,
-          backgroundColor: '#fff',
-          borderTopColor: '#ccc',
+          backgroundColor: 'rgba(7, 21, 43, 0.96)',
+          borderTopColor: 'rgba(255,255,255,0.12)',
           borderTopWidth: 1,
+          shadowColor: TutorPalette.shadow,
+          shadowOpacity: 0.2,
+          shadowRadius: 12,
+          shadowOffset: { width: 0, height: -4 },
         },
         tabBarIcon: ({ color, size }) => {
           switch (route.name) {

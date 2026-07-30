@@ -18,6 +18,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { AuthContext } from "@/src/context/AuthContext";
 import { api } from "@/src/api/api";
 import { getFeedPetinder, getFeedPetfinder, getFeedPaypet } from "@/src/api/anuncioService";
+import { TutorPalette } from "@/constants/theme";
 
 type BaseAnuncioDTO = {
   id: number;
@@ -298,7 +299,7 @@ export default function EditarAnuncio() {
   if (!!error) {
     return (
       <LinearGradient
-        colors={["#0B0B0F", "#0E2B5A"]}
+        colors={[TutorPalette.background, TutorPalette.backgroundSecondary]}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={{ flex: 1, paddingHorizontal: 16, paddingTop: 20 }}
@@ -319,7 +320,7 @@ export default function EditarAnuncio() {
 
   return (
     <LinearGradient
-      colors={["#0B0B0F", "#0E2B5A"]}
+      colors={[TutorPalette.background, TutorPalette.backgroundSecondary]}
       start={{ x: 0, y: 0 }}
       end={{ x: 1, y: 1 }}
       style={{ flex: 1 }}
@@ -337,11 +338,12 @@ export default function EditarAnuncio() {
         <Pressable
           onPress={() => router.back()}
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
+            width: 42,
+            height: 42,
+            borderRadius: 14,
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: "rgba(255,255,255,0.10)",
           }}
         >
           <Feather name="arrow-left" size={22} color="#fff" />
@@ -361,7 +363,7 @@ export default function EditarAnuncio() {
             Descrição
           </Text>
 
-          <View style={{ backgroundColor: "#fff", borderRadius: 18, paddingHorizontal: 12, paddingVertical: 10 }}>
+          <View style={{ backgroundColor: "rgba(245,247,255,0.96)", borderRadius: 18, paddingHorizontal: 12, paddingVertical: 10 }}>
             <TextInput
               value={descricao}
               onChangeText={setDescricao}
@@ -388,7 +390,7 @@ export default function EditarAnuncio() {
 
               <View
                 style={{
-                  backgroundColor: "#fff",
+                  backgroundColor: "rgba(245,247,255,0.96)",
                   borderRadius: 999,
                   paddingHorizontal: 12,
                   paddingVertical: 10,
@@ -397,7 +399,7 @@ export default function EditarAnuncio() {
                   gap: 8,
                 }}
               >
-                <Ionicons name="location" size={18} color="#0E2B5A" />
+                <Ionicons name="location" size={18} color={TutorPalette.primary} />
                 <TextInput
                   value={ultimoLocalVisto}
                   onChangeText={setUltimoLocalVisto}
@@ -416,7 +418,7 @@ export default function EditarAnuncio() {
               <Pressable
                 onPress={() => setShowPicker(true)}
                 style={{
-                  backgroundColor: "#fff",
+                  backgroundColor: "rgba(245,247,255,0.96)",
                   borderRadius: 999,
                   paddingHorizontal: 14,
                   paddingVertical: 12,
@@ -426,7 +428,7 @@ export default function EditarAnuncio() {
                 }}
               >
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 10, flex: 1 }}>
-                  <Ionicons name="calendar" size={18} color="#0E2B5A" />
+                  <Ionicons name="calendar" size={18} color={TutorPalette.primary} />
                   <Text style={{ color: dataDesaparecimento ? "#111" : "#8E8E93", fontWeight: "800" }}>
                     {dataDesaparecimento ? formatDateBR(dataDesaparecimento) : "Selecione a data"}
                   </Text>
@@ -470,8 +472,8 @@ export default function EditarAnuncio() {
                     paddingVertical: 12,
                     borderRadius: 999,
                     borderWidth: 1,
-                    borderColor: tipoPayPet === 1 ? "#1C66FF" : "rgba(255,255,255,0.25)",
-                    backgroundColor: tipoPayPet === 1 ? "rgba(28,102,255,0.20)" : "rgba(255,255,255,0.10)",
+                    borderColor: tipoPayPet === 1 ? TutorPalette.primary : "rgba(255,255,255,0.25)",
+                    backgroundColor: tipoPayPet === 1 ? "rgba(47,124,246,0.20)" : "rgba(255,255,255,0.10)",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -486,8 +488,8 @@ export default function EditarAnuncio() {
                     paddingVertical: 12,
                     borderRadius: 999,
                     borderWidth: 1,
-                    borderColor: tipoPayPet === 2 ? "#1C66FF" : "rgba(255,255,255,0.25)",
-                    backgroundColor: tipoPayPet === 2 ? "rgba(28,102,255,0.20)" : "rgba(255,255,255,0.10)",
+                    borderColor: tipoPayPet === 2 ? TutorPalette.primary : "rgba(255,255,255,0.25)",
+                    backgroundColor: tipoPayPet === 2 ? "rgba(47,124,246,0.20)" : "rgba(255,255,255,0.10)",
                     alignItems: "center",
                     justifyContent: "center",
                   }}
@@ -505,7 +507,7 @@ export default function EditarAnuncio() {
 
                 <View
                   style={{
-                    backgroundColor: "#fff",
+                    backgroundColor: "rgba(245,247,255,0.96)",
                     borderRadius: 999,
                     paddingHorizontal: 12,
                     paddingVertical: 10,
@@ -514,7 +516,7 @@ export default function EditarAnuncio() {
                     gap: 8,
                   }}
                 >
-                  <Ionicons name="cash" size={18} color="#0E2B5A" />
+                  <Ionicons name="cash" size={18} color={TutorPalette.primary} />
                   <TextInput
                     value={valor}
                     onChangeText={setValor}
@@ -535,7 +537,7 @@ export default function EditarAnuncio() {
           onPress={salvar}
           style={{
             marginTop: 18,
-            backgroundColor: saving ? "rgba(28,102,255,0.55)" : "#1C66FF",
+            backgroundColor: saving ? "rgba(47,124,246,0.55)" : TutorPalette.primary,
             borderRadius: 999,
             paddingVertical: 14,
             alignItems: "center",
