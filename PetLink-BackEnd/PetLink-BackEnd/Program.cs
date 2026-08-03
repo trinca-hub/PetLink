@@ -13,9 +13,17 @@ using System.Text;
 using Microsoft.OpenApi.Models;
 using PetLink_BackEnd.WebAPI.Data.Repositories;
 using PetLink_BackEnd.Data.Interfaces;
+using Microsoft.AspNetCore.DataProtection;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole();
+builder.Logging.AddDebug();
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(builder.Environment.ContentRootPath, ".aspnet-data-protection-keys")));
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>

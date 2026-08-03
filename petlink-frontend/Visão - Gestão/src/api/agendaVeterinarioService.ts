@@ -23,7 +23,7 @@ export type AgendaVeterinario = {
 
 export type AgendaVeterinarioPayload = {
   veterinarioId: number;
-  diasSemanaAtivos: string;
+  diasSemanaAtivos: string | number;
   horaInicioManha: string;
   horaFimManha: string;
   horaInicioTarde: string;
@@ -50,4 +50,8 @@ export function updateAgendaVeterinario(id: number, payload: AgendaVeterinarioPa
 
 export function getAgendaSlots(veterinarioId: number, token: string) {
   return api(`AgendaVeterinario/${veterinarioId}/slots`, "GET", null, token);
+}
+
+export function bloquearAgendaSlot(payload: { veterinarioId: number; dataHoraInicio: string; motivo?: string }, token: string) {
+  return api("AgendaVeterinario/bloquear-slot", "POST", payload, token);
 }

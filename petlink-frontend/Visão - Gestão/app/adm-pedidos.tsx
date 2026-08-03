@@ -1,5 +1,7 @@
 import { AuthContext } from "@/src/context/AuthContext";
 import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
+import { EmptyState } from "@/components/ManagementScreen";
+import { managementTheme } from "@/constants/managementTheme";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -44,7 +46,7 @@ export default function AdmPedidos() {
   const [emNomeProprio, setEmNomeProprio] = useState(false);
   const [usuarioId, setUsuarioId] = useState("");
   const [newItem, setNewItem] = useState<NewItem>(INITIAL_ITEM);
-  const [pendingItems, setPendingItems] = useState<Array<{ produtoId: number; quantidade: number }>>([]);
+  const [pendingItems, setPendingItems] = useState<{ produtoId: number; quantidade: number }[]>([]);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState("");
   const [openUsuarioSelect, setOpenUsuarioSelect] = useState(false);
@@ -122,9 +124,9 @@ export default function AdmPedidos() {
 
   const canCreatePedido = pendingItems.length > 0 && !saving && (emNomeProprio || !!selectedUsuario);
 
-  function getPedidoTotal(itens: ItemPedido[]) {
+  const getPedidoTotal = useCallback((itens: ItemPedido[]) => {
     return itens.reduce((total, item) => total + getLineTotal(item.produtoId, item.quantidade), 0);
-  }
+  }, [getLineTotal]);
 
   const filteredPedidos = useMemo(() => {
     const normalizedSearch = search.trim().toLowerCase();
@@ -171,7 +173,7 @@ export default function AdmPedidos() {
       if (sort.field === "data") return (new Date(a.dataPedido).getTime() - new Date(b.dataPedido).getTime()) * direction;
       return 0;
     });
-  }, [pedidos, usersById, itensMap, productById, search, usuarioTextFilter, itensFilter, sort]);
+  }, [pedidos, usersById, itensMap, productById, search, usuarioTextFilter, itensFilter, sort, getPedidoTotal]);
 
   const pedidoTextFilters = useMemo<TextFilter[]>(
     () => [
@@ -374,7 +376,7 @@ export default function AdmPedidos() {
   }
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
+    <LinearGradient colors={managementTheme.gradients.app} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCard}>
           <View style={{ flex: 1 }}>
@@ -418,9 +420,9 @@ export default function AdmPedidos() {
 
         <View style={styles.listCard}>
           {loading ? (
-            <Text style={styles.infoText}>Carregando pedidos...</Text>
+            <EmptyState icon="hourglass-outline" title="Carregando pedidos..." />
           ) : filteredPedidos.length === 0 ? (
-            <Text style={styles.infoText}>Nenhum pedido encontrado.</Text>
+            <EmptyState title="Nenhum pedido encontrado" description="Ajuste a busca ou crie um novo pedido." />
           ) : (
             filteredPedidos.map((pedido) => {
               const usuario = usersById[pedido.usuarioId];

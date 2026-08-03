@@ -1,4 +1,6 @@
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using PetLink_BackEnd.Data;
 using PetLink_BackEnd.Data.Interfaces;
 using PetLink_BackEnd.Objects.Dtos.Entities.AgendaVeterinario;
 using PetLink_BackEnd.Objects.Models;
@@ -11,12 +13,14 @@ namespace PetLink_BackEnd.Services.Entities
     {
         private readonly IAgendaVeterinarioRepository _agendaRepository;
         private readonly IAgendamentoConsultaRepository _agendamentoRepository;
+        private readonly AppDbContext _context;
         private readonly IMapper _mapper;
 
-        public AgendaVeterinarioService(IAgendaVeterinarioRepository agendaRepository, IAgendamentoConsultaRepository agendamentoRepository, IMapper mapper)
+        public AgendaVeterinarioService(IAgendaVeterinarioRepository agendaRepository, IAgendamentoConsultaRepository agendamentoRepository, AppDbContext context, IMapper mapper)
         {
             _agendaRepository = agendaRepository;
             _agendamentoRepository = agendamentoRepository;
+            _context = context;
             _mapper = mapper;
         }
 
@@ -108,7 +112,18 @@ namespace PetLink_BackEnd.Services.Entities
                 AddSlotsPeriodo(slots, inicioTarde, fimTarde, duracao);
             }
 
-            return slots.Select(s => new SlotDisponivelDTO
+            var fimBusca = inicio.AddDays(7);
+            var bloqueados = await _context.Set<AgendaSlotBloqueado>()
+                .AsNoTracking()
+                .Where(b => b.VeterinarioId == veterinarioId && b.DataHoraInicio >= inicio && b.DataHoraInicio < fimBusca)
+                .Select(b => b.DataHoraInicio)
+                .ToListAsync();
+
+            var bloqueadosSet = new HashSet<long>(bloqueados.Select(SlotKey));
+
+            return slots
+                .Where(s => !bloqueadosSet.Contains(SlotKey(s)))
+                .Select(s => new SlotDisponivelDTO
             {
                 DataHoraInicio = s,
                 DataHoraFim = s.Add(duracao)
@@ -132,6 +147,64 @@ namespace PetLink_BackEnd.Services.Entities
                 .Select(c => c.DataHoraInicio!.Value));
 
             return slots.Where(s => !ocupados.Contains(s.DataHoraInicio));
+        }
+
+        public async Task BloquearSlot(BloquearSlotDTO dto, int? veterinarioId)
+        {
+            var vetId = veterinarioId ?? dto.VeterinarioId;
+            if (vetId <= 0)
+                throw new InvalidOperationException("Veterinário inválido.");
+
+            var inicio = NormalizarDataHoraSlot(dto.DataHoraInicio);
+            var existe = await _context.Set<AgendaSlotBloqueado>()
+                .AnyAsync(b => b.VeterinarioId == vetId && b.DataHoraInicio == inicio);
+
+            if (existe)
+                return;
+
+            _context.Set<AgendaSlotBloqueado>().Add(new AgendaSlotBloqueado
+            {
+                VeterinarioId = vetId,
+                DataHoraInicio = inicio,
+                Motivo = dto.Motivo?.Trim(),
+                DataCriacao = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task DesbloquearSlot(int veterinarioId, DateTime dataHoraInicio, int? veterinarioAutenticadoId)
+        {
+            var vetId = veterinarioAutenticadoId ?? veterinarioId;
+            if (vetId != veterinarioId)
+                throw new UnauthorizedAccessException("Agenda não pertence ao veterinário autenticado.");
+
+            var inicio = NormalizarDataHoraSlot(dataHoraInicio);
+            var bloqueio = await _context.Set<AgendaSlotBloqueado>()
+                .FirstOrDefaultAsync(b => b.VeterinarioId == veterinarioId && b.DataHoraInicio == inicio);
+
+            if (bloqueio is null)
+                return;
+
+            _context.Set<AgendaSlotBloqueado>().Remove(bloqueio);
+            await _context.SaveChangesAsync();
+        }
+
+        private static DateTime NormalizarDataHoraSlot(DateTime dataHora)
+        {
+            var utc = dataHora.Kind switch
+            {
+                DateTimeKind.Utc => dataHora,
+                DateTimeKind.Local => dataHora.ToUniversalTime(),
+                _ => DateTime.SpecifyKind(dataHora, DateTimeKind.Utc)
+            };
+
+            return new DateTime(utc.Year, utc.Month, utc.Day, utc.Hour, utc.Minute, 0, DateTimeKind.Utc);
+        }
+
+        private static long SlotKey(DateTime dataHora)
+        {
+            return NormalizarDataHoraSlot(dataHora).Ticks;
         }
 
         private static void AddSlotsPeriodo(List<DateTime> slots, DateTime inicio, DateTime fim, TimeSpan duracao)

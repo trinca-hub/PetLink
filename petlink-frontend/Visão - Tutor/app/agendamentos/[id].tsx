@@ -17,6 +17,8 @@ import {
   cancelarAgendamento,
   confirmarAgendamento,
   getAgendamentoById,
+  recusarAgendamento,
+  remarcarAgendamento,
 } from "@/src/api/agendamentoService";
 import { getAgendaSlots } from "@/src/api/agendaVeterinarioService";
 import { getMyPetsService } from "@/src/api/authService";
@@ -87,7 +89,10 @@ export default function AgendamentoDetalheScreen() {
   const [petMap, setPetMap] = useState<Record<number, string>>({});
   const [saving, setSaving] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [declineModalOpen, setDeclineModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [declineReason, setDeclineReason] = useState("");
+  const [rescheduleReason, setRescheduleReason] = useState("");
 
   const slotsByDate = useMemo(() => {
     const map: Record<string, SlotDisponivel[]> = {};
@@ -185,7 +190,7 @@ export default function AgendamentoDetalheScreen() {
   async function handleConfirm() {
     if (!token || !agendamento) return;
 
-    if (!selectedSlot) {
+    if (!selectedSlot && !agendamento.dataHoraInicio) {
       setError("Selecione um horário para confirmar.");
       return;
     }
@@ -195,7 +200,7 @@ export default function AgendamentoDetalheScreen() {
 
     const result = await confirmarAgendamento(
       agendamento.id,
-      { dataHoraInicio: selectedSlot },
+      { dataHoraInicio: selectedSlot || agendamento.dataHoraInicio || undefined },
       token
     );
 
@@ -206,6 +211,60 @@ export default function AgendamentoDetalheScreen() {
       return;
     }
 
+    await load();
+  }
+
+  async function handleReschedule() {
+    if (!token || !agendamento) return;
+
+    if (!selectedSlot) {
+      setError("Selecione um novo horário para remarcar.");
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    const result = await remarcarAgendamento(
+      agendamento.id,
+      { dataHoraInicio: selectedSlot, motivo: rescheduleReason.trim() || undefined },
+      token
+    );
+
+    setSaving(false);
+
+    if (!result.ok) {
+      setError(getApiErrorMessage(result?.data, "Não foi possível remarcar o agendamento."));
+      return;
+    }
+
+    setSelectedSlot("");
+    setRescheduleReason("");
+    await load();
+  }
+
+  async function handleDecline() {
+    if (!token || !agendamento) return;
+
+    if (!declineReason.trim()) {
+      setError("Informe o motivo da recusa.");
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    const result = await recusarAgendamento(agendamento.id, { motivo: declineReason.trim() }, token);
+
+    setSaving(false);
+    setDeclineModalOpen(false);
+
+    if (!result.ok) {
+      setError(getApiErrorMessage(result?.data, "Não foi possível recusar o agendamento."));
+      return;
+    }
+
+    setDeclineReason("");
     await load();
   }
 
@@ -313,6 +372,12 @@ export default function AgendamentoDetalheScreen() {
           {agendamento?.motivoCancelamento ? (
             <Text style={{ color: "#ffd1d1", fontWeight: "800" }}>Motivo: {agendamento.motivoCancelamento}</Text>
           ) : null}
+          {agendamento?.motivoRecusa ? (
+            <Text style={{ color: "#ffd1d1", fontWeight: "800" }}>Recusa: {agendamento.motivoRecusa}</Text>
+          ) : null}
+          {agendamento?.motivoRemarcacao ? (
+            <Text style={{ color: "#d7e8ff", fontWeight: "800" }}>Remarcação: {agendamento.motivoRemarcacao}</Text>
+          ) : null}
         </View>
 
         {agendamento?.status === "Pendente" && (
@@ -406,8 +471,59 @@ export default function AgendamentoDetalheScreen() {
               }}
             >
               <Text style={{ color: "#0B0B0F", fontWeight: "900" }}>
-                {saving ? "Confirmando..." : "Confirmar consulta"}
+                {saving ? "Confirmando..." : agendamento.dataHoraInicio ? "Aceitar horário" : "Confirmar consulta"}
               </Text>
+            </Pressable>
+
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.26)",
+                borderRadius: 12,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                color: "#fff",
+                backgroundColor: "rgba(255,255,255,0.08)",
+                minHeight: 58,
+                textAlignVertical: "top",
+              }}
+              placeholder="Motivo da remarcação (opcional)"
+              placeholderTextColor="rgba(255,255,255,0.55)"
+              value={rescheduleReason}
+              onChangeText={setRescheduleReason}
+              multiline
+            />
+
+            <Pressable
+              onPress={handleReschedule}
+              disabled={saving || !selectedSlot}
+              style={{
+                marginTop: 6,
+                borderColor: "#fff",
+                borderWidth: 1,
+                paddingVertical: 10,
+                borderRadius: 999,
+                alignItems: "center",
+                opacity: saving || !selectedSlot ? 0.55 : 1,
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "900" }}>Propor remarcação</Text>
+            </Pressable>
+
+            <Pressable
+              onPress={() => setDeclineModalOpen(true)}
+              disabled={saving}
+              style={{
+                marginTop: 6,
+                borderColor: "#ffb4b4",
+                borderWidth: 1,
+                paddingVertical: 10,
+                borderRadius: 999,
+                alignItems: "center",
+                opacity: saving ? 0.7 : 1,
+              }}
+            >
+              <Text style={{ color: "#ffb4b4", fontWeight: "900" }}>Recusar consulta</Text>
             </Pressable>
 
             <Pressable
@@ -473,6 +589,47 @@ export default function AgendamentoDetalheScreen() {
                 style={{ borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: "#c73939" }}
               >
                 <Text style={{ color: "#fff", fontWeight: "700" }}>Cancelar</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal transparent visible={declineModalOpen} animationType="fade" onRequestClose={() => setDeclineModalOpen(false)}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.55)", justifyContent: "center", padding: 18 }}>
+          <View style={{ backgroundColor: "#0f253e", borderRadius: 16, padding: 16, gap: 10 }}>
+            <Text style={{ color: "#edf4ff", fontSize: 18, fontWeight: "700" }}>Recusar consulta</Text>
+            <Text style={{ color: "#b7c8e8", fontSize: 13 }}>Informe o motivo da recusa.</Text>
+            <TextInput
+              style={{
+                borderWidth: 1,
+                borderColor: "rgba(138,180,248,0.25)",
+                borderRadius: 10,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                color: "#eaf2ff",
+                backgroundColor: "rgba(20, 56, 99, 0.45)",
+                minHeight: 70,
+                textAlignVertical: "top",
+              }}
+              placeholder="Motivo da recusa"
+              placeholderTextColor="#98abc9"
+              value={declineReason}
+              onChangeText={setDeclineReason}
+              multiline
+            />
+            <View style={{ flexDirection: "row", justifyContent: "flex-end", gap: 10 }}>
+              <Pressable
+                onPress={() => setDeclineModalOpen(false)}
+                style={{ borderRadius: 10, borderWidth: 1, borderColor: "rgba(138,180,248,0.35)", paddingVertical: 10, paddingHorizontal: 14 }}
+              >
+                <Text style={{ color: "#dbe9ff", fontWeight: "700" }}>Voltar</Text>
+              </Pressable>
+              <Pressable
+                onPress={handleDecline}
+                style={{ borderRadius: 10, paddingVertical: 10, paddingHorizontal: 14, backgroundColor: "#c73939" }}
+              >
+                <Text style={{ color: "#fff", fontWeight: "700" }}>Recusar</Text>
               </Pressable>
             </View>
           </View>

@@ -1,5 +1,7 @@
 import { AuthContext } from "@/src/context/AuthContext";
 import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
+import { EmptyState } from "@/components/ManagementScreen";
+import { managementTheme } from "@/constants/managementTheme";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -71,11 +73,14 @@ export default function AdmServicos() {
     [pets]
   );
 
-  const tipoOptions: SelectOption[] = [
-    { value: "1", label: "Consulta", subtitle: "Tipo = 1" },
-    { value: "2", label: "Banho", subtitle: "Tipo = 2" },
-    { value: "3", label: "Tosa", subtitle: "Tipo = 3" },
-  ];
+  const tipoOptions = useMemo<SelectOption[]>(
+    () => [
+      { value: "1", label: "Consulta", subtitle: "Tipo = 1" },
+      { value: "2", label: "Banho", subtitle: "Tipo = 2" },
+      { value: "3", label: "Tosa", subtitle: "Tipo = 3" },
+    ],
+    []
+  );
 
   const selectedPet = useMemo(
     () => pets.find((pet) => pet.id === parseIntInput(form.petId)),
@@ -84,7 +89,7 @@ export default function AdmServicos() {
 
   const selectedTipo = useMemo(
     () => tipoOptions.find((tipo) => tipo.value === form.tipo),
-    [form.tipo]
+    [form.tipo, tipoOptions]
   );
 
   const filteredServicos = useMemo(() => {
@@ -284,7 +289,7 @@ export default function AdmServicos() {
   }
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
+    <LinearGradient colors={managementTheme.gradients.app} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCard}>
           <View style={{ flex: 1 }}>
@@ -332,9 +337,9 @@ export default function AdmServicos() {
 
         <View style={styles.listCard}>
           {loading ? (
-            <Text style={styles.infoText}>Carregando serviços...</Text>
+            <EmptyState icon="hourglass-outline" title="Carregando serviços..." />
           ) : filteredServicos.length === 0 ? (
-            <Text style={styles.infoText}>Nenhum serviço encontrado.</Text>
+            <EmptyState title="Nenhum serviço encontrado" description="Ajuste a busca ou cadastre um novo serviço." />
           ) : (
             filteredServicos.map((servico) => (
               <View key={servico.id} style={styles.itemCard}>

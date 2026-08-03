@@ -12,6 +12,7 @@ namespace PetLink_BackEnd.Objects.Dtos.Mappings
         {
             CreateMap<Produto, ProdutoDTO>().ReverseMap();
             CreateMap<Usuario, UsuarioDTO>().ReverseMap();
+            CreateMap<EnderecoUsuario, EnderecoUsuarioDTO>().ReverseMap();
             CreateMap<Funcionario, FuncionarioDTO>().ReverseMap();
 
             CreateMap<UsuarioDTO, Usuario>()

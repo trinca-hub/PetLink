@@ -5,14 +5,24 @@ export type CreateAgendamentoPayload = {
   veterinarioId: number;
   petId: number;
   tipoServico: TipoServico;
+  dataHoraInicio?: string;
   observacao?: string;
 };
 
 export type ConfirmarAgendamentoPayload = {
-  dataHoraInicio: string;
+  dataHoraInicio?: string;
 };
 
 export type CancelarAgendamentoPayload = {
+  motivo?: string;
+};
+
+export type RecusarAgendamentoPayload = {
+  motivo: string;
+};
+
+export type RemarcarAgendamentoPayload = {
+  dataHoraInicio: string;
   motivo?: string;
 };
 
@@ -42,4 +52,16 @@ export function cancelarAgendamento(
   token: string
 ) {
   return api(`Agendamento/${id}/cancelar`, "PUT", payload, token);
+}
+
+export function recusarAgendamento(id: number, payload: RecusarAgendamentoPayload, token: string) {
+  return api(`Agendamento/${id}/recusar`, "PUT", payload, token);
+}
+
+export function remarcarAgendamento(id: number, payload: RemarcarAgendamentoPayload, token: string) {
+  return api(`Agendamento/${id}/remarcar`, "PUT", payload, token);
+}
+
+export function getVeterinarios(token: string) {
+  return api("Veterinario", "GET", null, token);
 }

@@ -8,6 +8,8 @@ import {
 } from "@/src/api/petService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
+import { EmptyState } from "@/components/ManagementScreen";
+import { managementTheme } from "@/constants/managementTheme";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { AuthContext } from "@/src/context/AuthContext";
 import { getUsuarios, Usuario } from "@/src/api/usuarioService";
@@ -411,7 +413,7 @@ export default function AdmPets() {
   }
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
+    <LinearGradient colors={managementTheme.gradients.app} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCard}>
           <View style={{ flex: 1 }}>
@@ -450,9 +452,9 @@ export default function AdmPets() {
 
         <View style={styles.listCard}>
           {loading ? (
-            <Text style={styles.infoText}>Carregando pets...</Text>
+            <EmptyState icon="hourglass-outline" title="Carregando pets..." />
           ) : filteredPets.length === 0 ? (
-            <Text style={styles.infoText}>Nenhum pet encontrado.</Text>
+            <EmptyState title="Nenhum pet encontrado" description="Ajuste a busca ou cadastre um novo pet." />
           ) : (
             filteredPets.map((pet) => (
               <View key={pet.id} style={styles.itemCard}>

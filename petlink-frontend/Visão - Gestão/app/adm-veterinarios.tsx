@@ -6,6 +6,8 @@ import {
   Veterinario,
 } from "@/src/api/veterinarioService";
 import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
+import { EmptyState, StatusPill } from "@/components/ManagementScreen";
+import { managementTheme } from "@/constants/managementTheme";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
@@ -119,14 +121,17 @@ export default function ListaVeterinarios() {
     [statusFilter]
   );
 
-  const statusOptions: SelectOption[] = [
-    { value: "1", label: "Ativo", subtitle: "Status = 1" },
-    { value: "2", label: "Desativado", subtitle: "Status = 2" },
-  ];
+  const statusOptions = useMemo<SelectOption[]>(
+    () => [
+      { value: "1", label: "Ativo", subtitle: "Status = 1" },
+      { value: "2", label: "Desativado", subtitle: "Status = 2" },
+    ],
+    []
+  );
 
   const selectedStatus = useMemo(
     () => statusOptions.find((option) => option.value === form.status),
-    [form.status]
+    [form.status, statusOptions]
   );
 
   const loadVeterinarios = useCallback(async () => {
@@ -243,7 +248,7 @@ export default function ListaVeterinarios() {
   }
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
+    <LinearGradient colors={managementTheme.gradients.app} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCard}>
           <View style={styles.headerTextWrap}>
@@ -285,9 +290,9 @@ export default function ListaVeterinarios() {
 
         <View style={styles.listCard}>
           {loading ? (
-            <Text style={styles.infoText}>Carregando veterinários...</Text>
+            <EmptyState icon="hourglass-outline" title="Carregando veterinários..." />
           ) : filteredVeterinarios.length === 0 ? (
-            <Text style={styles.infoText}>Nenhum veterinário cadastrado.</Text>
+            <EmptyState title="Nenhum veterinário encontrado" description="Ajuste a busca ou cadastre um novo veterinário." />
           ) : (
             filteredVeterinarios.map((item) => (
               <View key={item.id} style={styles.itemCard}>
@@ -296,7 +301,10 @@ export default function ListaVeterinarios() {
                   <Text style={styles.itemSubtitle}>{item.email}</Text>
                   <Text style={styles.itemSubtitle}>CRMV: {item.crmv}</Text>
                   <Text style={styles.itemSalary}>Salário: R$ {Number(item.salario || 0).toFixed(2)}</Text>
-                  <Text style={styles.itemStatus}>Status: {Number(item.status) === 1 ? "Ativo" : "Desativado"}</Text>
+                  <StatusPill
+                    label={Number(item.status) === 1 ? "Ativo" : "Desativado"}
+                    tone={Number(item.status) === 1 ? "success" : "warning"}
+                  />
                 </View>
 
                 <View style={styles.itemActions}>

@@ -81,6 +81,12 @@ public class UsuarioController : Controller
             // Zeramos o id antes de cadastrar para que o banco gere automaticamente
             // e evite conflito com ids existentes
             usuarioDTO.Id = 0;
+            usuarioDTO.Telefone ??= string.Empty;
+            usuarioDTO.Cep ??= string.Empty;
+            usuarioDTO.Uf ??= string.Empty;
+            usuarioDTO.Cidade ??= string.Empty;
+            usuarioDTO.Bairro ??= string.Empty;
+            usuarioDTO.Rua ??= string.Empty;
 
             // Cria o hash da senha para maior segurança
             usuarioDTO.Senha = GenerateSha256Hash(usuarioDTO.Senha);

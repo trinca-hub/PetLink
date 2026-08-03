@@ -1,6 +1,6 @@
 import { api } from "@/src/api/api";
 
-export type StatusAgendamento = "Pendente" | "Confirmado" | "Cancelado";
+export type StatusAgendamento = "Pendente" | "Confirmado" | "Cancelado" | "Recusado";
 export type TipoServico = 1 | 2 | 3;
 
 export type AgendamentoConsulta = {
@@ -14,9 +14,13 @@ export type AgendamentoConsulta = {
   tipoServico: TipoServico;
   observacao?: string | null;
   motivoCancelamento?: string | null;
+  motivoRecusa?: string | null;
+  motivoRemarcacao?: string | null;
   dataCriacao?: string | null;
   dataConfirmacao?: string | null;
   dataCancelamento?: string | null;
+  dataRecusa?: string | null;
+  dataUltimaRemarcacao?: string | null;
   rowVersion?: string | null;
 };
 
@@ -24,6 +28,7 @@ export type CreateAgendamentoPayload = {
   veterinarioId: number;
   petId: number;
   tipoServico: TipoServico;
+  dataHoraInicio?: string;
   observacao?: string;
 };
 
@@ -31,10 +36,24 @@ export type CreateAgendamentoVeterinarioPayload = {
   usuarioId: number;
   petId: number;
   tipoServico: TipoServico;
+  dataHoraInicio?: string;
   observacao?: string;
 };
 
 export type CancelarAgendamentoPayload = {
+  motivo?: string;
+};
+
+export type ConfirmarAgendamentoPayload = {
+  dataHoraInicio?: string;
+};
+
+export type RecusarAgendamentoPayload = {
+  motivo: string;
+};
+
+export type RemarcarAgendamentoPayload = {
+  dataHoraInicio: string;
   motivo?: string;
 };
 
@@ -63,4 +82,16 @@ export function cancelarAgendamento(
   token: string
 ) {
   return api(`Agendamento/${id}/cancelar`, "PUT", payload, token);
+}
+
+export function confirmarAgendamento(id: number, payload: ConfirmarAgendamentoPayload, token: string) {
+  return api(`Agendamento/${id}/confirmar`, "PUT", payload, token);
+}
+
+export function recusarAgendamento(id: number, payload: RecusarAgendamentoPayload, token: string) {
+  return api(`Agendamento/${id}/recusar`, "PUT", payload, token);
+}
+
+export function remarcarAgendamento(id: number, payload: RemarcarAgendamentoPayload, token: string) {
+  return api(`Agendamento/${id}/remarcar`, "PUT", payload, token);
 }

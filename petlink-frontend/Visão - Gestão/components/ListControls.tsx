@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { managementTheme } from "@/constants/managementTheme";
 import { useMemo, useState } from "react";
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 
@@ -117,6 +118,8 @@ export default function ListControls({
         </View>
 
         <TouchableOpacity
+          accessibilityRole="button"
+          accessibilityLabel="Alternar filtros"
           style={[styles.filterButton, showFilters && styles.filterButtonActive]}
           onPress={() => setShowFilters((value) => !value)}
         >
@@ -139,6 +142,7 @@ export default function ListControls({
                 key={field.value}
                 style={[styles.chip, isActive && styles.chipActive]}
                 onPress={() => cycleSort(field)}
+                accessibilityRole="button"
               >
                 <Text style={[styles.chipText, isActive && styles.chipTextActive]}>{field.label}</Text>
                 <Ionicons
@@ -201,9 +205,9 @@ export default function ListControls({
 const styles = StyleSheet.create({
   container: {
     borderWidth: 1,
-    borderColor: "rgba(138,180,248,0.20)",
-    backgroundColor: "rgba(13, 32, 53, 0.78)",
-    borderRadius: 14,
+    borderColor: managementTheme.colors.border,
+    backgroundColor: managementTheme.colors.surface,
+    borderRadius: managementTheme.radii.md,
     padding: 12,
     gap: 10,
   },
@@ -212,26 +216,26 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 40,
     borderWidth: 1,
-    borderColor: "rgba(138,180,248,0.25)",
-    borderRadius: 10,
+    borderColor: managementTheme.colors.border,
+    borderRadius: managementTheme.radii.sm,
     paddingHorizontal: 10,
     backgroundColor: "rgba(20, 56, 99, 0.45)",
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
   },
-  searchInput: { flex: 1, color: "#eaf2ff", fontSize: 13, paddingVertical: 9 },
+  searchInput: { flex: 1, color: managementTheme.colors.inputText, fontSize: 13, paddingVertical: 9 },
   filterButton: {
     width: 40,
     height: 40,
-    borderRadius: 10,
+    borderRadius: managementTheme.radii.sm,
     borderWidth: 1,
     borderColor: "rgba(138,180,248,0.25)",
     backgroundColor: "rgba(20, 56, 99, 0.45)",
     alignItems: "center",
     justifyContent: "center",
   },
-  filterButtonActive: { backgroundColor: "#1d67e0", borderColor: "rgba(153, 196, 255, 0.65)" },
+  filterButtonActive: { backgroundColor: managementTheme.colors.primary, borderColor: "rgba(153, 196, 255, 0.65)" },
   filterCount: {
     position: "absolute",
     top: -5,
@@ -239,22 +243,22 @@ const styles = StyleSheet.create({
     minWidth: 17,
     height: 17,
     borderRadius: 9,
-    backgroundColor: "#34a873",
+    backgroundColor: managementTheme.colors.success,
     color: "#fff",
     fontSize: 10,
     fontWeight: "800",
     textAlign: "center",
     lineHeight: 17,
   },
-  counter: { color: "#b7c8e8", fontSize: 12, fontWeight: "700" },
+  counter: { color: managementTheme.colors.textMuted, fontSize: 12, fontWeight: "700" },
   filterPanel: { gap: 10, borderTopWidth: 1, borderTopColor: "rgba(138,180,248,0.16)", paddingTop: 10 },
   group: { gap: 6 },
-  groupLabel: { color: "#9fc0f6", fontSize: 11, fontWeight: "700" },
+  groupLabel: { color: managementTheme.colors.accent, fontSize: 11, fontWeight: "700" },
   filterInputBox: {
     minHeight: 38,
     borderWidth: 1,
     borderColor: "rgba(138,180,248,0.22)",
-    borderRadius: 10,
+    borderRadius: managementTheme.radii.sm,
     paddingHorizontal: 10,
     backgroundColor: "rgba(20, 56, 99, 0.35)",
     flexDirection: "row",
@@ -266,7 +270,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(138,180,248,0.24)",
     backgroundColor: "rgba(20, 56, 99, 0.35)",
-    borderRadius: 9,
+    borderRadius: managementTheme.radii.xs,
     paddingHorizontal: 10,
     paddingVertical: 7,
     flexDirection: "row",
@@ -274,7 +278,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   chipActive: {
-    backgroundColor: "#1d67e0",
+    backgroundColor: managementTheme.colors.primary,
     borderColor: "rgba(153, 196, 255, 0.65)",
   },
   chipText: { color: "#cddcf5", fontSize: 12, fontWeight: "700" },

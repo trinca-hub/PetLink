@@ -4,7 +4,7 @@ export type ApiResponse<T> = {
   error?: string | null;
 };
 
-export type StatusAgendamento = "Pendente" | "Confirmado" | "Cancelado";
+export type StatusAgendamento = "Pendente" | "Confirmado" | "Cancelado" | "Recusado";
 export type TipoServico = 1 | 2 | 3;
 
 export const TIPO_SERVICO_LABEL: Record<number, string> = {
@@ -41,8 +41,12 @@ export type AgendamentoConsulta = {
   tipoServico: TipoServico;
   observacao?: string | null;
   motivoCancelamento?: string | null;
+  motivoRecusa?: string | null;
+  motivoRemarcacao?: string | null;
   dataCriacao?: string | null;
   dataConfirmacao?: string | null;
   dataCancelamento?: string | null;
+  dataRecusa?: string | null;
+  dataUltimaRemarcacao?: string | null;
   rowVersion?: string | null;
 };

@@ -1,6 +1,9 @@
 import { api } from "@/src/api/api";
 
-export async function criarPedido(body: { usuarioId: number; dataPedido: string }, token?: string) {
+export async function criarPedido(
+  body: { usuarioId: number; enderecoUsuarioId?: number; dataPedido: string },
+  token?: string
+) {
   // POST /api/v1/Pedido
   return api("Pedido", "POST", body, token);
 }

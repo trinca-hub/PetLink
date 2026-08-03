@@ -5,6 +5,8 @@ import {
   getAdministradores,
 } from "@/src/api/administradorService";
 import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
+import { EmptyState, StatusPill } from "@/components/ManagementScreen";
+import { managementTheme } from "@/constants/managementTheme";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
@@ -54,14 +56,17 @@ export default function CadastroAdministrador() {
   const [emailFilter, setEmailFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("todos");
 
-  const statusOptions: SelectOption[] = [
-    { value: "1", label: "Ativo", subtitle: "Status = 1" },
-    { value: "2", label: "Desativado", subtitle: "Status = 2" },
-  ];
+  const statusOptions = useMemo<SelectOption[]>(
+    () => [
+      { value: "1", label: "Ativo", subtitle: "Status = 1" },
+      { value: "2", label: "Desativado", subtitle: "Status = 2" },
+    ],
+    []
+  );
 
   const selectedStatus = useMemo(
     () => statusOptions.find((option) => option.value === form.status),
-    [form.status]
+    [form.status, statusOptions]
   );
 
   const filteredAdministradores = useMemo(() => {
@@ -191,7 +196,7 @@ export default function CadastroAdministrador() {
   }
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
+    <LinearGradient colors={managementTheme.gradients.app} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCard}>
           <View style={styles.headerTextWrap}>
@@ -270,16 +275,19 @@ export default function CadastroAdministrador() {
           />
 
           {loading ? (
-            <Text style={styles.infoText}>Carregando administradores...</Text>
+            <EmptyState icon="hourglass-outline" title="Carregando administradores..." />
           ) : filteredAdministradores.length === 0 ? (
-            <Text style={styles.infoText}>Nenhum administrador encontrado.</Text>
+            <EmptyState title="Nenhum administrador encontrado" description="Cadastre um novo perfil ou ajuste os filtros." />
           ) : (
             filteredAdministradores.map((item) => (
               <View key={item.id} style={styles.itemCard}>
                 <View style={styles.itemMain}>
                   <Text style={styles.itemTitle}>{item.nome}</Text>
                   <Text style={styles.itemSubtitle}>{item.email}</Text>
-                  <Text style={styles.itemStatus}>Status: {Number(item.status) === 1 ? "Ativo" : "Desativado"}</Text>
+                  <StatusPill
+                    label={Number(item.status) === 1 ? "Ativo" : "Desativado"}
+                    tone={Number(item.status) === 1 ? "success" : "warning"}
+                  />
                 </View>
 
                 <TouchableOpacity style={[styles.iconAction, styles.iconDanger]} onPress={() => setConfirmDeleteId(item.id)}>

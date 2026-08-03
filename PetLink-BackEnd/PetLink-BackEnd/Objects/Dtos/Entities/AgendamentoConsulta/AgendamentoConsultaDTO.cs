@@ -14,8 +14,12 @@ namespace PetLink_BackEnd.Objects.Dtos.Entities.AgendamentoConsulta
         public TipoServico TipoServico { get; set; }
         public string? Observacao { get; set; }
         public string? MotivoCancelamento { get; set; }
+        public string? MotivoRecusa { get; set; }
+        public string? MotivoRemarcacao { get; set; }
         public DateTime DataCriacao { get; set; }
         public DateTime? DataConfirmacao { get; set; }
         public DateTime? DataCancelamento { get; set; }
+        public DateTime? DataRecusa { get; set; }
+        public DateTime? DataUltimaRemarcacao { get; set; }
     }
 }

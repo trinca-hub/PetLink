@@ -40,6 +40,12 @@ namespace PetLink_BackEnd.Objects.Models
         [Column("motivocancelamento")]
         public string? MotivoCancelamento { get; set; }
 
+        [Column("motivorecusa")]
+        public string? MotivoRecusa { get; set; }
+
+        [Column("motivoremarcacao")]
+        public string? MotivoRemarcacao { get; set; }
+
         [Column("datacriacao")]
         public DateTime DataCriacao { get; set; }
 
@@ -48,6 +54,12 @@ namespace PetLink_BackEnd.Objects.Models
 
         [Column("datacancelamento")]
         public DateTime? DataCancelamento { get; set; }
+
+        [Column("datarecusa")]
+        public DateTime? DataRecusa { get; set; }
+
+        [Column("dataultimaremarcacao")]
+        public DateTime? DataUltimaRemarcacao { get; set; }
 
         [Timestamp]
         [Column("rowversion")]

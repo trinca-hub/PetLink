@@ -4,9 +4,12 @@ import {
   Alert,
   FlatList,
   Image,
+  Modal,
   Pressable,
   SafeAreaView,
+  ScrollView,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
@@ -24,6 +27,14 @@ import {
   setCartProducts,
 } from "@/src/storage/cartProducts";
 import { checkoutFromItems } from "@/src/services/checkoutService";
+import {
+  EnderecoUsuario,
+  atualizarEnderecoUsuario,
+  criarEnderecoUsuario,
+  definirEnderecoPrincipal,
+  getEnderecosUsuario,
+  removerEnderecoUsuario,
+} from "@/src/api/enderecoService";
 import { TutorPalette } from "@/constants/theme";
 
 type ProdutoDTO = {
@@ -32,6 +43,37 @@ type ProdutoDTO = {
   preco: number;
   quantidade?: number;
   foto?: string;
+};
+
+type AddressForm = {
+  id?: number;
+  apelido: string;
+  destinatario: string;
+  telefone: string;
+  cep: string;
+  uf: string;
+  cidade: string;
+  bairro: string;
+  rua: string;
+  numero: string;
+  complemento: string;
+  referencia: string;
+  principal: boolean;
+};
+
+const emptyAddressForm: AddressForm = {
+  apelido: "Casa",
+  destinatario: "",
+  telefone: "",
+  cep: "",
+  uf: "",
+  cidade: "",
+  bairro: "",
+  rua: "",
+  numero: "",
+  complemento: "",
+  referencia: "",
+  principal: true,
 };
 
 function formatMoneyBR(valor?: number) {
@@ -46,6 +88,22 @@ function summarizeFailures(names: string[]) {
   return `${names.slice(0, 2).join(", ")}${names.length > 2 ? "..." : ""}`;
 }
 
+function normalizeAddressList(payload: any): EnderecoUsuario[] {
+  const list = Array.isArray(payload?.data?.data) ? payload.data.data : [];
+  return list.map((item: any) => ({
+    ...item,
+    id: Number(item.id),
+    usuarioId: Number(item.usuarioId),
+    numero: Number(item.numero),
+    principal: Boolean(item.principal),
+  }));
+}
+
+function formatAddress(address?: EnderecoUsuario | null) {
+  if (!address) return "Nenhum endereço selecionado";
+  return `${address.rua}, ${address.numero}${address.complemento ? ` - ${address.complemento}` : ""}`;
+}
+
 export default function Carrinho() {
   const { token, user } = useContext(AuthContext);
   const { openMenu } = useSideMenu();
@@ -53,10 +111,17 @@ export default function Carrinho() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [buying, setBuying] = useState(false);
+  const [savingAddress, setSavingAddress] = useState(false);
+  const [addressModalOpen, setAddressModalOpen] = useState(false);
 
   const [produtos, setProdutos] = useState<ProdutoDTO[]>([]);
   const [cartItems, setCartItems] = useState<CartProductItem[]>([]);
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [addresses, setAddresses] = useState<EnderecoUsuario[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
+  const [addressForm, setAddressForm] = useState<AddressForm>(emptyAddressForm);
+
+  const selectedAddress = addresses.find((item) => item.id === selectedAddressId) ?? null;
 
   function getEstoqueAtual(produtoId: number) {
     const p = produtos.find((x) => x.id === produtoId);
@@ -68,7 +133,25 @@ export default function Carrinho() {
     return estoque <= 0 || Number(item.quantidade) <= 0;
   }
 
-  async function load() {
+  const loadAddresses = useCallback(async () => {
+    if (!user?.id || !token) {
+      setAddresses([]);
+      setSelectedAddressId(null);
+      return;
+    }
+
+    const res = await getEnderecosUsuario(user.id, token);
+    const list = normalizeAddressList(res);
+    setAddresses(list);
+
+    const principal = list.find((item) => item.principal) ?? list[0];
+    setSelectedAddressId((prev) => {
+      if (prev && list.some((item) => item.id === prev)) return prev;
+      return principal?.id ?? null;
+    });
+  }, [user?.id, token]);
+
+  const load = useCallback(async () => {
     if (!user?.id) {
       setCartItems([]);
       setSelectedIds([]);
@@ -103,9 +186,10 @@ export default function Carrinho() {
 
     await setCartProducts(user.id, withStock);
     setCartItems(withStock);
-    setSelectedIds(withStock.filter((x) => !isUnavailable(x)).map((x) => x.produtoId));
+    setSelectedIds(withStock.filter((x) => Number(x.estoque) > 0 && Number(x.quantidade) > 0).map((x) => x.produtoId));
+    await loadAddresses();
     setLoading(false);
-  }
+  }, [loadAddresses, token, user?.id]);
 
   useFocusEffect(
     useCallback(() => {
@@ -118,7 +202,7 @@ export default function Carrinho() {
       return () => {
         isActive = false;
       };
-    }, [user?.id, token])
+    }, [load])
   );
 
   function toggleSelect(produtoId: number) {
@@ -132,10 +216,8 @@ export default function Carrinho() {
 
     const next = cartItems.map((x) => {
       if (x.produtoId !== produtoId) return x;
-
       const estoque = Number(x.estoque ?? getEstoqueAtual(x.produtoId));
       if (estoque <= 0) return { ...x, estoque, quantidade: 0 };
-
       return { ...x, estoque, quantidade: Math.max(1, Number(x.quantidade) - 1) };
     });
 
@@ -148,13 +230,9 @@ export default function Carrinho() {
 
     const next = cartItems.map((x) => {
       if (x.produtoId !== produtoId) return x;
-
       const estoque = Number(x.estoque ?? getEstoqueAtual(x.produtoId));
       if (estoque <= 0) return { ...x, estoque, quantidade: 0 };
-
-      const q = Number(x.quantidade ?? 1);
-      const nextQty = Math.min(q + 1, estoque);
-
+      const nextQty = Math.min(Number(x.quantidade ?? 1) + 1, estoque);
       return { ...x, estoque, quantidade: nextQty };
     });
 
@@ -164,7 +242,6 @@ export default function Carrinho() {
 
   async function removeItem(produtoId: number) {
     if (!user?.id) return;
-
     const next = await removeCartProduct(user.id, produtoId);
     setCartItems(next);
     setSelectedIds((prev) => prev.filter((id) => id !== produtoId));
@@ -176,8 +253,127 @@ export default function Carrinho() {
       .reduce((sum, x) => sum + Number(x.preco) * Number(x.quantidade), 0);
   }, [cartItems, selectedIds]);
 
+  function openNewAddress() {
+    setAddressForm({
+      ...emptyAddressForm,
+      destinatario: user?.nome ?? "",
+      principal: addresses.length === 0,
+    });
+    setAddressModalOpen(true);
+  }
+
+  function openEditAddress(address: EnderecoUsuario) {
+    setAddressForm({
+      id: address.id,
+      apelido: address.apelido || "Entrega",
+      destinatario: address.destinatario || user?.nome || "",
+      telefone: address.telefone || "",
+      cep: address.cep || "",
+      uf: address.uf || "",
+      cidade: address.cidade || "",
+      bairro: address.bairro || "",
+      rua: address.rua || "",
+      numero: String(address.numero || ""),
+      complemento: address.complemento || "",
+      referencia: address.referencia || "",
+      principal: Boolean(address.principal),
+    });
+    setAddressModalOpen(true);
+  }
+
+  function updateAddressField(key: keyof AddressForm, value: string | boolean) {
+    setAddressForm((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function buildAddressPayload(): EnderecoUsuario | null {
+    if (!user?.id) return null;
+    const numero = Number(addressForm.numero);
+
+    if (
+      !addressForm.cep.trim() ||
+      !addressForm.uf.trim() ||
+      !addressForm.cidade.trim() ||
+      !addressForm.bairro.trim() ||
+      !addressForm.rua.trim() ||
+      !numero
+    ) {
+      Alert.alert("Endereço", "Preencha CEP, UF, cidade, bairro, rua e número.");
+      return null;
+    }
+
+    return {
+      id: addressForm.id,
+      usuarioId: user.id,
+      apelido: addressForm.apelido.trim() || "Entrega",
+      destinatario: addressForm.destinatario.trim() || user.nome || "Destinatário",
+      telefone: addressForm.telefone.trim(),
+      cep: addressForm.cep.trim(),
+      uf: addressForm.uf.trim().toUpperCase(),
+      cidade: addressForm.cidade.trim(),
+      bairro: addressForm.bairro.trim(),
+      rua: addressForm.rua.trim(),
+      numero,
+      complemento: addressForm.complemento.trim(),
+      referencia: addressForm.referencia.trim(),
+      principal: addressForm.principal,
+      ativo: true,
+    };
+  }
+
+  async function saveAddress() {
+    if (!token) return;
+    const payload = buildAddressPayload();
+    if (!payload) return;
+
+    setSavingAddress(true);
+    const res = payload.id
+      ? await atualizarEnderecoUsuario(payload.id, payload, token)
+      : await criarEnderecoUsuario(payload, token);
+    setSavingAddress(false);
+
+    if (!res.ok) {
+      Alert.alert("Endereço", res?.data?.message || "Não foi possível salvar o endereço.");
+      return;
+    }
+
+    setAddressModalOpen(false);
+    await loadAddresses();
+  }
+
+  async function choosePrincipal(address: EnderecoUsuario) {
+    if (!token || !address.id) return;
+    setSelectedAddressId(address.id);
+    const res = await definirEnderecoPrincipal(address.id, token);
+    if (!res.ok) {
+      Alert.alert("Endereço", res?.data?.message || "Não foi possível definir o principal.");
+      return;
+    }
+    await loadAddresses();
+  }
+
+  async function deleteAddress(address: EnderecoUsuario) {
+    if (!token || !address.id) return;
+
+    Alert.alert("Remover endereço", `Remover ${address.apelido || "este endereço"}?`, [
+      { text: "Cancelar", style: "cancel" },
+      {
+        text: "Remover",
+        style: "destructive",
+        onPress: async () => {
+          const res = await removerEnderecoUsuario(address.id!, token);
+          if (!res.ok) {
+            Alert.alert("Endereço", res?.data?.message || "Não foi possível remover.");
+            return;
+          }
+          await loadAddresses();
+        },
+      },
+    ]);
+  }
+
   async function finalizarCompraSelecionados() {
     if (!user?.id || !token) return Alert.alert("Login", "Faça login para comprar.");
+    if (!selectedAddressId) return Alert.alert("Endereço de entrega", "Cadastre ou selecione um endereço para continuar.");
 
     const initiallySelected = cartItems.filter((x) => selectedIds.includes(x.produtoId));
     if (initiallySelected.length === 0) return Alert.alert("Carrinho", "Selecione pelo menos 1 produto.");
@@ -205,8 +401,12 @@ export default function Carrinho() {
         token,
         validItems.map((x) => ({
           produtoId: x.produtoId,
+          nome: x.nome,
+          preco: x.preco,
+          foto: x.foto,
           quantidade: Number(x.quantidade),
-        }))
+        })),
+        selectedAddressId
       );
 
       const confirmedIds = new Set(checkout.confirmedItems.map((item) => item.produtoId));
@@ -224,9 +424,7 @@ export default function Carrinho() {
         const failedNames = checkout.failedItems.map((f) => f.item.nome);
         Alert.alert(
           "Compra parcial",
-          `Itens confirmados: ${checkout.confirmedItems.length}. Falhas em: ${summarizeFailures(
-            failedNames
-          )}`
+          `Itens confirmados: ${checkout.confirmedItems.length}. Falhas em: ${summarizeFailures(failedNames)}`
         );
       } else {
         Alert.alert("Sucesso", "Compra realizada com sucesso!");
@@ -239,6 +437,57 @@ export default function Carrinho() {
     } finally {
       setBuying(false);
     }
+  }
+
+  function renderAddressCard(address: EnderecoUsuario) {
+    const checked = selectedAddressId === address.id;
+
+    return (
+      <Pressable
+        key={address.id}
+        onPress={() => setSelectedAddressId(address.id ?? null)}
+        style={{
+          padding: 12,
+          borderRadius: 16,
+          borderWidth: 1,
+          borderColor: checked ? TutorPalette.primary : "rgba(0,0,0,0.08)",
+          backgroundColor: checked ? "rgba(47,124,246,0.08)" : "#fff",
+          marginBottom: 10,
+        }}
+      >
+        <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
+          <View style={{ flex: 1 }}>
+            <Text style={{ color: TutorPalette.background, fontWeight: "900" }}>
+              {address.apelido || "Entrega"} {address.principal ? "• Principal" : ""}
+            </Text>
+            <Text style={{ color: TutorPalette.muted, fontWeight: "700", marginTop: 4 }}>
+              {formatAddress(address)}
+            </Text>
+            <Text style={{ color: TutorPalette.muted, marginTop: 2, fontSize: 12 }}>
+              {address.bairro}, {address.cidade} - {address.uf}
+            </Text>
+          </View>
+
+          <View style={{ width: 26, height: 26, borderRadius: 13, borderWidth: 2, borderColor: checked ? TutorPalette.primary : "rgba(0,0,0,0.2)", alignItems: "center", justifyContent: "center" }}>
+            {checked ? <View style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: TutorPalette.primary }} /> : null}
+          </View>
+        </View>
+
+        <View style={{ flexDirection: "row", gap: 14, marginTop: 10 }}>
+          <Pressable onPress={() => openEditAddress(address)}>
+            <Text style={{ color: TutorPalette.primary, fontWeight: "900" }}>Editar</Text>
+          </Pressable>
+          {!address.principal ? (
+            <Pressable onPress={() => choosePrincipal(address)}>
+              <Text style={{ color: TutorPalette.primary, fontWeight: "900" }}>Tornar principal</Text>
+            </Pressable>
+          ) : null}
+          <Pressable onPress={() => deleteAddress(address)}>
+            <Text style={{ color: TutorPalette.danger, fontWeight: "900" }}>Remover</Text>
+          </Pressable>
+        </View>
+      </Pressable>
+    );
   }
 
   return (
@@ -259,7 +508,7 @@ export default function Carrinho() {
         <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
           <View style={{ backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 20, padding: 14, borderWidth: 1, borderColor: TutorPalette.border }}>
             <Text style={{ color: TutorPalette.text, fontSize: 18, fontWeight: "900" }}>Carrinho</Text>
-            <Text style={{ color: TutorPalette.muted, fontSize: 13, marginTop: 4 }}>Escolha o que comprar sem perder a praticidade.</Text>
+            <Text style={{ color: TutorPalette.muted, fontSize: 13, marginTop: 4 }}>Selecione produtos e endereço de entrega antes de finalizar.</Text>
           </View>
         </View>
 
@@ -282,7 +531,27 @@ export default function Carrinho() {
             <FlatList
               data={cartItems}
               keyExtractor={(i) => String(i.produtoId)}
-              contentContainerStyle={{ paddingBottom: 140 }}
+              contentContainerStyle={{ paddingBottom: 186 }}
+              ListHeaderComponent={
+                <View style={{ marginBottom: 10 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                    <Text style={{ color: TutorPalette.background, fontWeight: "900", fontSize: 16 }}>Entrega</Text>
+                    <Pressable onPress={openNewAddress} style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
+                      <Ionicons name="add-circle-outline" size={18} color={TutorPalette.primary} />
+                      <Text style={{ color: TutorPalette.primary, fontWeight: "900" }}>Novo endereço</Text>
+                    </Pressable>
+                  </View>
+
+                  {addresses.length === 0 ? (
+                    <Pressable onPress={openNewAddress} style={{ borderRadius: 16, padding: 14, borderWidth: 1, borderColor: "rgba(47,124,246,0.25)", backgroundColor: "rgba(47,124,246,0.08)" }}>
+                      <Text style={{ color: TutorPalette.background, fontWeight: "900" }}>Cadastre um endereço para continuar</Text>
+                      <Text style={{ color: TutorPalette.muted, marginTop: 4, fontWeight: "700" }}>Você poderá salvar como principal e usar outros endereços depois.</Text>
+                    </Pressable>
+                  ) : (
+                    addresses.map(renderAddressCard)
+                  )}
+                </View>
+              }
               renderItem={({ item }) => {
                 const checked = selectedIds.includes(item.produtoId);
                 const estoque = Number(item.estoque ?? getEstoqueAtual(item.produtoId));
@@ -291,7 +560,7 @@ export default function Carrinho() {
 
                 return (
                   <View style={{ paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "rgba(0,0,0,0.06)" }}>
-                    <Pressable onPress={() => { if (indisponivel) return; toggleSelect(item.produtoId); }} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+                    <Pressable onPress={() => { if (!indisponivel) toggleSelect(item.produtoId); }} style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                       <View style={{ width: 26, height: 26, borderRadius: 8, borderWidth: 2, borderColor: indisponivel ? "rgba(0,0,0,0.12)" : checked ? TutorPalette.primary : "rgba(0,0,0,0.25)", backgroundColor: checked ? "rgba(47,124,246,0.12)" : "transparent", alignItems: "center", justifyContent: "center" }}>
                         {checked && <Ionicons name="checkmark" size={18} color={TutorPalette.primary} />}
                       </View>
@@ -343,8 +612,11 @@ export default function Carrinho() {
             />
           )}
 
-          <View style={{ position: "absolute", left: 14, right: 14, bottom: 14, backgroundColor: "rgba(255,255,255,0.9)", paddingTop: 10, borderRadius: 16, paddingHorizontal: 12, paddingBottom: 12 }}>
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
+          <View style={{ position: "absolute", left: 14, right: 14, bottom: 14, backgroundColor: "rgba(255,255,255,0.94)", paddingTop: 10, borderRadius: 16, paddingHorizontal: 12, paddingBottom: 12 }}>
+            <Text numberOfLines={1} style={{ color: TutorPalette.muted, fontWeight: "800", fontSize: 12 }}>
+              Entrega: {selectedAddress ? formatAddress(selectedAddress) : "cadastre ou selecione um endereço"}
+            </Text>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 6 }}>
               <Text style={{ fontWeight: "900", color: TutorPalette.background }}>Total selecionado</Text>
               <Text style={{ fontWeight: "900", color: TutorPalette.primary, fontSize: 16 }}>{formatMoneyBR(totalSelecionado)}</Text>
             </View>
@@ -354,6 +626,61 @@ export default function Carrinho() {
             </Pressable>
           </View>
         </View>
+
+        <Modal visible={addressModalOpen} transparent animationType="slide" onRequestClose={() => setAddressModalOpen(false)}>
+          <View style={{ flex: 1, backgroundColor: "rgba(5,10,18,0.52)", justifyContent: "flex-end" }}>
+            <View style={{ maxHeight: "88%", backgroundColor: "#fff", borderTopLeftRadius: 24, borderTopRightRadius: 24, padding: 18 }}>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+                <Text style={{ color: TutorPalette.background, fontWeight: "900", fontSize: 18 }}>
+                  {addressForm.id ? "Editar endereço" : "Novo endereço"}
+                </Text>
+                <Pressable onPress={() => setAddressModalOpen(false)} style={{ width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,0,0,0.05)" }}>
+                  <Ionicons name="close" size={20} color={TutorPalette.background} />
+                </Pressable>
+              </View>
+
+              <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ paddingBottom: 10 }}>
+                {[
+                  ["apelido", "Apelido", "Casa, trabalho..."],
+                  ["destinatario", "Destinatário", "Quem vai receber"],
+                  ["telefone", "Telefone", "Contato para entrega"],
+                  ["cep", "CEP", "00000000"],
+                  ["uf", "UF", "SP"],
+                  ["cidade", "Cidade", "Sua cidade"],
+                  ["bairro", "Bairro", "Seu bairro"],
+                  ["rua", "Rua", "Nome da rua"],
+                  ["numero", "Número", "Número"],
+                  ["complemento", "Complemento", "Apto, bloco..."],
+                  ["referencia", "Referência", "Ponto de referência"],
+                ].map(([key, label, placeholder]) => (
+                  <View key={key} style={{ marginBottom: 10 }}>
+                    <Text style={{ color: TutorPalette.background, fontWeight: "800", marginBottom: 6 }}>{label}</Text>
+                    <TextInput
+                      value={String(addressForm[key as keyof AddressForm] ?? "")}
+                      onChangeText={(value) => updateAddressField(key as keyof AddressForm, value)}
+                      placeholder={placeholder}
+                      placeholderTextColor="#99A3B3"
+                      keyboardType={key === "numero" || key === "cep" || key === "telefone" ? "numeric" : "default"}
+                      autoCapitalize={key === "uf" ? "characters" : "sentences"}
+                      style={{ height: 46, borderRadius: 14, borderWidth: 1, borderColor: "rgba(0,0,0,0.1)", paddingHorizontal: 12, color: TutorPalette.background, backgroundColor: "#F7F9FC" }}
+                    />
+                  </View>
+                ))}
+
+                <Pressable onPress={() => updateAddressField("principal", !addressForm.principal)} style={{ flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8 }}>
+                  <View style={{ width: 24, height: 24, borderRadius: 7, borderWidth: 2, borderColor: addressForm.principal ? TutorPalette.primary : "rgba(0,0,0,0.2)", alignItems: "center", justifyContent: "center" }}>
+                    {addressForm.principal ? <Ionicons name="checkmark" size={16} color={TutorPalette.primary} /> : null}
+                  </View>
+                  <Text style={{ color: TutorPalette.background, fontWeight: "900" }}>Usar como endereço principal</Text>
+                </Pressable>
+
+                <Pressable onPress={saveAddress} disabled={savingAddress} style={{ marginTop: 12, borderRadius: 999, backgroundColor: TutorPalette.primary, paddingVertical: 13, alignItems: "center" }}>
+                  {savingAddress ? <ActivityIndicator color="#fff" /> : <Text style={{ color: "#fff", fontWeight: "900" }}>Salvar endereço</Text>}
+                </Pressable>
+              </ScrollView>
+            </View>
+          </View>
+        </Modal>
       </SafeAreaView>
     </LinearGradient>
   );

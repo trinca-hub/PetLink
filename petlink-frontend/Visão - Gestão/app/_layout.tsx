@@ -1,7 +1,5 @@
-import { Stack } from "expo-router";
-import { AuthProvider } from "@/src/context/AuthContext";
-import { AuthContext } from "@/src/context/AuthContext";
-import { useRouter, usePathname } from "expo-router";
+import { Stack, usePathname, useRouter } from "expo-router";
+import { AuthContext, AuthProvider } from "@/src/context/AuthContext";
 import { useContext, useEffect } from "react";
 
 function RoleRouteGuard() {

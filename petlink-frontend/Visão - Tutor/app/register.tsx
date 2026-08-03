@@ -8,6 +8,7 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from "react-native";
 import { registerService } from "../src/api/authService";
 import { useRouter } from "expo-router";
@@ -21,42 +22,43 @@ export default function Register() {
 
   const [form, setForm] = useState({
     nome: "",
-    telefone: "",
-    cep: "",
-    uf: "",
-    cidade: "",
-    bairro: "",
-    rua: "",
-    numero: "",
     email: "",
     senha: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  function handleChange(key: string, value: string) {
+  function handleChange(key: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   async function handleRegister() {
+    if (!form.nome.trim() || !form.email.trim() || !form.senha.trim()) {
+      alert("Preencha nome, email e senha.");
+      return;
+    }
+
+    setLoading(true);
     const payload = {
-      nome: form.nome,
-      telefone: form.telefone,
-      cep: form.cep,
-      uf: form.uf,
-      cidade: form.cidade,
-      bairro: form.bairro,
-      rua: form.rua,
-      numero: Number(form.numero),
-      email: form.email,
+      nome: form.nome.trim(),
+      telefone: "",
+      cep: "",
+      uf: "",
+      cidade: "",
+      bairro: "",
+      rua: "",
+      numero: 0,
+      email: form.email.trim().toLowerCase(),
       senha: form.senha,
     };
 
     const result = await registerService(payload);
+    setLoading(false);
 
     if (result.ok) {
       alert("Conta criada!");
       router.replace("/login");
     } else {
-      alert("Erro ao cadastrar!");
+      alert(result?.data?.message || "Erro ao cadastrar.");
     }
   }
 
@@ -68,42 +70,65 @@ export default function Register() {
     >
       <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={{ flex: 1 }}>
         <LinearGradient
-          colors={["rgba(7, 21, 43, 0.84)", "rgba(15, 33, 60, 0.94)", "rgba(47, 124, 246, 0.92)"]}
+          colors={["rgba(7, 21, 43, 0.86)", "rgba(15, 33, 60, 0.94)", "rgba(47, 124, 246, 0.9)"]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.card}
         >
           <KeyboardAwareScrollView
-            extraScrollHeight={220}
+            extraScrollHeight={160}
             keyboardOpeningTime={0}
-            enableOnAndroid={true}
+            enableOnAndroid
             showsVerticalScrollIndicator={false}
           >
             <View style={styles.header}>
               <View style={styles.badge}>
-                <Ionicons name="sparkles" size={18} color={TutorPalette.accent} />
+                <Ionicons name="person-add-outline" size={20} color={TutorPalette.accent} />
               </View>
               <Text style={styles.title}>Criar conta</Text>
-              <Text style={styles.subtitle}>Personalize seu perfil e comece a usar o PetLink.</Text>
+              <Text style={styles.subtitle}>
+                Comece com seus dados de acesso. O endereço de entrega será escolhido na compra.
+              </Text>
             </View>
 
-            <Ionicons name="person-add-outline" size={84} color="#fff" style={{ alignSelf: "center", marginBottom: 18 }} />
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>NOME</Text>
+              <TextInput
+                value={form.nome}
+                onChangeText={(v) => handleChange("nome", v)}
+                style={styles.input}
+                placeholder="Digite seu nome"
+                placeholderTextColor="#9EB1C8"
+              />
+            </View>
 
-            {Object.keys(form).map((key) => (
-              <View key={key} style={styles.inputGroup}>
-                <Text style={styles.label}>{key.toUpperCase()}</Text>
-                <TextInput
-                  value={form[key as keyof typeof form]}
-                  onChangeText={(v) => handleChange(key, v)}
-                  style={styles.input}
-                  placeholder={`Digite ${key}`}
-                  placeholderTextColor="#9EB1C8"
-                />
-              </View>
-            ))}
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>EMAIL</Text>
+              <TextInput
+                value={form.email}
+                onChangeText={(v) => handleChange("email", v)}
+                style={styles.input}
+                placeholder="Digite seu email"
+                placeholderTextColor="#9EB1C8"
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
 
-            <TouchableOpacity style={styles.button} onPress={handleRegister}>
-              <Text style={styles.buttonText}>Cadastrar</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>SENHA</Text>
+              <TextInput
+                value={form.senha}
+                onChangeText={(v) => handleChange("senha", v)}
+                style={styles.input}
+                placeholder="Crie uma senha"
+                placeholderTextColor="#9EB1C8"
+                secureTextEntry
+              />
+            </View>
+
+            <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
+              {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.buttonText}>Cadastrar</Text>}
             </TouchableOpacity>
 
             <Text style={styles.footerText}>
@@ -126,37 +151,38 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 24,
     padding: 24,
-    marginVertical: 36,
+    marginVertical: 56,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.16)",
   },
   header: {
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 24,
   },
   badge: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
+    width: 48,
+    height: 48,
+    borderRadius: 16,
     backgroundColor: "rgba(255,255,255,0.14)",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 8,
+    marginBottom: 10,
   },
   title: {
     fontSize: 28,
     color: "#fff",
     fontWeight: "800",
-    marginBottom: 4,
+    marginBottom: 6,
   },
   subtitle: {
-    color: "rgba(255,255,255,0.8)",
+    color: "rgba(255,255,255,0.82)",
     fontSize: 13,
     textAlign: "center",
+    lineHeight: 19,
   },
   inputGroup: {
     width: "100%",
-    marginBottom: 12,
+    marginBottom: 14,
   },
   label: {
     color: "#fff",
@@ -165,22 +191,25 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   input: {
-    backgroundColor: "rgba(245,247,255,0.95)",
+    backgroundColor: "rgba(245,247,255,0.96)",
     borderRadius: 16,
     paddingHorizontal: 14,
-    height: 46,
+    height: 48,
     color: TutorPalette.background,
   },
   button: {
     width: "100%",
+    minHeight: 48,
     backgroundColor: TutorPalette.primary,
     borderRadius: 16,
     paddingVertical: 13,
-    marginTop: 12,
+    marginTop: 10,
     shadowColor: TutorPalette.shadow,
     shadowOpacity: 0.24,
     shadowRadius: 10,
     shadowOffset: { width: 0, height: 6 },
+    alignItems: "center",
+    justifyContent: "center",
   },
   buttonText: {
     color: "#fff",

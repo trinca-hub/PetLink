@@ -1,10 +1,11 @@
 import AdminActionCard from "@/components/AdminActionCard";
+import { ManagementScreen } from "@/components/ManagementScreen";
+import { managementStyles, managementTheme } from "@/constants/managementTheme";
 import { AuthContext } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { useContext } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function HomeVet() {
   const router = useRouter();
@@ -16,118 +17,122 @@ export default function HomeVet() {
   }
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.badge}>Veterinário</Text>
-            <Text style={styles.title}>Painel Veterinário</Text>
-            <Text style={styles.subtitle}>Olá, {user?.nome || "Veterinário"}. Você pode criar serviços para os pets.</Text>
+    <ManagementScreen
+      eyebrow="Atendimento clínico"
+      title="Painel Veterinário"
+      subtitle={`Olá, ${user?.nome || "Veterinário"}. Organize agenda, acompanhe solicitações e mantenha os serviços clínicos atualizados.`}
+      action={{ label: "Sair", icon: "log-out-outline", onPress: handleLogout }}
+    >
+      <View style={styles.overviewGrid}>
+        {[
+          { label: "Agenda", value: "Slots", icon: "calendar-outline", text: "Disponibilidade de atendimento" },
+          { label: "Solicitações", value: "Fila", icon: "chatbubbles-outline", text: "Pedidos de consulta para acompanhar" },
+          { label: "Serviços", value: "Catálogo", icon: "construct-outline", text: "Procedimentos vinculados aos pets" },
+        ].map((item) => (
+          <View key={item.label} style={styles.focusCard}>
+            <View style={styles.focusIcon}>
+              <Ionicons name={item.icon as any} size={18} color={managementTheme.colors.textStrong} />
+            </View>
+            <Text style={styles.focusValue}>{item.value}</Text>
+            <Text style={styles.focusLabel}>{item.label}</Text>
+            <Text style={styles.focusText}>{item.text}</Text>
           </View>
+        ))}
+      </View>
 
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={18} color="#dbe9ff" />
-            <Text style={styles.logoutText}>Sair</Text>
-          </TouchableOpacity>
+      <View style={managementStyles.panel}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Rotina veterinária</Text>
+          <Text style={styles.sectionHint}>Acesso rápido</Text>
         </View>
 
-        <View style={styles.actionsWrap}>
-          <Text style={styles.sectionTitle}>Ações disponíveis</Text>
-
+        <View style={styles.actionsGrid}>
           <AdminActionCard
             title="Minha Agenda"
-            subtitle="Configurar disponibilidade e ver slots"
+            subtitle="Configurar disponibilidade e consultar slots"
             icon="calendar-outline"
             onPress={() => router.push("/vet-agenda")}
           />
 
           <AdminActionCard
             title="Solicitações de Consulta"
-            subtitle="Enviar e acompanhar solicitações"
+            subtitle="Enviar e acompanhar solicitações clínicas"
             icon="chatbubbles-outline"
             onPress={() => router.push("/vet-solicitacoes")}
           />
 
           <AdminActionCard
             title="Criar Serviços"
-            subtitle="Cadastrar novos serviços vinculados aos pets"
+            subtitle="Cadastrar serviços vinculados aos pets"
             icon="construct-outline"
             onPress={() => router.push("/adm-servicos")}
           />
         </View>
-      </ScrollView>
-    </LinearGradient>
+      </View>
+    </ManagementScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    width: "100%",
-    maxWidth: 1080,
-    alignSelf: "center",
-    paddingHorizontal: 22,
-    paddingVertical: 22,
-    gap: 16,
-  },
-  header: {
-    borderWidth: 1,
-    borderColor: "rgba(138,180,248,0.30)",
-    backgroundColor: "rgba(19, 37, 59, 0.9)",
-    borderRadius: 18,
-    padding: 18,
+  overviewGrid: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    flexWrap: "wrap",
     gap: 12,
   },
-  badge: {
-    color: "#9fc0f6",
+  focusCard: {
+    minWidth: 220,
+    flex: 1,
+    borderWidth: 1,
+    borderColor: managementTheme.colors.border,
+    backgroundColor: "rgba(15, 23, 42, 0.82)",
+    borderRadius: managementTheme.radii.lg,
+    padding: 16,
+  },
+  focusIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 11,
+    backgroundColor: managementTheme.colors.successSoft,
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 12,
+  },
+  focusValue: {
+    color: managementTheme.colors.textStrong,
+    fontSize: 22,
+    fontWeight: "900",
+  },
+  focusLabel: {
+    color: managementTheme.colors.text,
+    fontSize: 13,
+    fontWeight: "900",
+    marginTop: 2,
+  },
+  focusText: {
+    color: managementTheme.colors.textSubtle,
     fontSize: 12,
-    fontWeight: "700",
-    marginBottom: 2,
+    lineHeight: 17,
+    marginTop: 5,
   },
-  title: {
-    color: "#eff5ff",
-    fontSize: 30,
-    fontWeight: "700",
-    lineHeight: 34,
-  },
-  subtitle: {
-    color: "#b7c8e8",
-    marginTop: 4,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  logoutButton: {
+  sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(26, 72, 130, 0.6)",
-    borderWidth: 1,
-    borderColor: "rgba(138, 180, 248, 0.4)",
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  logoutText: {
-    color: "#dbe9ff",
-    fontWeight: "700",
-    fontSize: 13,
-  },
-  actionsWrap: {
-    borderWidth: 1,
-    borderColor: "rgba(138,180,248,0.20)",
-    backgroundColor: "rgba(13, 32, 53, 0.88)",
-    borderRadius: 16,
-    padding: 16,
+    justifyContent: "space-between",
     gap: 10,
   },
   sectionTitle: {
-    color: "#edf4ff",
+    color: managementTheme.colors.text,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "900",
+  },
+  sectionHint: {
+    color: managementTheme.colors.textSubtle,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  actionsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
   },
 });

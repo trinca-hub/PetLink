@@ -9,7 +9,14 @@ namespace PetLink_BackEnd.Data.Builders
         {
             modelBuilder.Entity<Pedido>().HasKey(p => p.Id);
             modelBuilder.Entity<Pedido>().Property(p => p.UsuarioId).IsRequired();
+            modelBuilder.Entity<Pedido>().Property(p => p.EnderecoUsuarioId).IsRequired(false);
             modelBuilder.Entity<Pedido>().Property(p => p.DataPedido).IsRequired();
+
+            modelBuilder.Entity<Pedido>()
+                .HasOne(p => p.EnderecoUsuario)
+                .WithMany()
+                .HasForeignKey(p => p.EnderecoUsuarioId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Pedido>()
                 .HasData(new List<Pedido>

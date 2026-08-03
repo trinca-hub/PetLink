@@ -18,11 +18,20 @@ export default function LoginVet() {
     if (result.code === 1) {
       router.replace("/home-vet");
     } else {
-      setError(result.message || "Email ou senha inválidos");
+      setError(result.message || "E-mail ou senha inválidos");
     }
 
     setLoading(false);
   }
 
-  return <LoginForm title="Login Veterinário" onSubmit={handleLogin} loading={loading} error={error} />;
+  return (
+    <LoginForm
+      title="Login Veterinário"
+      subtitle="Acesse agenda e serviços veterinários."
+      profileLabel="Acesso veterinário."
+      onSubmit={handleLogin}
+      loading={loading}
+      error={error}
+    />
+  );
 }
