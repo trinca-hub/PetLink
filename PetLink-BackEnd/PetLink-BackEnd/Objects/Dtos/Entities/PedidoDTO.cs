@@ -4,6 +4,7 @@
     {
         public int Id { get; set; }
         public int UsuarioId { get; set; }
+        public int? EnderecoUsuarioId { get; set; }
         public DateTime DataPedido { get; set; }
     }
 }

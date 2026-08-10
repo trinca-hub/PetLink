@@ -6,7 +6,7 @@ export function getApiErrorMessage(payload: any, fallback: string) {
 
   const validationErrors = payload?.errors;
   if (validationErrors && typeof validationErrors === "object") {
-    const entries = Object.entries(validationErrors) as Array<[string, string[]]>;
+    const entries = Object.entries(validationErrors) as [string, string[]][];
     const messages = entries
       .flatMap(([, value]) => (Array.isArray(value) ? value : []))
       .filter(Boolean);

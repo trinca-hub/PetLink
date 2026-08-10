@@ -28,7 +28,9 @@ namespace PetLink_BackEnd.Data.Builders
                 .IsUnique();
 
             modelBuilder.Entity<AgendaVeterinario>()
-                .HasCheckConstraint("CK_agendaveterinario_horarios", "horainiciomanha < horafimmanha AND horainiciotarde < horafimtarde");
+                .HasCheckConstraint(
+                    "CK_agendaveterinario_horarios",
+                    "horainiciomanha = INTERVAL '08:00:00' AND horafimmanha = INTERVAL '11:00:00' AND horainiciotarde = INTERVAL '13:00:00' AND horafimtarde = INTERVAL '17:00:00'");
 
             modelBuilder.Entity<AgendaVeterinario>()
                 .HasCheckConstraint("CK_agendaveterinario_dias", "diassemanaativos > 0");

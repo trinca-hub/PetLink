@@ -1,11 +1,12 @@
 import AdminActionCard from "@/components/AdminActionCard";
+import { ManagementScreen } from "@/components/ManagementScreen";
 import { FUNC_MENU } from "@/constants/funcMenu";
+import { managementStyles, managementTheme } from "@/constants/managementTheme";
 import { AuthContext } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import { LinearGradient } from "expo-linear-gradient";
 import { useContext } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 
 export default function HomeFunc() {
   const router = useRouter();
@@ -17,24 +18,35 @@ export default function HomeFunc() {
   }
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View style={styles.header}>
-          <View>
-            <Text style={styles.badge}>Funcionário</Text>
-            <Text style={styles.title}>Painel Operacional</Text>
-            <Text style={styles.subtitle}>Olá, {user?.nome || "Funcionário"}. Acesse apenas os módulos operacionais permitidos.</Text>
+    <ManagementScreen
+      eyebrow="Operação"
+      title="Painel Operacional"
+      subtitle={`Olá, ${user?.nome || "Funcionário"}. Acesse os módulos do dia a dia com foco em estoque, pets, pedidos e serviços.`}
+      action={{ label: "Sair", icon: "log-out-outline", onPress: handleLogout }}
+    >
+      <View style={styles.workflowPanel}>
+        {[
+          { icon: "cube-outline", title: "Estoque organizado", text: "Atualize itens antes de gerar pedidos." },
+          { icon: "paw-outline", title: "Pets vinculados", text: "Mantenha os cadastros consistentes." },
+          { icon: "receipt-outline", title: "Pedidos controlados", text: "Crie e cancele pedidos com rastreio de itens." },
+        ].map((item) => (
+          <View key={item.title} style={styles.workflowItem}>
+            <Ionicons name={item.icon as any} size={18} color={managementTheme.colors.accent} />
+            <View style={styles.workflowCopy}>
+              <Text style={styles.workflowTitle}>{item.title}</Text>
+              <Text style={styles.workflowText}>{item.text}</Text>
+            </View>
           </View>
+        ))}
+      </View>
 
-          <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
-            <Ionicons name="log-out-outline" size={18} color="#dbe9ff" />
-            <Text style={styles.logoutText}>Sair</Text>
-          </TouchableOpacity>
+      <View style={managementStyles.panel}>
+        <View style={styles.sectionHeader}>
+          <Text style={styles.sectionTitle}>Módulos operacionais</Text>
+          <Text style={styles.sectionHint}>Permissões do perfil</Text>
         </View>
 
-        <View style={styles.actionsWrap}>
-          <Text style={styles.sectionTitle}>Ações disponíveis</Text>
-
+        <View style={styles.actionsGrid}>
           {FUNC_MENU.map((item) => (
             <AdminActionCard
               key={item.route}
@@ -45,79 +57,65 @@ export default function HomeFunc() {
             />
           ))}
         </View>
-      </ScrollView>
-    </LinearGradient>
+      </View>
+    </ManagementScreen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  content: {
-    width: "100%",
-    maxWidth: 1080,
-    alignSelf: "center",
-    paddingHorizontal: 22,
-    paddingVertical: 22,
-    gap: 16,
-  },
-  header: {
+  workflowPanel: {
     borderWidth: 1,
-    borderColor: "rgba(138,180,248,0.30)",
-    backgroundColor: "rgba(19, 37, 59, 0.9)",
-    borderRadius: 18,
-    padding: 18,
+    borderColor: managementTheme.colors.border,
+    backgroundColor: "rgba(15, 23, 42, 0.82)",
+    borderRadius: managementTheme.radii.lg,
+    padding: 16,
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
+    flexWrap: "wrap",
     gap: 12,
   },
-  badge: {
-    color: "#9fc0f6",
+  workflowItem: {
+    minWidth: 230,
+    flex: 1,
+    flexDirection: "row",
+    gap: 11,
+    alignItems: "flex-start",
+    backgroundColor: "rgba(30, 41, 59, 0.42)",
+    borderRadius: managementTheme.radii.md,
+    padding: 12,
+  },
+  workflowCopy: {
+    flex: 1,
+    gap: 3,
+  },
+  workflowTitle: {
+    color: managementTheme.colors.text,
+    fontSize: 13,
+    fontWeight: "900",
+  },
+  workflowText: {
+    color: managementTheme.colors.textSubtle,
     fontSize: 12,
-    fontWeight: "700",
-    marginBottom: 2,
+    lineHeight: 17,
   },
-  title: {
-    color: "#eff5ff",
-    fontSize: 30,
-    fontWeight: "700",
-    lineHeight: 34,
-  },
-  subtitle: {
-    color: "#b7c8e8",
-    marginTop: 4,
-    fontSize: 14,
-    lineHeight: 20,
-  },
-  logoutButton: {
+  sectionHeader: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
-    backgroundColor: "rgba(26, 72, 130, 0.6)",
-    borderWidth: 1,
-    borderColor: "rgba(138, 180, 248, 0.4)",
-    borderRadius: 12,
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-  },
-  logoutText: {
-    color: "#dbe9ff",
-    fontWeight: "700",
-    fontSize: 13,
-  },
-  actionsWrap: {
-    borderWidth: 1,
-    borderColor: "rgba(138,180,248,0.20)",
-    backgroundColor: "rgba(13, 32, 53, 0.88)",
-    borderRadius: 16,
-    padding: 16,
+    justifyContent: "space-between",
     gap: 10,
   },
   sectionTitle: {
-    color: "#edf4ff",
+    color: managementTheme.colors.text,
     fontSize: 16,
-    fontWeight: "700",
+    fontWeight: "900",
+  },
+  sectionHint: {
+    color: managementTheme.colors.textSubtle,
+    fontSize: 12,
+    fontWeight: "800",
+  },
+  actionsGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 10,
   },
 });

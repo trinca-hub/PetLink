@@ -22,6 +22,12 @@ namespace PetLink_BackEnd.Objects.Models
         public int UsuarioId { get; set; }
         public Usuario Usuario { get; set; } = null!;
 
+        [Column("origemsolicitacao")]
+        public OrigemSolicitacao OrigemSolicitacao { get; set; }
+
+        [Column("ultimoresponsavelremarcacao")]
+        public OrigemSolicitacao? UltimoResponsavelRemarcacao { get; set; }
+
         [Column("datahorainicio")]
         public DateTime? DataHoraInicio { get; set; }
 
@@ -40,6 +46,12 @@ namespace PetLink_BackEnd.Objects.Models
         [Column("motivocancelamento")]
         public string? MotivoCancelamento { get; set; }
 
+        [Column("motivorecusa")]
+        public string? MotivoRecusa { get; set; }
+
+        [Column("motivoremarcacao")]
+        public string? MotivoRemarcacao { get; set; }
+
         [Column("datacriacao")]
         public DateTime DataCriacao { get; set; }
 
@@ -49,18 +61,25 @@ namespace PetLink_BackEnd.Objects.Models
         [Column("datacancelamento")]
         public DateTime? DataCancelamento { get; set; }
 
+        [Column("datarecusa")]
+        public DateTime? DataRecusa { get; set; }
+
+        [Column("dataultimaremarcacao")]
+        public DateTime? DataUltimaRemarcacao { get; set; }
+
         [Timestamp]
         [Column("rowversion")]
         public byte[] RowVersion { get; set; } = Array.Empty<byte>();
 
         public AgendamentoConsulta() { }
 
-        public AgendamentoConsulta(int id, int veterinarioId, int petId, int usuarioId, DateTime dataHoraInicio, DateTime dataHoraFim, StatusAgendamento status, TipoServico tipoServico, string? observacao, string? motivoCancelamento, DateTime dataCriacao, DateTime? dataConfirmacao, DateTime? dataCancelamento)
+        public AgendamentoConsulta(int id, int veterinarioId, int petId, int usuarioId, OrigemSolicitacao origemSolicitacao, DateTime dataHoraInicio, DateTime dataHoraFim, StatusAgendamento status, TipoServico tipoServico, string? observacao, string? motivoCancelamento, DateTime dataCriacao, DateTime? dataConfirmacao, DateTime? dataCancelamento)
         {
             Id = id;
             VeterinarioId = veterinarioId;
             PetId = petId;
             UsuarioId = usuarioId;
+            OrigemSolicitacao = origemSolicitacao;
             DataHoraInicio = dataHoraInicio;
             DataHoraFim = dataHoraFim;
             Status = status;

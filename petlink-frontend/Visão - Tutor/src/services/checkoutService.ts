@@ -169,6 +169,7 @@ export async function checkoutFromItems(
   userId: number,
   token: string,
   items: CheckoutItemInput[],
+  enderecoUsuarioId?: number,
   options?: RetryOptions
 ): Promise<CheckoutResult> {
   const normalizedItems = normalizeItems(items);
@@ -188,7 +189,7 @@ export async function checkoutFromItems(
 
   try {
     const pedidoRes = await runWithRetry(
-      () => criarPedido({ usuarioId: userId, dataPedido: new Date().toISOString() }, token),
+      () => criarPedido({ usuarioId: userId, enderecoUsuarioId, dataPedido: new Date().toISOString() }, token),
       options
     );
 

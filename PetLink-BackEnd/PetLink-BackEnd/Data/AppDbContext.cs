@@ -9,6 +9,7 @@ public class AppDbContext : DbContext
 
     public DbSet<Produto> Produtos { get; set; }
     public DbSet<Usuario> Usuarios { get; set; }
+    public DbSet<EnderecoUsuario> EnderecosUsuarios { get; set; }
     public DbSet<Funcionario> Funcionarios { get; set; }
     public DbSet<Administrador> Administradores { get; set; }
     public DbSet<Veterinario> Veterinarios { get; set; }
@@ -21,6 +22,7 @@ public class AppDbContext : DbContext
     public DbSet<AnuncioPetFinder> AnunciosPetFinder { get; set; }
     public DbSet<AnuncioPeTinder> AnunciosPeTinder { get; set; }
     public DbSet<AgendaVeterinario> AgendasVeterinarios { get; set; }
+    public DbSet<AgendaSlotBloqueado> AgendaSlotsBloqueados { get; set; }
     public DbSet<AgendamentoConsulta> AgendamentosConsultas { get; set; }
 
 
@@ -32,6 +34,7 @@ public class AppDbContext : DbContext
 
         ProdutoBuilder.Build(modelBuilder);
         UsuarioBuilder.Build(modelBuilder);
+        EnderecoUsuarioBuilder.Build(modelBuilder);
         FuncionarioBuilder.Build(modelBuilder);
         AdministradorBuilder.Build(modelBuilder);
         VeterinarioBuilder.Build(modelBuilder);
@@ -44,6 +47,7 @@ public class AppDbContext : DbContext
         AnuncioPetFinderBuilder.Build(modelBuilder);
         AnuncioPeTinderBuilder.Build(modelBuilder);
         AgendaVeterinarioBuilder.Build(modelBuilder);
+        AgendaSlotBloqueadoBuilder.Build(modelBuilder);
         AgendamentoConsultaBuilder.Build(modelBuilder);
 
 

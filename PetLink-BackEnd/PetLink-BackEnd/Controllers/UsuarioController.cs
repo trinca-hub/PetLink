@@ -81,6 +81,12 @@ public class UsuarioController : Controller
             // Zeramos o id antes de cadastrar para que o banco gere automaticamente
             // e evite conflito com ids existentes
             usuarioDTO.Id = 0;
+            usuarioDTO.Telefone ??= string.Empty;
+            usuarioDTO.Cep ??= string.Empty;
+            usuarioDTO.Uf ??= string.Empty;
+            usuarioDTO.Cidade ??= string.Empty;
+            usuarioDTO.Bairro ??= string.Empty;
+            usuarioDTO.Rua ??= string.Empty;
 
             // Cria o hash da senha para maior segurança
             usuarioDTO.Senha = GenerateSha256Hash(usuarioDTO.Senha);
@@ -314,6 +320,7 @@ public class UsuarioController : Controller
             new Claim(JwtRegisteredClaimNames.Sub, usuarioDTO.Id.ToString()), // ✅ agora é o ID
             new Claim(ClaimTypes.NameIdentifier, usuarioDTO.Id.ToString()),   // ✅ padrão
             new Claim(JwtRegisteredClaimNames.Email, usuarioDTO.Email),
+            new Claim(ClaimTypes.Role, "Tutor"),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

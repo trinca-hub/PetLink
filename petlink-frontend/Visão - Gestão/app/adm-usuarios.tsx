@@ -1,6 +1,8 @@
 import { deleteUsuario, getUsuarios, Usuario } from "@/src/api/usuarioService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import ListControls, { SortState, TextFilter } from "@/components/ListControls";
+import { EmptyState } from "@/components/ManagementScreen";
+import { managementTheme } from "@/constants/managementTheme";
 import { AuthContext } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -93,7 +95,7 @@ export default function ListaUsuarios() {
   }
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
+    <LinearGradient colors={managementTheme.gradients.app} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCard}>
           <View style={styles.headerTextWrap}>
@@ -126,9 +128,9 @@ export default function ListaUsuarios() {
 
         <View style={styles.listCard}>
           {loading ? (
-            <Text style={styles.infoText}>Carregando usuários...</Text>
+            <EmptyState icon="hourglass-outline" title="Carregando usuários..." />
           ) : filteredUsuarios.length === 0 ? (
-            <Text style={styles.infoText}>Nenhum usuário cadastrado.</Text>
+            <EmptyState title="Nenhum usuário encontrado" description="Ajuste a busca para localizar outro tutor." />
           ) : (
             filteredUsuarios.map((item) => (
               <View key={item.id} style={styles.itemCard}>

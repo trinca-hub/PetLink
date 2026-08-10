@@ -9,5 +9,7 @@ namespace PetLink_BackEnd.Services.Interfaces
         Task<AgendaDTO> BuscarAgendaVeterinario(int veterinarioId);
         Task<IEnumerable<SlotDisponivelDTO>> GerarSlotsDisponiveis(int veterinarioId, DateTime? dataInicio);
         Task<IEnumerable<SlotDisponivelDTO>> GerarSlotsDisponiveisTutor(int veterinarioId, DateTime? dataInicio);
+        Task BloquearSlot(BloquearSlotDTO dto, int? veterinarioId);
+        Task DesbloquearSlot(int veterinarioId, DateTime dataHoraInicio, int? veterinarioAutenticadoId);
     }
 }

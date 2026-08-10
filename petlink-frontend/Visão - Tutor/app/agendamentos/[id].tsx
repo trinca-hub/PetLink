@@ -17,8 +17,13 @@ import {
   cancelarAgendamento,
   confirmarAgendamento,
   getAgendamentoById,
+  remarcarAgendamento,
 } from "@/src/api/agendamentoService";
-import { getAgendaSlots } from "@/src/api/agendaVeterinarioService";
+import {
+  filtrarSlotsHorarioAtendimento,
+  getAgendaSlots,
+  isDataHoraDentroHorarioAtendimento,
+} from "@/src/api/agendaVeterinarioService";
 import { getMyPetsService } from "@/src/api/authService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AgendamentoConsulta, SlotDisponivel, TIPO_SERVICO_LABEL } from "@/src/types/agendamento";
@@ -88,6 +93,7 @@ export default function AgendamentoDetalheScreen() {
   const [saving, setSaving] = useState(false);
   const [cancelModalOpen, setCancelModalOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("");
+  const [rescheduleReason, setRescheduleReason] = useState("");
 
   const slotsByDate = useMemo(() => {
     const map: Record<string, SlotDisponivel[]> = {};
@@ -156,7 +162,7 @@ export default function AgendamentoDetalheScreen() {
     if (!token) return;
     const slotsRes: any = await getAgendaSlots(vetId, token);
     if (slotsRes?.ok && Array.isArray(slotsRes?.data?.data)) {
-      setSlots(slotsRes.data.data);
+      setSlots(filtrarSlotsHorarioAtendimento(slotsRes.data.data));
     } else if (!slotsRes?.ok) {
       setError(getApiErrorMessage(slotsRes?.data, "Não foi possível carregar os horários disponíveis."));
     }
@@ -185,8 +191,14 @@ export default function AgendamentoDetalheScreen() {
   async function handleConfirm() {
     if (!token || !agendamento) return;
 
-    if (!selectedSlot) {
+    if (!selectedSlot && !agendamento.dataHoraInicio) {
       setError("Selecione um horário para confirmar.");
+      return;
+    }
+
+    const horarioConfirmacao = agendamento.dataHoraInicio || selectedSlot;
+    if (!horarioConfirmacao || !isDataHoraDentroHorarioAtendimento(horarioConfirmacao)) {
+      setError("O horário deve estar entre 08:00-11:00 ou 13:00-17:00.");
       return;
     }
 
@@ -195,7 +207,7 @@ export default function AgendamentoDetalheScreen() {
 
     const result = await confirmarAgendamento(
       agendamento.id,
-      { dataHoraInicio: selectedSlot },
+      { dataHoraInicio: agendamento.dataHoraInicio || selectedSlot || undefined },
       token
     );
 
@@ -206,6 +218,40 @@ export default function AgendamentoDetalheScreen() {
       return;
     }
 
+    await load();
+  }
+
+  async function handleReschedule() {
+    if (!token || !agendamento) return;
+
+    if (!selectedSlot) {
+      setError("Selecione um novo horário para remarcar.");
+      return;
+    }
+
+    if (!isDataHoraDentroHorarioAtendimento(selectedSlot)) {
+      setError("O horário deve estar entre 08:00-11:00 ou 13:00-17:00.");
+      return;
+    }
+
+    setSaving(true);
+    setError(null);
+
+    const result = await remarcarAgendamento(
+      agendamento.id,
+      { dataHoraInicio: selectedSlot, motivo: rescheduleReason.trim() || undefined },
+      token
+    );
+
+    setSaving(false);
+
+    if (!result.ok) {
+      setError(getApiErrorMessage(result?.data, "Não foi possível remarcar o agendamento."));
+      return;
+    }
+
+    setSelectedSlot("");
+    setRescheduleReason("");
     await load();
   }
 
@@ -240,6 +286,11 @@ export default function AgendamentoDetalheScreen() {
       </View>
     );
   }
+
+  const responsavelPelaPropostaAtual =
+    agendamento?.ultimoResponsavelRemarcacao ?? agendamento?.origemSolicitacao;
+  const canAccept =
+    agendamento?.status === "Pendente" && responsavelPelaPropostaAtual === "Veterinario";
 
   return (
     <LinearGradient
@@ -312,6 +363,12 @@ export default function AgendamentoDetalheScreen() {
           ) : null}
           {agendamento?.motivoCancelamento ? (
             <Text style={{ color: "#ffd1d1", fontWeight: "800" }}>Motivo: {agendamento.motivoCancelamento}</Text>
+          ) : null}
+          {agendamento?.motivoRecusa ? (
+            <Text style={{ color: "#ffd1d1", fontWeight: "800" }}>Recusa: {agendamento.motivoRecusa}</Text>
+          ) : null}
+          {agendamento?.motivoRemarcacao ? (
+            <Text style={{ color: "#d7e8ff", fontWeight: "800" }}>Remarcação: {agendamento.motivoRemarcacao}</Text>
           ) : null}
         </View>
 
@@ -393,21 +450,58 @@ export default function AgendamentoDetalheScreen() {
               </View>
             )}
 
-            <Pressable
-              onPress={handleConfirm}
-              disabled={saving}
+            {canAccept && (
+              <Pressable
+                onPress={handleConfirm}
+                disabled={saving}
+                style={{
+                  marginTop: 8,
+                  backgroundColor: "#fff",
+                  paddingVertical: 12,
+                  borderRadius: 999,
+                  alignItems: "center",
+                  opacity: saving ? 0.7 : 1,
+                }}
+              >
+                <Text style={{ color: "#0B0B0F", fontWeight: "900" }}>
+                  {saving ? "Confirmando..." : agendamento.dataHoraInicio ? "Aceitar horário" : "Confirmar consulta"}
+                </Text>
+              </Pressable>
+            )}
+
+            <TextInput
               style={{
-                marginTop: 8,
-                backgroundColor: "#fff",
-                paddingVertical: 12,
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.26)",
+                borderRadius: 12,
+                paddingHorizontal: 12,
+                paddingVertical: 10,
+                color: "#fff",
+                backgroundColor: "rgba(255,255,255,0.08)",
+                minHeight: 58,
+                textAlignVertical: "top",
+              }}
+              placeholder="Motivo da remarcação (opcional)"
+              placeholderTextColor="rgba(255,255,255,0.55)"
+              value={rescheduleReason}
+              onChangeText={setRescheduleReason}
+              multiline
+            />
+
+            <Pressable
+              onPress={handleReschedule}
+              disabled={saving || !selectedSlot}
+              style={{
+                marginTop: 6,
+                borderColor: "#fff",
+                borderWidth: 1,
+                paddingVertical: 10,
                 borderRadius: 999,
                 alignItems: "center",
-                opacity: saving ? 0.7 : 1,
+                opacity: saving || !selectedSlot ? 0.55 : 1,
               }}
             >
-              <Text style={{ color: "#0B0B0F", fontWeight: "900" }}>
-                {saving ? "Confirmando..." : "Confirmar consulta"}
-              </Text>
+              <Text style={{ color: "#fff", fontWeight: "900" }}>Propor remarcação</Text>
             </Pressable>
 
             <Pressable
@@ -415,6 +509,32 @@ export default function AgendamentoDetalheScreen() {
               disabled={saving}
               style={{
                 marginTop: 6,
+                borderColor: "#fff",
+                borderWidth: 1,
+                paddingVertical: 10,
+                borderRadius: 999,
+                alignItems: "center",
+                opacity: saving ? 0.7 : 1,
+              }}
+            >
+              <Text style={{ color: "#fff", fontWeight: "900" }}>Cancelar consulta</Text>
+            </Pressable>
+          </View>
+        )}
+
+        {agendamento?.status === "Confirmado" && (
+          <View
+            style={{
+              backgroundColor: "rgba(255,255,255,0.12)",
+              borderRadius: 14,
+              paddingVertical: 12,
+              paddingHorizontal: 14,
+            }}
+          >
+            <Pressable
+              onPress={() => setCancelModalOpen(true)}
+              disabled={saving}
+              style={{
                 borderColor: "#fff",
                 borderWidth: 1,
                 paddingVertical: 10,
@@ -478,6 +598,7 @@ export default function AgendamentoDetalheScreen() {
           </View>
         </View>
       </Modal>
+
     </LinearGradient>
   );
 }

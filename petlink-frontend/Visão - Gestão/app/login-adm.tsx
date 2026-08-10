@@ -18,11 +18,20 @@ export default function LoginAdm() {
     if (result.code === 1) {
       router.replace("/home-adm");
     } else {
-      setError(result.message || "Email ou senha inválidos");
+      setError(result.message || "E-mail ou senha inválidos");
     }
 
     setLoading(false);
   }
 
-  return <LoginForm title="Login Administrador" onSubmit={handleLogin} loading={loading} error={error} />;
+  return (
+    <LoginForm
+      title="Login Administrador"
+      subtitle="Acesse a gestão administrativa."
+      profileLabel="Acesso administrativo."
+      onSubmit={handleLogin}
+      loading={loading}
+      error={error}
+    />
+  );
 }

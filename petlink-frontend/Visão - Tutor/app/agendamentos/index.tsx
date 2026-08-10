@@ -23,6 +23,7 @@ const FILTERS: Array<StatusAgendamento | "Todos"> = [
   "Pendente",
   "Confirmado",
   "Cancelado",
+  "Recusado",
 ];
 
 function formatDateTime(value?: string | null) {
@@ -233,6 +234,16 @@ export default function AgendamentosScreen() {
           </Pressable>
         )}
       />
+
+      <View style={{ paddingHorizontal: 16, marginTop: 10, marginBottom: 20 }}>
+        <Pressable
+          onPress={() => router.push("/agendamentos/novo")}
+          style={{ backgroundColor: "#fff", borderRadius: 999, paddingVertical: 12, alignItems: "center" }}
+        >
+          <Text style={{ color: "#0B0B0F", fontWeight: "900"}}>Solicitar consulta</Text>
+        </Pressable>
+      </View>
+      
     </LinearGradient>
   );
 }

@@ -6,6 +6,8 @@ import {
   updateFuncionario,
 } from "@/src/api/funcionarioService";
 import ListControls, { SortState, TextFilter } from "@/components/ListControls";
+import { EmptyState } from "@/components/ManagementScreen";
+import { managementTheme } from "@/constants/managementTheme";
 import { AuthContext } from "@/src/context/AuthContext";
 import { parseDecimalInput } from "@/src/utils/numberUtils";
 import { Ionicons } from "@expo/vector-icons";
@@ -45,7 +47,7 @@ function getApiErrorMessage(payload: any, fallback: string) {
 
   const validationErrors = payload?.errors;
   if (validationErrors && typeof validationErrors === "object") {
-    const entries = Object.entries(validationErrors) as Array<[string, string[]]>;
+    const entries = Object.entries(validationErrors) as [string, string[]][];
     const messages = entries
       .flatMap(([, value]) => (Array.isArray(value) ? value : []))
       .filter(Boolean);
@@ -248,7 +250,7 @@ export default function ListaFuncionarios() {
   }
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
+    <LinearGradient colors={managementTheme.gradients.app} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCard}>
           <View style={styles.headerTextWrap}>
@@ -288,9 +290,9 @@ export default function ListaFuncionarios() {
 
         <View style={styles.listCard}>
           {loading ? (
-            <Text style={styles.infoText}>Carregando funcionários...</Text>
+            <EmptyState icon="hourglass-outline" title="Carregando funcionários..." />
           ) : filteredFuncionarios.length === 0 ? (
-            <Text style={styles.infoText}>Nenhum funcionário cadastrado.</Text>
+            <EmptyState title="Nenhum funcionário encontrado" description="Ajuste a busca ou cadastre um novo funcionário." />
           ) : (
             filteredFuncionarios.map((item) => (
               <View key={item.id} style={styles.itemCard}>

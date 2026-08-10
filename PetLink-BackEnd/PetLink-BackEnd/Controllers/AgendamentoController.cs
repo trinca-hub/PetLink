@@ -128,12 +128,13 @@ namespace PetLink_BackEnd.Controllers
             try
             {
                 var usuarioId = await GetUsuarioId();
-                if (!usuarioId.HasValue)
+                var veterinarioId = await GetVeterinarioId();
+                if (!usuarioId.HasValue && !veterinarioId.HasValue)
                 {
-                    return Unauthorized(ApiResponseFactory.Failure<object>("Usuário não autenticado"));
+                    return Unauthorized(ApiResponseFactory.Failure<object>("Usuário ou veterinário não autenticado"));
                 }
 
-                var agendamento = await _agendamentoService.ConfirmarConsulta(id, dto, usuarioId.Value);
+                var agendamento = await _agendamentoService.ConfirmarConsulta(id, dto, usuarioId ?? 0, veterinarioId);
                 if (agendamento == null)
                 {
                     return NotFound(ApiResponseFactory.Failure<object>("Agendamento não encontrado"));
@@ -148,6 +149,66 @@ namespace PetLink_BackEnd.Controllers
             catch (Exception ex)
             {
                 return BadRequest(ApiResponseFactory.Failure<object>("Erro ao confirmar consulta", ex.Message));
+            }
+        }
+
+        [HttpPut("{id}/recusar")]
+        public async Task<IActionResult> Recusar(int id, [FromBody] RecusarConsultaDTO dto)
+        {
+            try
+            {
+                var usuarioId = await GetUsuarioId();
+                var veterinarioId = await GetVeterinarioId();
+                if (!usuarioId.HasValue && !veterinarioId.HasValue)
+                {
+                    return Unauthorized(ApiResponseFactory.Failure<object>("Usuário ou veterinário não autenticado"));
+                }
+
+                var agendamento = await _agendamentoService.RecusarConsulta(id, dto, usuarioId ?? 0, veterinarioId);
+                if (agendamento == null)
+                {
+                    return NotFound(ApiResponseFactory.Failure<object>("Agendamento não encontrado"));
+                }
+
+                return Ok(ApiResponseFactory.Success("Agendamento recusado com sucesso", agendamento));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, ApiResponseFactory.Failure<object>("Acesso negado", ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponseFactory.Failure<object>("Erro ao recusar consulta", ex.Message));
+            }
+        }
+
+        [HttpPut("{id}/remarcar")]
+        public async Task<IActionResult> Remarcar(int id, [FromBody] RemarcarConsultaDTO dto)
+        {
+            try
+            {
+                var usuarioId = await GetUsuarioId();
+                var veterinarioId = await GetVeterinarioId();
+                if (!usuarioId.HasValue && !veterinarioId.HasValue)
+                {
+                    return Unauthorized(ApiResponseFactory.Failure<object>("Usuário ou veterinário não autenticado"));
+                }
+
+                var agendamento = await _agendamentoService.RemarcarConsulta(id, dto, usuarioId ?? 0, veterinarioId);
+                if (agendamento == null)
+                {
+                    return NotFound(ApiResponseFactory.Failure<object>("Agendamento não encontrado"));
+                }
+
+                return Ok(ApiResponseFactory.Success("Remarcação enviada com sucesso", agendamento));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, ApiResponseFactory.Failure<object>("Acesso negado", ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponseFactory.Failure<object>("Erro ao remarcar consulta", ex.Message));
             }
         }
 
@@ -183,6 +244,10 @@ namespace PetLink_BackEnd.Controllers
 
         private async Task<int?> GetUsuarioId()
         {
+            var perfil = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            if (string.Equals(perfil, "Veterinario", StringComparison.OrdinalIgnoreCase))
+                return null;
+
             var email = User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
                 ?.Value;
@@ -196,6 +261,10 @@ namespace PetLink_BackEnd.Controllers
 
         private async Task<int?> GetVeterinarioId()
         {
+            var perfil = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            if (string.Equals(perfil, "Tutor", StringComparison.OrdinalIgnoreCase))
+                return null;
+
             var email = User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
                 ?.Value;

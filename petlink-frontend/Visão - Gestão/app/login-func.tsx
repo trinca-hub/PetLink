@@ -18,11 +18,20 @@ export default function LoginFunc() {
     if (result.code === 1) {
       router.replace("/home-func");
     } else {
-      setError(result.message || "Email ou senha inválidos");
+      setError(result.message || "E-mail ou senha inválidos");
     }
 
     setLoading(false);
   }
 
-  return <LoginForm title="Login Funcionário" onSubmit={handleLogin} loading={loading} error={error} />;
+  return (
+    <LoginForm
+      title="Login Funcionário"
+      subtitle="Acesse as rotinas operacionais."
+      profileLabel="Acesso operacional."
+      onSubmit={handleLogin}
+      loading={loading}
+      error={error}
+    />
+  );
 }

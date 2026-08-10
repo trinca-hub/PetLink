@@ -9,7 +9,7 @@ import {
   View,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { type Href, router } from "expo-router";
 
 import { useSideMenu } from "@/src/context/SideMenuContext";
 import { AuthContext } from "@/src/context/AuthContext";
@@ -43,7 +43,7 @@ export function SideMenu() {
     ]);
   };
 
-  const goTo = (path: string) => {
+  const goTo = (path: Href) => {
     closeMenu();
     router.push(path);
   };
@@ -62,6 +62,11 @@ export function SideMenu() {
             </View>
 
             <View style={styles.section}>
+              <Pressable style={styles.item} onPress={() => goTo("/agendamentos/novo")}>
+                <Ionicons name="add-circle-outline" size={18} color="#E8F0FF" />
+                <Text style={styles.itemText}>Solicitar consulta</Text>
+              </Pressable>
+
               <Pressable style={styles.item} onPress={() => goTo("/agendamentos")}>
                 <Ionicons name="calendar-outline" size={18} color="#E8F0FF" />
                 <Text style={styles.itemText}>Agendamentos</Text>

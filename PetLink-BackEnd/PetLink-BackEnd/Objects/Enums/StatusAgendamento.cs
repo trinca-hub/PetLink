@@ -4,6 +4,7 @@ namespace PetLink_BackEnd.Objects.Enums
     {
         Pendente = 1,
         Confirmado = 2,
-        Cancelado = 3
+        Cancelado = 3,
+        Recusado = 4
     }
 }

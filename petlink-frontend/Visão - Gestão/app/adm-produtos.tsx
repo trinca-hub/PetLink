@@ -7,6 +7,8 @@ import {
 } from "@/src/api/produtoService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
+import { EmptyState, StatusPill } from "@/components/ManagementScreen";
+import { managementTheme } from "@/constants/managementTheme";
 import { AuthContext } from "@/src/context/AuthContext";
 import { isLikelyHttpUrl, validateImageUrl } from "@/src/utils/imageUrlUtils";
 import { parseDecimalInput, parseIntInput } from "@/src/utils/numberUtils";
@@ -289,7 +291,7 @@ export default function ListaProdutos() {
   }
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
+    <LinearGradient colors={managementTheme.gradients.app} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCard}>
           <View style={styles.headerTextWrap}>
@@ -331,9 +333,9 @@ export default function ListaProdutos() {
 
         <View style={styles.listCard}>
           {loading ? (
-            <Text style={styles.infoText}>Carregando produtos...</Text>
+            <EmptyState icon="hourglass-outline" title="Carregando produtos..." />
           ) : filteredProdutos.length === 0 ? (
-            <Text style={styles.infoText}>Nenhum produto cadastrado.</Text>
+            <EmptyState title="Nenhum produto encontrado" description="Ajuste a busca ou cadastre um novo produto." />
           ) : (
             filteredProdutos.map((item) => (
               <View key={item.id} style={styles.itemCard}>
@@ -350,7 +352,10 @@ export default function ListaProdutos() {
                     <Text style={styles.itemTitle}>{item.nome}</Text>
                     <Text style={styles.itemSubtitle}>{item.descricao}</Text>
                     <Text style={styles.itemPrice}>Preço: R$ {Number(item.preco || 0).toFixed(2)}</Text>
-                    <Text style={styles.itemStock}>Estoque: {item.quantidade}</Text>
+                    <StatusPill
+                      label={item.quantidade > 0 ? `Estoque ${item.quantidade}` : "Sem estoque"}
+                      tone={item.quantidade > 0 ? "success" : "warning"}
+                    />
                   </View>
                 </View>
 

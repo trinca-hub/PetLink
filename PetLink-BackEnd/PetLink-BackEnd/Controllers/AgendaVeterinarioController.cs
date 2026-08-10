@@ -86,6 +86,40 @@ namespace PetLink_BackEnd.Controllers
             return Ok(ApiResponseFactory.Success("Slots disponíveis listados com sucesso", slots));
         }
 
+        [HttpPost("bloquear-slot")]
+        public async Task<IActionResult> BloquearSlot([FromBody] BloquearSlotDTO dto)
+        {
+            try
+            {
+                var vetId = await GetVeterinarioId();
+                await _agendaService.BloquearSlot(dto, vetId);
+                return Ok(ApiResponseFactory.Success<object>("Horário removido da agenda", null));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponseFactory.Failure<object>("Erro ao remover horário", ex.Message));
+            }
+        }
+
+        [HttpDelete("{veterinarioId}/slots")]
+        public async Task<IActionResult> DesbloquearSlot(int veterinarioId, [FromQuery] DateTime dataHoraInicio)
+        {
+            try
+            {
+                var vetId = await GetVeterinarioId();
+                await _agendaService.DesbloquearSlot(veterinarioId, dataHoraInicio, vetId);
+                return Ok(ApiResponseFactory.Success<object>("Horário restaurado na agenda", null));
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, ApiResponseFactory.Failure<object>("Acesso negado", ex.Message));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponseFactory.Failure<object>("Erro ao restaurar horário", ex.Message));
+            }
+        }
+
         private async Task<int?> GetVeterinarioId()
         {
             var email = User.Claims

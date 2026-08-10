@@ -4,8 +4,9 @@ export type ApiResponse<T> = {
   error?: string | null;
 };
 
-export type StatusAgendamento = "Pendente" | "Confirmado" | "Cancelado";
+export type StatusAgendamento = "Pendente" | "Confirmado" | "Cancelado" | "Recusado";
 export type TipoServico = 1 | 2 | 3;
+export type OrigemSolicitacao = "Tutor" | "Veterinario";
 
 export const TIPO_SERVICO_LABEL: Record<number, string> = {
   1: "Consulta",
@@ -35,14 +36,20 @@ export type AgendamentoConsulta = {
   veterinarioId: number;
   petId: number;
   usuarioId: number;
+  origemSolicitacao: OrigemSolicitacao;
+  ultimoResponsavelRemarcacao?: OrigemSolicitacao | null;
   dataHoraInicio?: string | null;
   dataHoraFim?: string | null;
   status: StatusAgendamento;
   tipoServico: TipoServico;
   observacao?: string | null;
   motivoCancelamento?: string | null;
+  motivoRecusa?: string | null;
+  motivoRemarcacao?: string | null;
   dataCriacao?: string | null;
   dataConfirmacao?: string | null;
   dataCancelamento?: string | null;
+  dataRecusa?: string | null;
+  dataUltimaRemarcacao?: string | null;
   rowVersion?: string | null;
 };

@@ -10,10 +10,10 @@ export type AdminCreatePedidoPayload = {
   usuarioId?: number;
   emNomeProprio: boolean;
   dataPedido?: string;
-  itens?: Array<{
+  itens?: {
     produtoId: number;
     quantidade: number;
-  }>;
+  }[];
 };
 
 export function getAdminPedidos(token: string) {

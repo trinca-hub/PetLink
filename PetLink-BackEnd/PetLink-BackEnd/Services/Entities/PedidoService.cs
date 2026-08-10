@@ -38,6 +38,17 @@ public class PedidoService : GenericService<Pedido, PedidoDTO>, IPedidoService
         if (!exists)
             throw new ArgumentException("Usuário não encontrado.");
 
+        if (pedidoDTO.EnderecoUsuarioId.HasValue)
+        {
+            var enderecoValido = await _context.EnderecosUsuarios.AnyAsync(e =>
+                e.Id == pedidoDTO.EnderecoUsuarioId.Value &&
+                e.UsuarioId == pedidoDTO.UsuarioId &&
+                e.Ativo);
+
+            if (!enderecoValido)
+                throw new ArgumentException("Endereço de entrega não encontrado para este usuário.");
+        }
+
         var entity = _mapper.Map<Pedido>(pedidoDTO);
 
         // garante que o banco gere o ID

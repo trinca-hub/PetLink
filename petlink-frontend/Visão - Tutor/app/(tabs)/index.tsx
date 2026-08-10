@@ -112,12 +112,9 @@ export default function Home() {
           </Pressable>
         </View>
 
-        <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
-          <View style={{ backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 20, padding: 14, borderWidth: 1, borderColor: TutorPalette.border }}>
-            <Text style={{ color: TutorPalette.text, fontSize: 18, fontWeight: "900", marginBottom: 4 }}>{pageTitle}</Text>
-            <Text style={{ color: TutorPalette.muted, fontSize: 13 }}>Organize seus pets, fotos e informações com um visual mais moderno.</Text>
-          </View>
-        </View>
+        <Text style={{ color: "#fff", fontSize: 18, fontWeight: "900", marginTop: 12, paddingHorizontal: 16 }}>
+          {pageTitle}
+        </Text>
 
         {!!error && (
           <View style={{ paddingHorizontal: 16, marginTop: 12 }}>

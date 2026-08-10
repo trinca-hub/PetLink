@@ -7,6 +7,8 @@ import {
   updateAdminAnuncioPetfinder,
 } from "@/src/api/anuncioService";
 import ListControls, { FilterGroup, SortState, TextFilter } from "@/components/ListControls";
+import { EmptyState } from "@/components/ManagementScreen";
+import { managementTheme } from "@/constants/managementTheme";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
@@ -99,14 +101,17 @@ export default function ListaAnuncios() {
 
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
-  const tipoPayPetOptions: SelectOption[] = [
-    { value: "1", label: "Adoção", subtitle: "TipoPayPet = 1" },
-    { value: "2", label: "Venda", subtitle: "TipoPayPet = 2" },
-  ];
+  const tipoPayPetOptions = useMemo<SelectOption[]>(
+    () => [
+      { value: "1", label: "Adoção", subtitle: "TipoPayPet = 1" },
+      { value: "2", label: "Venda", subtitle: "TipoPayPet = 2" },
+    ],
+    []
+  );
 
   const selectedTipoPayPet = useMemo(
     () => tipoPayPetOptions.find((option) => option.value === editForm.tipoPayPet),
-    [editForm.tipoPayPet]
+    [editForm.tipoPayPet, tipoPayPetOptions]
   );
 
   const loadAnuncios = useCallback(async () => {
@@ -318,7 +323,7 @@ export default function ListaAnuncios() {
   }, [loadAnuncios]);
 
   return (
-    <LinearGradient colors={["#071321", "#0d1b2a", "#12263f"]} style={styles.container}>
+    <LinearGradient colors={managementTheme.gradients.app} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.headerCard}>
           <View style={styles.headerTextWrap}>
@@ -405,9 +410,9 @@ export default function ListaAnuncios() {
 
         <View style={styles.listCard}>
           {loading ? (
-            <Text style={styles.infoText}>Carregando anúncios...</Text>
+            <EmptyState icon="hourglass-outline" title="Carregando anúncios..." />
           ) : anunciosFiltrados.length === 0 ? (
-            <Text style={styles.infoText}>Nenhum anúncio encontrado.</Text>
+            <EmptyState title="Nenhum anúncio encontrado" description="Ajuste a busca ou cadastre um novo anúncio." />
           ) : (
             anunciosFiltrados.map((item) => (
               <View key={item.anuncioId} style={styles.itemCard}>
