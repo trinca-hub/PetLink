@@ -24,6 +24,8 @@ public class AppDbContext : DbContext
     public DbSet<AgendaVeterinario> AgendasVeterinarios { get; set; }
     public DbSet<AgendaSlotBloqueado> AgendaSlotsBloqueados { get; set; }
     public DbSet<AgendamentoConsulta> AgendamentosConsultas { get; set; }
+    public DbSet<TokenRedefinicaoSenha> TokensRedefinicaoSenha { get; set; }
+    public DbSet<TentativaLogin> TentativasLogin { get; set; }
 
 
 
@@ -49,6 +51,8 @@ public class AppDbContext : DbContext
         AgendaVeterinarioBuilder.Build(modelBuilder);
         AgendaSlotBloqueadoBuilder.Build(modelBuilder);
         AgendamentoConsultaBuilder.Build(modelBuilder);
+        TokenRedefinicaoSenhaBuilder.Build(modelBuilder);
+        TentativaLoginBuilder.Build(modelBuilder);
 
 
 

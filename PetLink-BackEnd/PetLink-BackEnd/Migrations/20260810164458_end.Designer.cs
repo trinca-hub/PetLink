@@ -12,8 +12,8 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260730202053_AddEnderecoUsuarioEntrega")]
-    partial class AddEnderecoUsuarioEntrega
+    [Migration("20260810164458_end")]
+    partial class end
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -87,6 +87,40 @@ namespace PetLink_BackEnd.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendaSlotBloqueado", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datacriacao");
+
+                    b.Property<DateTime>("DataHoraInicio")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datahorainicio");
+
+                    b.Property<string>("Motivo")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("motivo");
+
+                    b.Property<int>("VeterinarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("veterinarioid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VeterinarioId", "DataHoraInicio")
+                        .IsUnique();
+
+                    b.ToTable("agendaslotbloqueado");
+                });
+
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendaVeterinario", b =>
                 {
                     b.Property<int>("Id")
@@ -139,7 +173,7 @@ namespace PetLink_BackEnd.Migrations
 
                             t.HasCheckConstraint("CK_agendaveterinario_duracao", "duracaominutos = 60");
 
-                            t.HasCheckConstraint("CK_agendaveterinario_horarios", "horainiciomanha < horafimmanha AND horainiciotarde < horafimtarde");
+                            t.HasCheckConstraint("CK_agendaveterinario_horarios", "horainiciomanha = INTERVAL '08:00:00' AND horafimmanha = INTERVAL '11:00:00' AND horainiciotarde = INTERVAL '13:00:00' AND horafimtarde = INTERVAL '17:00:00'");
                         });
                 });
 
@@ -172,15 +206,37 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("datahorainicio");
 
+                    b.Property<DateTime?>("DataRecusa")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datarecusa");
+
+                    b.Property<DateTime?>("DataUltimaRemarcacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("dataultimaremarcacao");
+
                     b.Property<string>("MotivoCancelamento")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("motivocancelamento");
 
+                    b.Property<string>("MotivoRecusa")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("motivorecusa");
+
+                    b.Property<string>("MotivoRemarcacao")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("motivoremarcacao");
+
                     b.Property<string>("Observacao")
                         .HasMaxLength(500)
                         .HasColumnType("character varying(500)")
                         .HasColumnName("observacao");
+
+                    b.Property<int>("OrigemSolicitacao")
+                        .HasColumnType("integer")
+                        .HasColumnName("origemsolicitacao");
 
                     b.Property<int>("PetId")
                         .HasColumnType("integer")
@@ -199,6 +255,10 @@ namespace PetLink_BackEnd.Migrations
                     b.Property<int>("TipoServico")
                         .HasColumnType("integer")
                         .HasColumnName("tiposervico");
+
+                    b.Property<int?>("UltimoResponsavelRemarcacao")
+                        .HasColumnType("integer")
+                        .HasColumnName("ultimoresponsavelremarcacao");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer")
@@ -227,9 +287,11 @@ namespace PetLink_BackEnd.Migrations
                         {
                             t.HasCheckConstraint("CK_agendamentoconsulta_horario", "(datahorainicio IS NULL AND datahorafim IS NULL) OR (datahorainicio < datahorafim)");
 
+                            t.HasCheckConstraint("CK_agendamentoconsulta_origem", "origemsolicitacao IN (1, 2)");
+
                             t.HasCheckConstraint("CK_agendamentoconsulta_status_datas", "(status <> 2 OR dataconfirmacao IS NOT NULL) AND (status <> 3 OR datacancelamento IS NOT NULL)");
 
-                            t.HasCheckConstraint("CK_agendamentoconsulta_status_pendente", "(status <> 1 OR (datahorainicio IS NULL AND datahorafim IS NULL))");
+                            t.HasCheckConstraint("CK_agendamentoconsulta_ultimo_responsavel", "ultimoresponsavelremarcacao IS NULL OR ultimoresponsavelremarcacao IN (1, 2)");
                         });
                 });
 
@@ -1066,6 +1128,17 @@ namespace PetLink_BackEnd.Migrations
                             Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 1
                         });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendaSlotBloqueado", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Veterinario", "Veterinario")
+                        .WithMany()
+                        .HasForeignKey("VeterinarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Veterinario");
                 });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendaVeterinario", b =>

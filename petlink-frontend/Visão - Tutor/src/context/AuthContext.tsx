@@ -63,7 +63,13 @@ async function login(email: string, senha: string) {
     return { code: 1 };
   }
 
-  return { code: 0, message: result?.data?.message || "Erro ao fazer login" };
+  const attemptData = result?.data?.data;
+  return {
+    code: 0,
+    message: result?.data?.message || "Erro ao fazer login",
+    attemptsRemaining: attemptData?.tentativasRestantes,
+    lockedUntil: attemptData?.bloqueadoAte,
+  };
 }
 
 

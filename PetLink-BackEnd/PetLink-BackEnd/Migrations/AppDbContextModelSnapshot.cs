@@ -937,6 +937,34 @@ namespace PetLink_BackEnd.Migrations
                         });
                 });
 
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.TentativaLogin", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("AtualizadoEm").HasColumnType("timestamp with time zone").HasColumnName("atualizado_em");
+                    b.Property<DateTime?>("BloqueadoAte").HasColumnType("timestamp with time zone").HasColumnName("bloqueado_ate");
+                    b.Property<string>("Email").IsRequired().HasMaxLength(100).HasColumnType("character varying(100)").HasColumnName("email");
+                    b.Property<int>("Falhas").HasColumnType("integer").HasColumnName("falhas");
+                    b.Property<string>("Ip").IsRequired().HasMaxLength(64).HasColumnType("character varying(64)").HasColumnName("ip");
+                    b.HasKey("Id");
+                    b.HasIndex("Email", "Ip").IsUnique();
+                    b.ToTable("tentativa_login", (string)null);
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.TokenRedefinicaoSenha", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("ExpiraEm").HasColumnType("timestamp with time zone").HasColumnName("expira_em");
+                    b.Property<string>("TokenHash").IsRequired().HasMaxLength(64).HasColumnType("character varying(64)").HasColumnName("token_hash");
+                    b.Property<DateTime?>("UsadoEm").HasColumnType("timestamp with time zone").HasColumnName("usado_em");
+                    b.Property<int>("UsuarioId").HasColumnType("integer").HasColumnName("usuario_id");
+                    b.HasKey("Id");
+                    b.HasIndex("TokenHash").IsUnique();
+                    b.HasIndex("UsuarioId");
+                    b.ToTable("token_redefinicao_senha", (string)null);
+                });
+
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Usuario", b =>
                 {
                     b.Property<int>("Id")
@@ -1147,6 +1175,16 @@ namespace PetLink_BackEnd.Migrations
                         .IsRequired();
 
                     b.Navigation("Veterinario");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.TokenRedefinicaoSenha", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Usuario");
                 });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendamentoConsulta", b =>

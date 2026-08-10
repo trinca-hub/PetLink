@@ -1,4 +1,4 @@
-import { useState, useContext } from "react";
+import { useState, useContext, useEffect } from "react";
 import {
   View,
   Text,
@@ -21,6 +21,25 @@ export default function Login() {
 
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const [bloqueadoAte, setBloqueadoAte] = useState<string | null>(null);
+  const [segundosRestantes, setSegundosRestantes] = useState(0);
+
+  useEffect(() => {
+    if (!bloqueadoAte) return;
+    const atualizar = () => {
+      const segundos = Math.max(0, Math.ceil((new Date(bloqueadoAte).getTime() - Date.now()) / 1000));
+      setSegundosRestantes(segundos);
+      if (segundos === 0) {
+        setBloqueadoAte(null);
+        setFeedback("");
+      }
+    };
+    atualizar();
+    const timer = setInterval(atualizar, 1000);
+    return () => clearInterval(timer);
+  }, [bloqueadoAte]);
 
   async function handleLogin() {
     try {
@@ -28,6 +47,9 @@ export default function Login() {
       if (result?.code === 1) {
         router.replace("/(tabs)");
       } else {
+        if (result?.lockedUntil) setBloqueadoAte(result.lockedUntil);
+        const tentativas = typeof result?.attemptsRemaining === "number" ? ` Tentativas restantes: ${result.attemptsRemaining}.` : "";
+        setFeedback(`${result?.message || "Credenciais inválidas."}${tentativas}`);
         alert(result?.message || "Credenciais inválidas");
       }
     } catch (error) {
@@ -74,18 +96,27 @@ export default function Login() {
 
           <View style={styles.inputGroup}>
             <Text style={styles.label}>Senha</Text>
-            <TextInput
-              value={senha}
-              onChangeText={setSenha}
-              secureTextEntry
-              placeholder="Digite sua senha"
-              placeholderTextColor="#9EB1C8"
-              style={styles.input}
-            />
+            <View style={styles.passwordInput}>
+              <TextInput value={senha} onChangeText={setSenha} secureTextEntry={!mostrarSenha} placeholder="Digite sua senha" placeholderTextColor="#9EB1C8" style={styles.passwordTextInput} />
+              <TouchableOpacity accessibilityRole="button" accessibilityLabel={mostrarSenha ? "Ocultar senha" : "Mostrar senha"} onPress={() => setMostrarSenha((value) => !value)} style={styles.eyeButton}>
+                <Ionicons name={mostrarSenha ? "eye-off-outline" : "eye-outline"} size={21} color="#31506F" />
+              </TouchableOpacity>
+            </View>
           </View>
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>Entrar</Text>
+          {!!feedback && <Text accessibilityLiveRegion="polite" style={styles.feedback}>{segundosRestantes > 0 ? `${feedback} Aguarde ${segundosRestantes}s.` : feedback}</Text>}
+
+          <TouchableOpacity
+            accessibilityRole="button"
+            accessibilityLabel="Redefinir senha"
+            style={styles.forgotPasswordButton}
+            onPress={() => router.push("/redefinir-senha")}
+          >
+            <Text style={styles.forgotPasswordText}>Esqueceu sua senha?</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={[styles.button, segundosRestantes > 0 && styles.buttonDisabled]} onPress={handleLogin} disabled={segundosRestantes > 0}>
+            <Text style={styles.buttonText}>{segundosRestantes > 0 ? `Aguarde ${segundosRestantes}s` : "Entrar"}</Text>
           </TouchableOpacity>
 
           <Text style={styles.footerText}>
@@ -152,6 +183,10 @@ const styles = StyleSheet.create({
     height: 46,
     color: TutorPalette.background,
   },
+  passwordInput: { backgroundColor: "rgba(245,247,255,0.95)", borderRadius: 16, height: 46, flexDirection: "row", alignItems: "center" },
+  passwordTextInput: { flex: 1, height: "100%", paddingLeft: 14, color: TutorPalette.background },
+  eyeButton: { minWidth: 48, height: "100%", alignItems: "center", justifyContent: "center" },
+  feedback: { width: "100%", color: "#FFE2A4", fontSize: 12, lineHeight: 17, marginTop: -3, marginBottom: 7, textAlign: "center" },
   button: {
     width: "100%",
     backgroundColor: TutorPalette.primary,
@@ -162,6 +197,18 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 12,
     shadowOffset: { width: 0, height: 6 },
+  },
+  buttonDisabled: { opacity: 0.62 },
+  forgotPasswordButton: {
+    alignSelf: "flex-end",
+    marginTop: -4,
+    marginBottom: 2,
+  },
+  forgotPasswordText: {
+    color: "#DDEBFF",
+    fontSize: 13,
+    fontWeight: "700",
+    textDecorationLine: "underline",
   },
   buttonText: {
     color: "#fff",

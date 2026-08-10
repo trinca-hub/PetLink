@@ -36,4 +36,22 @@ public class UsuarioService : GenericService<Usuario, UsuarioDTO>, IUsuarioServi
         return _mapper.Map<UsuarioDTO>(usuario);
     }
 
+    public override async Task Create(UsuarioDTO usuarioDTO)
+    {
+        var usuario = new Usuario
+        {
+            Nome = usuarioDTO.Nome,
+            Telefone = usuarioDTO.Telefone,
+            Cep = usuarioDTO.Cep,
+            Uf = usuarioDTO.Uf,
+            Cidade = usuarioDTO.Cidade,
+            Bairro = usuarioDTO.Bairro,
+            Rua = usuarioDTO.Rua,
+            Numero = usuarioDTO.Numero,
+            Email = usuarioDTO.Email,
+            Senha = usuarioDTO.Senha,
+        };
+        await _usuarioRepository.Add(usuario);
+    }
+
 }

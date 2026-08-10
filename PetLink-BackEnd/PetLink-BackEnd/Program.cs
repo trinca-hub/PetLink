@@ -127,6 +127,7 @@ builder.Services.AddScoped<IAnuncioService, AnuncioService>();
 builder.Services.AddScoped<IAnuncioPayPetService, AnuncioPayPetService>();
 builder.Services.AddScoped<IAgendaVeterinarioService, AgendaVeterinarioService>();
 builder.Services.AddScoped<IAgendamentoService, AgendamentoService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 
 

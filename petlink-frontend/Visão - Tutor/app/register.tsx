@@ -16,6 +16,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 import { TutorPalette } from "@/constants/theme";
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { isPasswordAccepted } from "../src/utils/passwordStrength";
 
 export default function Register() {
   const router = useRouter();
@@ -26,6 +28,7 @@ export default function Register() {
     senha: "",
   });
   const [loading, setLoading] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
   function handleChange(key: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -34,6 +37,10 @@ export default function Register() {
   async function handleRegister() {
     if (!form.nome.trim() || !form.email.trim() || !form.senha.trim()) {
       alert("Preencha nome, email e senha.");
+      return;
+    }
+    if (!isPasswordAccepted(form.senha)) {
+      alert("Crie uma senha de pelo menos 8 caracteres com 3 tipos: maiúscula, minúscula, número ou símbolo.");
       return;
     }
 
@@ -117,14 +124,21 @@ export default function Register() {
 
             <View style={styles.inputGroup}>
               <Text style={styles.label}>SENHA</Text>
-              <TextInput
-                value={form.senha}
-                onChangeText={(v) => handleChange("senha", v)}
-                style={styles.input}
-                placeholder="Crie uma senha"
-                placeholderTextColor="#9EB1C8"
-                secureTextEntry
-              />
+              <View style={styles.passwordInput}>
+                <TextInput
+                  value={form.senha}
+                  onChangeText={(v) => handleChange("senha", v)}
+                  style={styles.passwordTextInput}
+                  placeholder="Crie uma senha"
+                  placeholderTextColor="#9EB1C8"
+                  secureTextEntry={!mostrarSenha}
+                  autoComplete="new-password"
+                />
+                <TouchableOpacity accessibilityRole="button" accessibilityLabel={mostrarSenha ? "Ocultar senha" : "Mostrar senha"} onPress={() => setMostrarSenha((value) => !value)} style={styles.eyeButton}>
+                  <Ionicons name={mostrarSenha ? "eye-off-outline" : "eye-outline"} size={21} color="#31506F" />
+                </TouchableOpacity>
+              </View>
+              <PasswordStrengthIndicator password={form.senha} />
             </View>
 
             <TouchableOpacity style={styles.button} onPress={handleRegister} disabled={loading}>
@@ -197,6 +211,15 @@ const styles = StyleSheet.create({
     height: 48,
     color: TutorPalette.background,
   },
+  passwordInput: {
+    backgroundColor: "rgba(245,247,255,0.96)",
+    borderRadius: 16,
+    height: 48,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  passwordTextInput: { flex: 1, height: "100%", paddingLeft: 14, color: TutorPalette.background },
+  eyeButton: { minWidth: 48, height: "100%", alignItems: "center", justifyContent: "center" },
   button: {
     width: "100%",
     minHeight: 48,
