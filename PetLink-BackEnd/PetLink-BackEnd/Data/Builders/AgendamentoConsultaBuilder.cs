@@ -11,6 +11,8 @@ namespace PetLink_BackEnd.Data.Builders
             modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.VeterinarioId).IsRequired();
             modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.PetId).IsRequired();
             modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.UsuarioId).IsRequired();
+            modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.OrigemSolicitacao).IsRequired();
+            modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.UltimoResponsavelRemarcacao).IsRequired(false);
             modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.DataHoraInicio).IsRequired(false);
             modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.DataHoraFim).IsRequired(false);
             modelBuilder.Entity<AgendamentoConsulta>().Property(a => a.Status).IsRequired();
@@ -65,6 +67,12 @@ namespace PetLink_BackEnd.Data.Builders
 
             modelBuilder.Entity<AgendamentoConsulta>()
                 .HasCheckConstraint("CK_agendamentoconsulta_status_datas", "(status <> 2 OR dataconfirmacao IS NOT NULL) AND (status <> 3 OR datacancelamento IS NOT NULL)");
+
+            modelBuilder.Entity<AgendamentoConsulta>()
+                .HasCheckConstraint("CK_agendamentoconsulta_origem", "origemsolicitacao IN (1, 2)");
+
+            modelBuilder.Entity<AgendamentoConsulta>()
+                .HasCheckConstraint("CK_agendamentoconsulta_ultimo_responsavel", "ultimoresponsavelremarcacao IS NULL OR ultimoresponsavelremarcacao IN (1, 2)");
         }
     }
 }

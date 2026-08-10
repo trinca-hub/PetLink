@@ -2,12 +2,15 @@ import { api } from "@/src/api/api";
 
 export type StatusAgendamento = "Pendente" | "Confirmado" | "Cancelado" | "Recusado";
 export type TipoServico = 1 | 2 | 3;
+export type OrigemSolicitacao = "Tutor" | "Veterinario";
 
 export type AgendamentoConsulta = {
   id: number;
   veterinarioId: number;
   petId: number;
   usuarioId: number;
+  origemSolicitacao: OrigemSolicitacao;
+  ultimoResponsavelRemarcacao?: OrigemSolicitacao | null;
   dataHoraInicio?: string | null;
   dataHoraFim?: string | null;
   status: StatusAgendamento;

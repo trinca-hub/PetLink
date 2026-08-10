@@ -320,6 +320,7 @@ public class UsuarioController : Controller
             new Claim(JwtRegisteredClaimNames.Sub, usuarioDTO.Id.ToString()), // ✅ agora é o ID
             new Claim(ClaimTypes.NameIdentifier, usuarioDTO.Id.ToString()),   // ✅ padrão
             new Claim(JwtRegisteredClaimNames.Email, usuarioDTO.Email),
+            new Claim(ClaimTypes.Role, "Tutor"),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

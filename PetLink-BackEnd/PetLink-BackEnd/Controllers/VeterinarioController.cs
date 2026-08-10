@@ -302,6 +302,7 @@ public class VeterinarioController : Controller
             new Claim(JwtRegisteredClaimNames.Sub, veterinarioDTO.Id.ToString()),
             new Claim(ClaimTypes.NameIdentifier, veterinarioDTO.Id.ToString()),
             new Claim(JwtRegisteredClaimNames.Email, veterinarioDTO.Email),
+            new Claim(ClaimTypes.Role, "Veterinario"),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

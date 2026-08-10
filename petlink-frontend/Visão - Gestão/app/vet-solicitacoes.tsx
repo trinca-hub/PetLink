@@ -13,7 +13,12 @@ import {
   recusarAgendamento,
   remarcarAgendamento,
 } from "@/src/api/agendamentoService";
-import { SlotDisponivel, getAgendaSlots } from "@/src/api/agendaVeterinarioService";
+import {
+  SlotDisponivel,
+  filtrarSlotsHorarioAtendimento,
+  getAgendaSlots,
+  isDataHoraDentroHorarioAtendimento,
+} from "@/src/api/agendaVeterinarioService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { getPetsByUsuario, Pet } from "@/src/api/petService";
 import { getUsuarios, Usuario } from "@/src/api/usuarioService";
@@ -320,7 +325,7 @@ export default function VetSolicitacoes() {
     setLoadingSlots(false);
 
     if (result.ok && Array.isArray(result?.data?.data)) {
-      setAgendaSlots(result.data.data);
+      setAgendaSlots(filtrarSlotsHorarioAtendimento(result.data.data));
     } else {
       setAgendaSlots([]);
       setError(getApiErrorMessage(result?.data, "Nao foi possivel carregar horarios da agenda."));
@@ -440,6 +445,11 @@ export default function VetSolicitacoes() {
       return;
     }
 
+    if (!isDataHoraDentroHorarioAtendimento(selectedSlot)) {
+      setError("O horario deve estar entre 08:00-11:00 ou 13:00-17:00.");
+      return;
+    }
+
     setSaving(true);
     setError(null);
     setNotice(null);
@@ -498,6 +508,11 @@ export default function VetSolicitacoes() {
       return;
     }
 
+    if (!isDataHoraDentroHorarioAtendimento(item.dataHoraInicio)) {
+      setError("O horario da solicitacao esta fora do periodo de atendimento.");
+      return;
+    }
+
     await runOperation(
       `accept-${item.id}`,
       () => confirmarAgendamento(item.id, { dataHoraInicio: item.dataHoraInicio || undefined }, token),
@@ -547,6 +562,11 @@ export default function VetSolicitacoes() {
 
     if (!rescheduleSlot) {
       setError("Selecione um novo horario para remarcar.");
+      return;
+    }
+
+    if (!isDataHoraDentroHorarioAtendimento(rescheduleSlot)) {
+      setError("O horario deve estar entre 08:00-11:00 ou 13:00-17:00.");
       return;
     }
 
@@ -852,6 +872,10 @@ function RequestCard({
   const meta = statusMeta(item.status);
   const isPending = item.status === "Pendente";
   const isConfirmed = item.status === "Confirmado";
+  const responsavelPelaPropostaAtual = item.ultimoResponsavelRemarcacao ?? item.origemSolicitacao;
+  const canAccept = isPending && responsavelPelaPropostaAtual === "Tutor";
+  const canReject = canAccept && item.origemSolicitacao === "Tutor";
+  const canCancel = isConfirmed || (isPending && item.origemSolicitacao === "Veterinario");
   const currentOperation =
     operationKey === `accept-${item.id}` ||
     operationKey === `reject-${item.id}` ||
@@ -901,37 +925,40 @@ function RequestCard({
 
       {(isPending || isConfirmed) && (
         <View style={styles.cardActions}>
-          {isPending && (
-            <>
-              <ActionButton
-                label="Aceitar"
-                icon="checkmark-outline"
-                tone="success"
-                loading={operationKey === `accept-${item.id}`}
-                disabled={currentOperation}
-                onPress={onAccept}
-              />
-              <ActionButton
-                label="Recusar"
-                icon="close-outline"
-                tone="danger"
-                loading={operationKey === `reject-${item.id}`}
-                disabled={currentOperation}
-                onPress={onReject}
-              />
-            </>
+          {canAccept && (
+            <ActionButton
+              label="Aceitar"
+              icon="checkmark-outline"
+              tone="success"
+              loading={operationKey === `accept-${item.id}`}
+              disabled={currentOperation}
+              onPress={onAccept}
+            />
           )}
 
-          <ActionButton
-            label="Remarcar"
-            icon="swap-horizontal-outline"
-            tone="neutral"
-            loading={operationKey === `reschedule-${item.id}`}
-            disabled={currentOperation}
-            onPress={onReschedule}
-          />
+          {canReject && (
+            <ActionButton
+              label="Recusar"
+              icon="close-outline"
+              tone="danger"
+              loading={operationKey === `reject-${item.id}`}
+              disabled={currentOperation}
+              onPress={onReject}
+            />
+          )}
 
-          {isConfirmed && (
+          {isPending && (
+            <ActionButton
+              label="Remarcar"
+              icon="swap-horizontal-outline"
+              tone="neutral"
+              loading={operationKey === `reschedule-${item.id}`}
+              disabled={currentOperation}
+              onPress={onReschedule}
+            />
+          )}
+
+          {canCancel && (
             <ActionButton
               label="Cancelar"
               icon="trash-outline"

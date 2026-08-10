@@ -52,6 +52,7 @@ namespace PetLink_BackEnd.Services.Entities
                 VeterinarioId = dto.VeterinarioId,
                 PetId = dto.PetId,
                 UsuarioId = usuarioId,
+                OrigemSolicitacao = OrigemSolicitacao.Tutor,
                 DataHoraInicio = dto.DataHoraInicio.HasValue ? NormalizarDataHoraSlot(dto.DataHoraInicio.Value) : null,
                 DataHoraFim = fim,
                 Status = StatusAgendamento.Pendente,
@@ -91,6 +92,7 @@ namespace PetLink_BackEnd.Services.Entities
                 VeterinarioId = veterinarioId,
                 PetId = dto.PetId,
                 UsuarioId = dto.UsuarioId,
+                OrigemSolicitacao = OrigemSolicitacao.Veterinario,
                 DataHoraInicio = dto.DataHoraInicio.HasValue ? NormalizarDataHoraSlot(dto.DataHoraInicio.Value) : null,
                 DataHoraFim = fim,
                 Status = StatusAgendamento.Pendente,
@@ -127,12 +129,19 @@ namespace PetLink_BackEnd.Services.Entities
             if (agendamento == null)
                 return null;
 
-            ValidarAcesso(agendamento, usuarioId, veterinarioId);
-
             if (agendamento.Status != StatusAgendamento.Pendente)
                 throw new InvalidOperationException("Somente solicitações pendentes podem ser confirmadas.");
 
-            var inicio = dto.DataHoraInicio ?? agendamento.DataHoraInicio;
+            var parteAtuante = ObterParteAtuante(agendamento, usuarioId, veterinarioId);
+            ValidarDestinatarioAtual(agendamento, parteAtuante, "aceitar");
+
+            if (dto.DataHoraInicio.HasValue && agendamento.DataHoraInicio.HasValue &&
+                SlotKey(dto.DataHoraInicio.Value) != SlotKey(agendamento.DataHoraInicio.Value))
+            {
+                throw new InvalidOperationException("Para alterar o horário proposto, utilize a remarcação.");
+            }
+
+            var inicio = agendamento.DataHoraInicio ?? dto.DataHoraInicio;
             if (!inicio.HasValue)
                 throw new InvalidOperationException("Selecione um horário para confirmar.");
 
@@ -157,10 +166,14 @@ namespace PetLink_BackEnd.Services.Entities
             if (agendamento == null)
                 return null;
 
-            ValidarAcesso(agendamento, usuarioId, veterinarioId);
+            if (agendamento.Status != StatusAgendamento.Pendente)
+                throw new InvalidOperationException("Somente solicitações pendentes podem ser recusadas.");
 
-            if (agendamento.Status == StatusAgendamento.Cancelado || agendamento.Status == StatusAgendamento.Recusado)
-                throw new InvalidOperationException("Solicitação já foi encerrada.");
+            var parteAtuante = ObterParteAtuante(agendamento, usuarioId, veterinarioId);
+            if (agendamento.OrigemSolicitacao != OrigemSolicitacao.Tutor || parteAtuante != OrigemSolicitacao.Veterinario)
+                throw new UnauthorizedAccessException("A recusa é permitida somente ao veterinário em solicitações criadas pelo tutor.");
+
+            ValidarDestinatarioAtual(agendamento, parteAtuante, "recusar");
 
             if (string.IsNullOrWhiteSpace(dto.Motivo))
                 throw new InvalidOperationException("Informe o motivo da recusa.");
@@ -183,10 +196,10 @@ namespace PetLink_BackEnd.Services.Entities
             if (agendamento == null)
                 return null;
 
-            ValidarAcesso(agendamento, usuarioId, veterinarioId);
+            if (agendamento.Status != StatusAgendamento.Pendente)
+                throw new InvalidOperationException("Somente solicitações pendentes podem ser remarcadas.");
 
-            if (agendamento.Status == StatusAgendamento.Cancelado || agendamento.Status == StatusAgendamento.Recusado)
-                throw new InvalidOperationException("Solicitação encerrada não pode ser remarcada.");
+            var parteAtuante = ObterParteAtuante(agendamento, usuarioId, veterinarioId);
 
             var fim = await ValidarSlotDisponivel(agendamento.VeterinarioId, dto.DataHoraInicio, id);
 
@@ -195,6 +208,7 @@ namespace PetLink_BackEnd.Services.Entities
             agendamento.Status = StatusAgendamento.Pendente;
             agendamento.DataConfirmacao = null;
             agendamento.DataUltimaRemarcacao = DateTime.UtcNow;
+            agendamento.UltimoResponsavelRemarcacao = parteAtuante;
             agendamento.MotivoRemarcacao = string.IsNullOrWhiteSpace(dto.Motivo) ? null : dto.Motivo.Trim();
 
             await _agendamentoRepository.Update(agendamento);
@@ -207,10 +221,16 @@ namespace PetLink_BackEnd.Services.Entities
             if (agendamento == null)
                 return null;
 
-            if (agendamento.Status == StatusAgendamento.Cancelado)
-                throw new InvalidOperationException("Solicitação já está cancelada.");
+            if (agendamento.Status != StatusAgendamento.Pendente && agendamento.Status != StatusAgendamento.Confirmado)
+                throw new InvalidOperationException("Somente solicitações pendentes ou confirmadas podem ser canceladas.");
 
-            ValidarAcesso(agendamento, usuarioId, veterinarioId);
+            var parteAtuante = ObterParteAtuante(agendamento, usuarioId, veterinarioId);
+            if (agendamento.Status == StatusAgendamento.Pendente &&
+                agendamento.OrigemSolicitacao == OrigemSolicitacao.Tutor &&
+                parteAtuante != OrigemSolicitacao.Tutor)
+            {
+                throw new UnauthorizedAccessException("Solicitações criadas pelo tutor só podem ser canceladas pelo próprio tutor.");
+            }
 
             agendamento.Status = StatusAgendamento.Cancelado;
             agendamento.DataCancelamento = DateTime.UtcNow;
@@ -239,7 +259,10 @@ namespace PetLink_BackEnd.Services.Entities
             if (inicio <= DateTime.UtcNow)
                 throw new InvalidOperationException("Não é permitido usar horários no passado.");
 
-            var slots = await GerarSlotsAgenda(agenda, DateTime.UtcNow.Date);
+            if (!AgendaHorarioHelper.EstaDentroDoHorario(inicio, agenda.DuracaoMinutos))
+                throw new InvalidOperationException("Horário deve estar entre 08:00-11:00 ou 13:00-17:00.");
+
+            var slots = await GerarSlotsAgenda(agenda, AgendaHorarioHelper.HojeLocal);
             if (!slots.Contains(inicio))
                 throw new InvalidOperationException("Horário fora da agenda configurada.");
 
@@ -260,13 +283,28 @@ namespace PetLink_BackEnd.Services.Entities
             return fim;
         }
 
-        private static void ValidarAcesso(AgendamentoConsulta agendamento, int usuarioId, int? veterinarioId)
+        private static OrigemSolicitacao ObterParteAtuante(AgendamentoConsulta agendamento, int usuarioId, int? veterinarioId)
         {
             var isTutor = agendamento.UsuarioId == usuarioId;
             var isVet = veterinarioId.HasValue && agendamento.VeterinarioId == veterinarioId.Value;
 
-            if (!isTutor && !isVet)
-                throw new UnauthorizedAccessException("Solicitação não pertence ao usuário ou veterinário.");
+            if (isTutor && !isVet)
+                return OrigemSolicitacao.Tutor;
+
+            if (isVet && !isTutor)
+                return OrigemSolicitacao.Veterinario;
+
+            if (isTutor && isVet)
+                throw new UnauthorizedAccessException("Não foi possível identificar o perfil autenticado. Faça login novamente.");
+
+            throw new UnauthorizedAccessException("Solicitação não pertence ao usuário ou veterinário autenticado.");
+        }
+
+        private static void ValidarDestinatarioAtual(AgendamentoConsulta agendamento, OrigemSolicitacao parteAtuante, string acao)
+        {
+            var responsavelPelaPropostaAtual = agendamento.UltimoResponsavelRemarcacao ?? agendamento.OrigemSolicitacao;
+            if (responsavelPelaPropostaAtual == parteAtuante)
+                throw new UnauthorizedAccessException($"Quem fez a proposta atual não pode {acao} a própria solicitação.");
         }
 
         private static Task<HashSet<DateTime>> GerarSlotsAgenda(AgendaVeterinario agenda, DateTime dataInicio)
@@ -281,8 +319,16 @@ namespace PetLink_BackEnd.Services.Entities
                 if (!diasAtivos.Contains(dia.DayOfWeek))
                     continue;
 
-                AddSlotsPeriodo(slots, dia.Add(agenda.HoraInicioManha), dia.Add(agenda.HoraFimManha), duracao);
-                AddSlotsPeriodo(slots, dia.Add(agenda.HoraInicioTarde), dia.Add(agenda.HoraFimTarde), duracao);
+                AddSlotsPeriodo(
+                    slots,
+                    AgendaHorarioHelper.CriarHorarioUtc(dia, agenda.HoraInicioManha),
+                    AgendaHorarioHelper.CriarHorarioUtc(dia, agenda.HoraFimManha),
+                    duracao);
+                AddSlotsPeriodo(
+                    slots,
+                    AgendaHorarioHelper.CriarHorarioUtc(dia, agenda.HoraInicioTarde),
+                    AgendaHorarioHelper.CriarHorarioUtc(dia, agenda.HoraFimTarde),
+                    duracao);
             }
 
             return Task.FromResult(slots);
@@ -290,14 +336,7 @@ namespace PetLink_BackEnd.Services.Entities
 
         private static DateTime NormalizarDataHoraSlot(DateTime dataHora)
         {
-            var utc = dataHora.Kind switch
-            {
-                DateTimeKind.Utc => dataHora,
-                DateTimeKind.Local => dataHora.ToUniversalTime(),
-                _ => DateTime.SpecifyKind(dataHora, DateTimeKind.Utc)
-            };
-
-            return new DateTime(utc.Year, utc.Month, utc.Day, utc.Hour, utc.Minute, 0, DateTimeKind.Utc);
+            return AgendaHorarioHelper.ParaUtc(dataHora);
         }
 
         private static long SlotKey(DateTime dataHora)

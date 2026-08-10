@@ -89,9 +89,9 @@ namespace PetLink_BackEnd.Services.Entities
             if (agenda == null)
             return Enumerable.Empty<SlotDisponivelDTO>();
 
-            var inicio = dataInicio?.Date ?? DateTime.UtcNow.Date;
-            if (inicio < DateTime.UtcNow.Date)
-                inicio = DateTime.UtcNow.Date;
+            var inicio = AgendaHorarioHelper.ObterDataLocal(dataInicio);
+            if (inicio < AgendaHorarioHelper.HojeLocal)
+                inicio = AgendaHorarioHelper.HojeLocal;
 
             var slots = new List<DateTime>();
             var duracao = TimeSpan.FromMinutes(agenda.DuracaoMinutos);
@@ -103,19 +103,20 @@ namespace PetLink_BackEnd.Services.Entities
                 if (!diasAtivos.Contains(dia.DayOfWeek))
                     continue;
 
-                var inicioManha = dia.Add(agenda.HoraInicioManha);
-                var fimManha = dia.Add(agenda.HoraFimManha);
-                var inicioTarde = dia.Add(agenda.HoraInicioTarde);
-                var fimTarde = dia.Add(agenda.HoraFimTarde);
+                var inicioManha = AgendaHorarioHelper.CriarHorarioUtc(dia, agenda.HoraInicioManha);
+                var fimManha = AgendaHorarioHelper.CriarHorarioUtc(dia, agenda.HoraFimManha);
+                var inicioTarde = AgendaHorarioHelper.CriarHorarioUtc(dia, agenda.HoraInicioTarde);
+                var fimTarde = AgendaHorarioHelper.CriarHorarioUtc(dia, agenda.HoraFimTarde);
 
                 AddSlotsPeriodo(slots, inicioManha, fimManha, duracao);
                 AddSlotsPeriodo(slots, inicioTarde, fimTarde, duracao);
             }
 
-            var fimBusca = inicio.AddDays(7);
+            var inicioBusca = AgendaHorarioHelper.CriarHorarioUtc(inicio, TimeSpan.Zero);
+            var fimBusca = AgendaHorarioHelper.CriarHorarioUtc(inicio.AddDays(7), TimeSpan.Zero);
             var bloqueados = await _context.Set<AgendaSlotBloqueado>()
                 .AsNoTracking()
-                .Where(b => b.VeterinarioId == veterinarioId && b.DataHoraInicio >= inicio && b.DataHoraInicio < fimBusca)
+                .Where(b => b.VeterinarioId == veterinarioId && b.DataHoraInicio >= inicioBusca && b.DataHoraInicio < fimBusca)
                 .Select(b => b.DataHoraInicio)
                 .ToListAsync();
 
@@ -136,17 +137,18 @@ namespace PetLink_BackEnd.Services.Entities
             if (agenda == null)
                 return Enumerable.Empty<SlotDisponivelDTO>();
 
-            var inicio = dataInicio?.Date ?? DateTime.UtcNow.Date;
-            if (inicio < DateTime.UtcNow.Date)
-                inicio = DateTime.UtcNow.Date;
+            var inicio = AgendaHorarioHelper.ObterDataLocal(dataInicio);
+            if (inicio < AgendaHorarioHelper.HojeLocal)
+                inicio = AgendaHorarioHelper.HojeLocal;
 
             var slots = (await GerarSlotsDisponiveis(veterinarioId, inicio)).ToList();
-            var fim = inicio.AddDays(7);
-            var confirmados = await _agendamentoRepository.GetConfirmadosPorVeterinario(veterinarioId, inicio, fim);
-            var ocupados = new HashSet<DateTime>(confirmados.Where(c => c.DataHoraInicio.HasValue)
-                .Select(c => c.DataHoraInicio!.Value));
+            var inicioBusca = AgendaHorarioHelper.CriarHorarioUtc(inicio, TimeSpan.Zero);
+            var fimBusca = AgendaHorarioHelper.CriarHorarioUtc(inicio.AddDays(7), TimeSpan.Zero);
+            var confirmados = await _agendamentoRepository.GetConfirmadosPorVeterinario(veterinarioId, inicioBusca, fimBusca);
+            var ocupados = new HashSet<long>(confirmados.Where(c => c.DataHoraInicio.HasValue)
+                .Select(c => SlotKey(c.DataHoraInicio!.Value)));
 
-            return slots.Where(s => !ocupados.Contains(s.DataHoraInicio));
+            return slots.Where(s => !ocupados.Contains(SlotKey(s.DataHoraInicio)));
         }
 
         public async Task BloquearSlot(BloquearSlotDTO dto, int? veterinarioId)
@@ -192,14 +194,7 @@ namespace PetLink_BackEnd.Services.Entities
 
         private static DateTime NormalizarDataHoraSlot(DateTime dataHora)
         {
-            var utc = dataHora.Kind switch
-            {
-                DateTimeKind.Utc => dataHora,
-                DateTimeKind.Local => dataHora.ToUniversalTime(),
-                _ => DateTime.SpecifyKind(dataHora, DateTimeKind.Utc)
-            };
-
-            return new DateTime(utc.Year, utc.Month, utc.Day, utc.Hour, utc.Minute, 0, DateTimeKind.Utc);
+            return AgendaHorarioHelper.ParaUtc(dataHora);
         }
 
         private static long SlotKey(DateTime dataHora)
@@ -220,13 +215,8 @@ namespace PetLink_BackEnd.Services.Entities
 
         private static void ValidarRegrasAgenda(TimeSpan inicioManha, TimeSpan fimManha, TimeSpan inicioTarde, TimeSpan fimTarde, int duracao)
         {
-            var esperadoInicioManha = new TimeSpan(8, 0, 0);
-            var esperadoFimManha = new TimeSpan(11, 0, 0);
-            var esperadoInicioTarde = new TimeSpan(13, 0, 0);
-            var esperadoFimTarde = new TimeSpan(17, 0, 0);
-
-            if (inicioManha != esperadoInicioManha || fimManha != esperadoFimManha ||
-                inicioTarde != esperadoInicioTarde || fimTarde != esperadoFimTarde)
+            if (inicioManha != AgendaHorarioHelper.InicioManha || fimManha != AgendaHorarioHelper.FimManha ||
+                inicioTarde != AgendaHorarioHelper.InicioTarde || fimTarde != AgendaHorarioHelper.FimTarde)
             {
                 throw new InvalidOperationException("Horários da agenda devem ser 08:00-11:00 e 13:00-17:00.");
             }

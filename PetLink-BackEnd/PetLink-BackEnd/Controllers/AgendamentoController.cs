@@ -244,6 +244,10 @@ namespace PetLink_BackEnd.Controllers
 
         private async Task<int?> GetUsuarioId()
         {
+            var perfil = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            if (string.Equals(perfil, "Veterinario", StringComparison.OrdinalIgnoreCase))
+                return null;
+
             var email = User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
                 ?.Value;
@@ -257,6 +261,10 @@ namespace PetLink_BackEnd.Controllers
 
         private async Task<int?> GetVeterinarioId()
         {
+            var perfil = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Role)?.Value;
+            if (string.Equals(perfil, "Tutor", StringComparison.OrdinalIgnoreCase))
+                return null;
+
             var email = User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
                 ?.Value;

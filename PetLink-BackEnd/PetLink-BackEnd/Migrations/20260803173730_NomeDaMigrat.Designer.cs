@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using PetLink_BackEnd.Data;
@@ -11,9 +12,11 @@ using PetLink_BackEnd.Data;
 namespace PetLink_BackEnd.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260803173730_NomeDaMigrat")]
+    partial class NomeDaMigrat
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -170,7 +173,7 @@ namespace PetLink_BackEnd.Migrations
 
                             t.HasCheckConstraint("CK_agendaveterinario_duracao", "duracaominutos = 60");
 
-                            t.HasCheckConstraint("CK_agendaveterinario_horarios", "horainiciomanha = INTERVAL '08:00:00' AND horafimmanha = INTERVAL '11:00:00' AND horainiciotarde = INTERVAL '13:00:00' AND horafimtarde = INTERVAL '17:00:00'");
+                            t.HasCheckConstraint("CK_agendaveterinario_horarios", "horainiciomanha < horafimmanha AND horainiciotarde < horafimtarde");
                         });
                 });
 
@@ -231,10 +234,6 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("character varying(500)")
                         .HasColumnName("observacao");
 
-                    b.Property<int>("OrigemSolicitacao")
-                        .HasColumnType("integer")
-                        .HasColumnName("origemsolicitacao");
-
                     b.Property<int>("PetId")
                         .HasColumnType("integer")
                         .HasColumnName("petid");
@@ -252,10 +251,6 @@ namespace PetLink_BackEnd.Migrations
                     b.Property<int>("TipoServico")
                         .HasColumnType("integer")
                         .HasColumnName("tiposervico");
-
-                    b.Property<int?>("UltimoResponsavelRemarcacao")
-                        .HasColumnType("integer")
-                        .HasColumnName("ultimoresponsavelremarcacao");
 
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer")
@@ -284,11 +279,7 @@ namespace PetLink_BackEnd.Migrations
                         {
                             t.HasCheckConstraint("CK_agendamentoconsulta_horario", "(datahorainicio IS NULL AND datahorafim IS NULL) OR (datahorainicio < datahorafim)");
 
-                            t.HasCheckConstraint("CK_agendamentoconsulta_origem", "origemsolicitacao IN (1, 2)");
-
                             t.HasCheckConstraint("CK_agendamentoconsulta_status_datas", "(status <> 2 OR dataconfirmacao IS NOT NULL) AND (status <> 3 OR datacancelamento IS NOT NULL)");
-
-                            t.HasCheckConstraint("CK_agendamentoconsulta_ultimo_responsavel", "ultimoresponsavelremarcacao IS NULL OR ultimoresponsavelremarcacao IN (1, 2)");
                         });
                 });
 

@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "MaEKi21S4dQ=",
+  "dgSpecHash": "lmHcvU/qqQA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\olive\\Documents\\Nova pasta\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
+  "projectFilePath": "C:\\Users\\olive\\OneDrive\\Documentos\\Fatec\\PetLink\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\olive\\.nuget\\packages\\automapper\\15.0.1\\automapper.15.0.1.nupkg.sha512",
     "C:\\Users\\olive\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
@@ -68,8 +68,10 @@
     {
       "code": "NU1903",
       "level": "Warning",
-      "warningLevel": 1,
       "message": "O pacote 'AutoMapper' 15.0.1 tem uma alta vulnerabilidade de gravidade conhecida, https://github.com/advisories/GHSA-rvv3-g6hj-g44x",
+      "projectPath": "C:\\Users\\olive\\OneDrive\\Documentos\\Fatec\\PetLink\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
+      "warningLevel": 1,
+      "filePath": "C:\\Users\\olive\\OneDrive\\Documentos\\Fatec\\PetLink\\PetLink\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
       "libraryId": "AutoMapper",
       "targetGraphs": [
         "net8.0"

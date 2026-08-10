@@ -6,6 +6,7 @@ export type ApiResponse<T> = {
 
 export type StatusAgendamento = "Pendente" | "Confirmado" | "Cancelado" | "Recusado";
 export type TipoServico = 1 | 2 | 3;
+export type OrigemSolicitacao = "Tutor" | "Veterinario";
 
 export const TIPO_SERVICO_LABEL: Record<number, string> = {
   1: "Consulta",
@@ -35,6 +36,8 @@ export type AgendamentoConsulta = {
   veterinarioId: number;
   petId: number;
   usuarioId: number;
+  origemSolicitacao: OrigemSolicitacao;
+  ultimoResponsavelRemarcacao?: OrigemSolicitacao | null;
   dataHoraInicio?: string | null;
   dataHoraFim?: string | null;
   status: StatusAgendamento;

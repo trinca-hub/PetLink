@@ -16,7 +16,11 @@ import { Feather, Ionicons } from "@expo/vector-icons";
 
 import { AuthContext } from "@/src/context/AuthContext";
 import { createAgendamento, getVeterinarios } from "@/src/api/agendamentoService";
-import { getAgendaSlots } from "@/src/api/agendaVeterinarioService";
+import {
+  filtrarSlotsHorarioAtendimento,
+  getAgendaSlots,
+  isDataHoraDentroHorarioAtendimento,
+} from "@/src/api/agendaVeterinarioService";
 import { getMyPetsService } from "@/src/api/authService";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { SlotDisponivel } from "@/src/types/agendamento";
@@ -106,7 +110,7 @@ export default function NovoAgendamento() {
       const result: any = await getAgendaSlots(veterinarioId, token);
 
       if (result?.ok && Array.isArray(result?.data?.data)) {
-        setSlots(result.data.data);
+        setSlots(filtrarSlotsHorarioAtendimento(result.data.data));
       } else {
         setSlots([]);
         setError(getApiErrorMessage(result?.data, "Nao foi possivel carregar os horarios deste veterinario."));
@@ -175,6 +179,11 @@ export default function NovoAgendamento() {
 
     if (!petId || !vetId || !selectedSlot) {
       setError("Selecione pet, veterinario e horario para continuar.");
+      return;
+    }
+
+    if (!isDataHoraDentroHorarioAtendimento(selectedSlot)) {
+      setError("O horario deve estar entre 08:00-11:00 ou 13:00-17:00.");
       return;
     }
 

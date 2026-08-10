@@ -8,6 +8,7 @@ import {
   SlotDisponivel,
   bloquearAgendaSlot,
   createAgendaVeterinario,
+  filtrarSlotsHorarioAtendimento,
   getAgendaSlots,
   getAgendaVeterinario,
   updateAgendaVeterinario,
@@ -201,7 +202,7 @@ export default function VetAgenda() {
     const result = await getAgendaSlots(vetId, token);
 
     if (result.ok && Array.isArray(result?.data?.data)) {
-      setSlots(result.data.data);
+      setSlots(filtrarSlotsHorarioAtendimento(result.data.data));
     } else {
       setSlots([]);
       setError(getApiErrorMessage(result?.data, "Nao foi possivel carregar os horarios."));
