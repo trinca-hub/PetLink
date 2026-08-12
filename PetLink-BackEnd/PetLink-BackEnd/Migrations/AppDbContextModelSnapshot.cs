@@ -965,6 +965,20 @@ namespace PetLink_BackEnd.Migrations
                     b.ToTable("token_redefinicao_senha", (string)null);
                 });
 
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.TokenRedefinicaoSenhaGestao", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<string>("Email").IsRequired().HasColumnType("text").HasColumnName("email");
+                    b.Property<DateTime>("ExpiraEm").HasColumnType("timestamp with time zone").HasColumnName("expira_em");
+                    b.Property<string>("Perfil").IsRequired().HasColumnType("text").HasColumnName("perfil");
+                    b.Property<string>("TokenHash").IsRequired().HasColumnType("text").HasColumnName("token_hash");
+                    b.Property<DateTime?>("UsadoEm").HasColumnType("timestamp with time zone").HasColumnName("usado_em");
+                    b.HasKey("Id");
+                    b.HasIndex("Perfil", "Email", "TokenHash").IsUnique();
+                    b.ToTable("token_redefinicao_senha_gestao", (string)null);
+                });
+
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Usuario", b =>
                 {
                     b.Property<int>("Id")

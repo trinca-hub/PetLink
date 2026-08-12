@@ -32,6 +32,7 @@ export default function LoginFunc() {
       onSubmit={handleLogin}
       loading={loading}
       error={error}
+      onForgotPassword={() => router.push("/redefinir-senha?perfil=func")}
     />
   );
 }

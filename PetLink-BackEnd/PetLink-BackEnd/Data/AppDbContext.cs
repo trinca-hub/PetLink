@@ -26,6 +26,7 @@ public class AppDbContext : DbContext
     public DbSet<AgendamentoConsulta> AgendamentosConsultas { get; set; }
     public DbSet<TokenRedefinicaoSenha> TokensRedefinicaoSenha { get; set; }
     public DbSet<TentativaLogin> TentativasLogin { get; set; }
+    public DbSet<TokenRedefinicaoSenhaGestao> TokensRedefinicaoSenhaGestao { get; set; }
 
 
 
@@ -53,6 +54,10 @@ public class AppDbContext : DbContext
         AgendamentoConsultaBuilder.Build(modelBuilder);
         TokenRedefinicaoSenhaBuilder.Build(modelBuilder);
         TentativaLoginBuilder.Build(modelBuilder);
+        modelBuilder.Entity<TokenRedefinicaoSenhaGestao>(entity =>
+        {
+            entity.HasIndex(token => new { token.Perfil, token.Email, token.TokenHash }).IsUnique();
+        });
 
 
 

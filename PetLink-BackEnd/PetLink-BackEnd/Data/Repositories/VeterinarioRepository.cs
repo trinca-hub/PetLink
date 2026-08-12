@@ -4,6 +4,7 @@ using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Models;
 using PetLink_BackEnd.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using PetLink_BackEnd.Security;
 
 namespace PetLink_BackEnd.Data.Repositories
 {
@@ -18,7 +19,8 @@ namespace PetLink_BackEnd.Data.Repositories
 
         public async Task<Veterinario> Login(Login login)
         {
-            return await _context.Veterinarios.AsNoTracking().FirstOrDefaultAsync(p => p.Email == login.Email && p.Senha == login.Password);
+            var conta = await _context.Veterinarios.AsNoTracking().FirstOrDefaultAsync(p => p.Email == login.Email);
+            return conta is not null && PasswordSecurity.Verify(login.Password, conta.Senha) ? conta : null;
         }
 
         public async Task<Veterinario> GetByEmail(string email)

@@ -32,6 +32,7 @@ export default function LoginAdm() {
       onSubmit={handleLogin}
       loading={loading}
       error={error}
+      onForgotPassword={() => router.push("/redefinir-senha?perfil=adm")}
     />
   );
 }

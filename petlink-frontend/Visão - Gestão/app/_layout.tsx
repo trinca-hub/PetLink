@@ -10,7 +10,7 @@ function RoleRouteGuard() {
   useEffect(() => {
     if (!hydrated) return;
 
-    const publicRoutes = ["/", "/login-adm", "/login-func", "/login-vet"];
+    const publicRoutes = ["/", "/login-adm", "/login-func", "/login-vet", "/redefinir-senha"];
     const isPublic = publicRoutes.includes(pathname);
 
     if (!token) {

@@ -21,6 +21,7 @@ type LoginFormProps = {
   loading?: boolean;
   error?: string;
   onSubmit: (email: string, senha: string) => Promise<void>;
+  onForgotPassword?: () => void;
 };
 
 export default function LoginForm({
@@ -30,9 +31,11 @@ export default function LoginForm({
   loading = false,
   error,
   onSubmit,
+  onForgotPassword,
 }: LoginFormProps) {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [mostrarSenha, setMostrarSenha] = useState(false);
   const { width } = useWindowDimensions();
   const isCompact = width < 760;
   const shellWidth = isCompact ? Math.max(Math.min(width - 72, 420), 300) : "100%";
@@ -99,16 +102,10 @@ export default function LoginForm({
 
               <View style={styles.inputGroup}>
                 <Text style={styles.label}>Senha</Text>
-                <TextInput
-                  value={senha}
-                  onChangeText={setSenha}
-                  secureTextEntry
-                  textContentType="password"
-                  placeholder="Digite sua senha"
-                  placeholderTextColor="#64748b"
-                  style={styles.input}
-                />
+                <View style={styles.passwordInput}><TextInput value={senha} onChangeText={setSenha} secureTextEntry={!mostrarSenha} textContentType="password" placeholder="Digite sua senha" placeholderTextColor="#64748b" style={styles.passwordTextInput} /><TouchableOpacity onPress={() => setMostrarSenha((value) => !value)} accessibilityRole="button" accessibilityLabel={mostrarSenha ? "Ocultar senha" : "Mostrar senha"} style={styles.eyeButton}><Ionicons name={mostrarSenha ? "eye-off-outline" : "eye-outline"} size={20} color="#334155" /></TouchableOpacity></View>
               </View>
+
+              {!!onForgotPassword && <TouchableOpacity onPress={onForgotPassword} style={styles.forgotButton}><Text style={styles.forgotText}>Esqueceu sua senha?</Text></TouchableOpacity>}
 
               {!!error && (
                 <View style={styles.errorBox}>
@@ -274,6 +271,11 @@ const styles = StyleSheet.create({
     borderColor: "rgba(203, 213, 225, 0.65)",
     fontSize: 14,
   },
+  passwordInput: { flexDirection: "row", alignItems: "center", backgroundColor: "#f8fafc", borderRadius: managementTheme.radii.md, minHeight: 46, borderWidth: 1, borderColor: "rgba(203, 213, 225, 0.65)" },
+  passwordTextInput: { flex: 1, minHeight: 46, paddingLeft: 14, color: managementTheme.colors.inputText, fontSize: 14 },
+  eyeButton: { width: 46, minHeight: 46, alignItems: "center", justifyContent: "center" },
+  forgotButton: { alignSelf: "flex-end", marginTop: -5 },
+  forgotText: { color: managementTheme.colors.accent, fontSize: 12, fontWeight: "800", textDecorationLine: "underline" },
   errorBox: {
     flexDirection: "row",
     alignItems: "flex-start",

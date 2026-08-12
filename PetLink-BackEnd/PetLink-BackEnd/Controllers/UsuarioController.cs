@@ -289,7 +289,7 @@ public class UsuarioController : Controller
         }
 
         var email = redefinicao.Email.Trim().ToLowerInvariant();
-        var tokenHash = GenerateSha256Hash(redefinicao.Token.Trim());
+        var tokenHash = GenerateSha256Hash(NormalizarToken(redefinicao.Token));
         var agora = DateTime.UtcNow;
 
         var token = await _context.TokensRedefinicaoSenha
@@ -305,6 +305,14 @@ public class UsuarioController : Controller
             _response.Code = ResponseEnum.INVALID;
             _response.Data = null;
             _response.Message = "O link de redefinição é inválido ou expirou.";
+            return BadRequest(_response);
+        }
+
+        if (PasswordSecurity.Verify(redefinicao.NovaSenha, token.Usuario.Senha))
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "A nova senha não pode ser igual à senha atual.";
             return BadRequest(_response);
         }
 
@@ -461,6 +469,8 @@ public class UsuarioController : Controller
         }
         return builder.ToString();
     }
+
+    private static string NormalizarToken(string token) => string.Concat(token.Where(character => !char.IsWhiteSpace(character)));
 
     private string GenerateJwtToken(UsuarioDTO usuarioDTO)
     {

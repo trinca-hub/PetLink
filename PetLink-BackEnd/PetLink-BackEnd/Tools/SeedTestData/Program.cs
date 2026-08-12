@@ -1,4 +1,5 @@
 using Npgsql;
+using System.Security.Cryptography;
 
 const string defaultConnection =
     "Host=localhost;Port=5432;Database=PetLinkBD;Username=postgres;Password=123456;";
@@ -9,6 +10,21 @@ var connectionString = args.FirstOrDefault()
 
 const string passwordHash123456 =
     "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92";
+const string enzoEmail = "enzo.stafuza@gmail.com";
+const string enzoPassword = "100715Ess";
+
+static string HashPassword(string password)
+{
+    const int iterations = 600_000;
+    const int saltSize = 16;
+    const int hashSize = 32;
+
+    var salt = RandomNumberGenerator.GetBytes(saltSize);
+    var hash = Rfc2898DeriveBytes.Pbkdf2(password, salt, iterations, HashAlgorithmName.SHA256, hashSize);
+    return $"PBKDF2${iterations}${Convert.ToBase64String(salt)}${Convert.ToBase64String(hash)}";
+}
+
+var enzoPasswordHash = HashPassword(enzoPassword);
 
 var sql = $$"""
 BEGIN;
@@ -19,7 +35,8 @@ VALUES
   (2, 'Enzo Stafuza', '17999990002', '15700002', 'SP', 'Campinas', 'Cambuí', 'Rua das Flores', 202, 'enzo@gmail.com', '{{passwordHash123456}}'),
   (3, 'Yasmin Basso', '17999990003', '15700003', 'SP', 'Santos', 'Gonzaga', 'Avenida Praia', 303, 'yasmin@gmail.com', '{{passwordHash123456}}'),
   (4, 'Lara Almeida', '17999990004', '15700004', 'SP', 'Ribeirao Preto', 'Jardim Paulista', 'Rua Cedro', 404, 'lara@gmail.com', '{{passwordHash123456}}'),
-  (5, 'Mateus Lima', '17999990005', '15700005', 'SP', 'Jundiai', 'Vila Arens', 'Rua Ipê', 505, 'mateus@gmail.com', '{{passwordHash123456}}')
+  (5, 'Mateus Lima', '17999990005', '15700005', 'SP', 'Jundiai', 'Vila Arens', 'Rua Ipê', 505, 'mateus@gmail.com', '{{passwordHash123456}}'),
+  (6, 'Enzo Stafuza', '17999990006', '15700006', 'SP', 'Urânia', 'Centro', 'Rua das Flores', 6, '{{enzoEmail}}', '{{enzoPasswordHash}}')
 ON CONFLICT (id) DO UPDATE SET
   nome = EXCLUDED.nome, telefone = EXCLUDED.telefone, cep = EXCLUDED.cep, uf = EXCLUDED.uf,
   cidade = EXCLUDED.cidade, bairro = EXCLUDED.bairro, rua = EXCLUDED.rua, numero = EXCLUDED.numero,
@@ -31,7 +48,8 @@ VALUES
   (2, 'Enzo Funcionário', 'enzo@gmail.com', '{{passwordHash123456}}', 3200.00),
   (3, 'Yasmin Funcionária', 'yasmin@gmail.com', '{{passwordHash123456}}', 3500.00),
   (4, 'Lara Funcionária', 'lara.func@gmail.com', '{{passwordHash123456}}', 3000.00),
-  (5, 'Mateus Funcionário', 'mateus.func@gmail.com', '{{passwordHash123456}}', 4100.00)
+  (5, 'Mateus Funcionário', 'mateus.func@gmail.com', '{{passwordHash123456}}', 4100.00),
+  (6, 'Enzo Stafuza', '{{enzoEmail}}', '{{enzoPasswordHash}}', 3500.00)
 ON CONFLICT (id) DO UPDATE SET
   nome = EXCLUDED.nome, email = EXCLUDED.email, senha = EXCLUDED.senha, salario = EXCLUDED.salario;
 
@@ -41,7 +59,8 @@ VALUES
   (2, 'Enzo Administrador', 'enzo@gmail.com', '{{passwordHash123456}}', 1),
   (3, 'Yasmin Administradora', 'yasmin@gmail.com', '{{passwordHash123456}}', 1),
   (4, 'Lara Administradora', 'lara.adm@gmail.com', '{{passwordHash123456}}', 1),
-  (5, 'Mateus Administrador', 'mateus.adm@gmail.com', '{{passwordHash123456}}', 2)
+  (5, 'Mateus Administrador', 'mateus.adm@gmail.com', '{{passwordHash123456}}', 2),
+  (6, 'Enzo Stafuza', '{{enzoEmail}}', '{{enzoPasswordHash}}', 1)
 ON CONFLICT (id) DO UPDATE SET
   nome = EXCLUDED.nome, email = EXCLUDED.email, senha = EXCLUDED.senha, status = EXCLUDED.status;
 
@@ -51,7 +70,8 @@ VALUES
   (2, 'Enzo Veterinário', 'CRMV-SP-1002', 7600.00, 'enzo@gmail.com', '{{passwordHash123456}}', 1),
   (3, 'Yasmin Veterinária', 'CRMV-SP-1003', 7900.00, 'yasmin@gmail.com', '{{passwordHash123456}}', 1),
   (4, 'Lara Veterinária', 'CRMV-SP-1004', 6800.00, 'lara.vet@gmail.com', '{{passwordHash123456}}', 1),
-  (5, 'Mateus Veterinário', 'CRMV-SP-1005', 6500.00, 'mateus.vet@gmail.com', '{{passwordHash123456}}', 2)
+  (5, 'Mateus Veterinário', 'CRMV-SP-1005', 6500.00, 'mateus.vet@gmail.com', '{{passwordHash123456}}', 2),
+  (6, 'Enzo Stafuza', 'CRMV-SP-1006', 8000.00, '{{enzoEmail}}', '{{enzoPasswordHash}}', 1)
 ON CONFLICT (id) DO UPDATE SET
   nome = EXCLUDED.nome, crmv = EXCLUDED.crmv, salario = EXCLUDED.salario,
   email = EXCLUDED.email, senha = EXCLUDED.senha, status = EXCLUDED.status;
@@ -228,3 +248,4 @@ Console.WriteLine("Logins criados em usuario, funcionario, administrador e veter
 Console.WriteLine("- gabriel@gmail.com / 123456");
 Console.WriteLine("- enzo@gmail.com / 123456");
 Console.WriteLine("- yasmin@gmail.com / 123456");
+Console.WriteLine($"- {enzoEmail} / {enzoPassword} (usuario, funcionario, administrador e veterinario)");
