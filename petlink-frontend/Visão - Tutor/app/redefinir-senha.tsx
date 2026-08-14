@@ -1,9 +1,9 @@
 import { useState } from "react";
 import {
   Alert,
-  ImageBackground,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
   ScrollView,
   StyleSheet,
   Text,
@@ -14,16 +14,17 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { TutorPalette } from "@/constants/theme";
 import { requestPasswordResetService, resetPasswordService } from "@/src/api/authService";
 import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
-import { isPasswordAccepted } from "../src/utils/passwordStrength";
+import { PetLinkAuthBackdrop, PetLinkAuthHeader } from "@/components/PetLinkAuthVisual";
+import { isPasswordAccepted } from "@/src/utils/passwordStrength";
 
 export default function RedefinirSenha() {
   const router = useRouter();
   const params = useLocalSearchParams<{ email?: string; token?: string }>();
   const emailDoLink = Array.isArray(params.email) ? params.email[0] : params.email;
   const tokenDoLink = Array.isArray(params.token) ? params.token[0] : params.token;
+
   const [email, setEmail] = useState(emailDoLink ?? "");
   const [token, setToken] = useState(tokenDoLink ?? "");
   const [novaSenha, setNovaSenha] = useState("");
@@ -33,8 +34,14 @@ export default function RedefinirSenha() {
   const [mostrarNovaSenha, setMostrarNovaSenha] = useState(false);
   const [mostrarConfirmacao, setMostrarConfirmacao] = useState(false);
 
+  const exibindoRedefinicao = Boolean(token || codigoSolicitado);
+  const subtitulo = exibindoRedefinicao
+    ? "Informe o código recebido e crie sua nova senha."
+    : "Informe seu e-mail para receber um código seguro de recuperação.";
+
   async function handleSolicitacao() {
     const normalizedEmail = email.trim().toLowerCase();
+
     if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
       Alert.alert("E-mail inválido", "Informe o e-mail usado no seu cadastro.");
       return;
@@ -43,6 +50,7 @@ export default function RedefinirSenha() {
     setEnviando(true);
     const result = await requestPasswordResetService(normalizedEmail);
     setEnviando(false);
+
     if (!result.ok) {
       Alert.alert("Não foi possível enviar", result.data?.message || "Tente novamente mais tarde.");
       return;
@@ -54,14 +62,17 @@ export default function RedefinirSenha() {
 
   async function handleRedefinicao() {
     const normalizedEmail = email.trim().toLowerCase();
+
     if (!/^\S+@\S+\.\S+$/.test(normalizedEmail) || !token.trim()) {
       Alert.alert("Dados incompletos", "Informe o e-mail e o código recebido.");
       return;
     }
+
     if (!isPasswordAccepted(novaSenha)) {
       Alert.alert("Senha fraca", "Use ao menos 8 caracteres e combine 3 tipos: maiúscula, minúscula, número ou símbolo.");
       return;
     }
+
     if (novaSenha !== confirmacaoSenha) {
       Alert.alert("Senhas diferentes", "Confirme a nova senha corretamente.");
       return;
@@ -70,6 +81,7 @@ export default function RedefinirSenha() {
     setEnviando(true);
     const result = await resetPasswordService(normalizedEmail, token.trim(), novaSenha);
     setEnviando(false);
+
     if (!result.ok) {
       Alert.alert("Não foi possível redefinir", result.data?.message || "Solicite um novo link.");
       return;
@@ -81,118 +93,142 @@ export default function RedefinirSenha() {
   }
 
   return (
-    <ImageBackground
-      source={require("../assets/images/background.jpg")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={styles.keyboardView}
-      >
-        <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <LinearGradient
-            colors={["rgba(7, 21, 43, 0.82)", "rgba(15, 33, 60, 0.92)", "rgba(47, 124, 246, 0.92)"]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 1 }}
-            style={styles.card}
-          >
-          <View style={styles.badge}>
-            <Ionicons name="lock-closed-outline" size={22} color={TutorPalette.accent} />
-          </View>
-          <Text style={styles.title}>Redefinir senha</Text>
-          <Text style={styles.subtitle}>
-            {token || codigoSolicitado
-              ? "Informe o código recebido e crie uma nova senha para sua conta."
-              : "Informe seu e-mail. Você receberá um link e um código seguro para criar uma nova senha."}
-          </Text>
+    <LinearGradient colors={["#030508", "#090C12", "#020305"]} style={styles.page}>
+      <PetLinkAuthBackdrop />
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.keyboard}>
+          <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
+            <View style={styles.form}>
+              <PetLinkAuthHeader title="Redefinir senha" subtitle={subtitulo} />
 
-          <View style={styles.inputGroup}>
-            <Text style={styles.label}>E-mail cadastrado</Text>
-            <TextInput
-              value={email}
-              onChangeText={setEmail}
-              placeholder="Digite seu e-mail"
-              placeholderTextColor="#9EB1C8"
-              style={styles.input}
-              keyboardType="email-address"
-              autoCapitalize="none"
-              autoCorrect={false}
-              autoComplete="email"
-            />
-          </View>
+              <View style={styles.field}>
+                <Ionicons name="mail-outline" size={22} color="#287AF5" />
+                <TextInput
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="E-mail cadastrado"
+                  placeholderTextColor="#8B909A"
+                  style={styles.input}
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="email"
+                />
+              </View>
 
-          {token || codigoSolicitado ? (
-            <>
-              {!token && (
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Código de recuperação</Text>
-                  <TextInput
-                    value={token}
-                    onChangeText={setToken}
-                    placeholder="Cole o código recebido no e-mail"
-                    placeholderTextColor="#9EB1C8"
-                    style={styles.input}
-                    autoCapitalize="characters"
-                    autoCorrect={false}
-                  />
-                </View>
+              {exibindoRedefinicao && (
+                <>
+                  {!token && (
+                    <View style={styles.field}>
+                      <Ionicons name="key-outline" size={22} color="#287AF5" />
+                      <TextInput
+                        value={token}
+                        onChangeText={setToken}
+                        placeholder="Código de recuperação"
+                        placeholderTextColor="#8B909A"
+                        style={styles.input}
+                        autoCapitalize="characters"
+                        autoCorrect={false}
+                      />
+                    </View>
+                  )}
+
+                  <View style={[styles.field, styles.passwordField]}>
+                    <Ionicons name="lock-closed-outline" size={22} color="#287AF5" />
+                    <TextInput
+                      value={novaSenha}
+                      onChangeText={setNovaSenha}
+                      placeholder="Nova senha"
+                      placeholderTextColor="#8B909A"
+                      style={styles.input}
+                      secureTextEntry={!mostrarNovaSenha}
+                      autoComplete="new-password"
+                    />
+                    <TouchableOpacity
+                      accessibilityRole="button"
+                      accessibilityLabel={mostrarNovaSenha ? "Ocultar senha" : "Mostrar senha"}
+                      onPress={() => setMostrarNovaSenha((value) => !value)}
+                      style={styles.eyeButton}
+                    >
+                      <Ionicons name={mostrarNovaSenha ? "eye-off-outline" : "eye-outline"} size={23} color="#9AA0AA" />
+                    </TouchableOpacity>
+                  </View>
+
+                  <PasswordStrengthIndicator password={novaSenha} />
+
+                  <View style={styles.confirmationSpacing}>
+                    <View style={styles.field}>
+                      <Ionicons name="shield-checkmark-outline" size={22} color="#287AF5" />
+                      <TextInput
+                        value={confirmacaoSenha}
+                        onChangeText={setConfirmacaoSenha}
+                        placeholder="Confirmar nova senha"
+                        placeholderTextColor="#8B909A"
+                        style={styles.input}
+                        secureTextEntry={!mostrarConfirmacao}
+                        autoComplete="new-password"
+                      />
+                      <TouchableOpacity
+                        accessibilityRole="button"
+                        accessibilityLabel={mostrarConfirmacao ? "Ocultar senha" : "Mostrar senha"}
+                        onPress={() => setMostrarConfirmacao((value) => !value)}
+                        style={styles.eyeButton}
+                      >
+                        <Ionicons name={mostrarConfirmacao ? "eye-off-outline" : "eye-outline"} size={23} color="#9AA0AA" />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </>
               )}
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Nova senha</Text>
-                <View style={styles.passwordInput}>
-                  <TextInput value={novaSenha} onChangeText={setNovaSenha} style={styles.passwordTextInput} secureTextEntry={!mostrarNovaSenha} autoComplete="new-password" />
-                  <TouchableOpacity accessibilityRole="button" accessibilityLabel={mostrarNovaSenha ? "Ocultar senha" : "Mostrar senha"} onPress={() => setMostrarNovaSenha((value) => !value)} style={styles.eyeButton}>
-                    <Ionicons name={mostrarNovaSenha ? "eye-off-outline" : "eye-outline"} size={21} color="#31506F" />
-                  </TouchableOpacity>
-                </View>
-                <PasswordStrengthIndicator password={novaSenha} />
-              </View>
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>Confirmar nova senha</Text>
-                <View style={styles.passwordInput}>
-                  <TextInput value={confirmacaoSenha} onChangeText={setConfirmacaoSenha} style={styles.passwordTextInput} secureTextEntry={!mostrarConfirmacao} autoComplete="new-password" />
-                  <TouchableOpacity accessibilityRole="button" accessibilityLabel={mostrarConfirmacao ? "Ocultar senha" : "Mostrar senha"} onPress={() => setMostrarConfirmacao((value) => !value)} style={styles.eyeButton}>
-                    <Ionicons name={mostrarConfirmacao ? "eye-off-outline" : "eye-outline"} size={21} color="#31506F" />
-                  </TouchableOpacity>
-                </View>
-              </View>
-              <TouchableOpacity style={styles.button} onPress={handleRedefinicao} disabled={enviando}>
-                <Text style={styles.buttonText}>{enviando ? "Redefinindo..." : "Redefinir senha"}</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            <TouchableOpacity style={styles.button} onPress={handleSolicitacao} disabled={enviando}>
-              <Text style={styles.buttonText}>{enviando ? "Enviando..." : "Enviar link de recuperação"}</Text>
-            </TouchableOpacity>
-          )}
 
-          <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
-            <Text style={styles.backText}>Voltar para o login</Text>
-          </TouchableOpacity>
-          </LinearGradient>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </ImageBackground>
+              <TouchableOpacity accessibilityRole="button" style={[styles.primaryButton, enviando && styles.buttonDisabled]} onPress={exibindoRedefinicao ? handleRedefinicao : handleSolicitacao} disabled={enviando}>
+                <LinearGradient colors={["#1764D9", "#0E51C7"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.primaryGradient}>
+                  <Text style={styles.primaryButtonText}>
+                    {enviando ? (exibindoRedefinicao ? "Redefinindo..." : "Enviando...") : exibindoRedefinicao ? "Redefinir senha" : "Enviar código"}
+                  </Text>
+                  {!enviando && <Ionicons name="paw" size={28} color="rgba(255,255,255,0.28)" style={styles.buttonPaw} />}
+                </LinearGradient>
+              </TouchableOpacity>
+
+              <TouchableOpacity accessibilityRole="button" style={styles.backButton} onPress={() => router.back()}>
+                <Ionicons name="arrow-back-outline" size={18} color="#287AF5" />
+                <Text style={styles.backText}>Voltar para o login</Text>
+              </TouchableOpacity>
+            </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  background: { flex: 1, justifyContent: "center", paddingHorizontal: 24 },
-  keyboardView: { flex: 1, width: "100%" },
-  scrollContent: { flexGrow: 1, justifyContent: "center", paddingVertical: 24 },
-  card: { width: "100%", borderRadius: 24, padding: 24, alignItems: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.16)" },
-  badge: { width: 44, height: 44, borderRadius: 14, backgroundColor: "rgba(255,255,255,0.14)", alignItems: "center", justifyContent: "center", marginBottom: 10 },
-  title: { fontSize: 28, color: "#fff", fontWeight: "800", marginBottom: 6 },
-  subtitle: { color: "rgba(255,255,255,0.78)", fontSize: 13, textAlign: "center", lineHeight: 19, marginBottom: 22 },
-  inputGroup: { width: "100%", marginBottom: 14 },
-  label: { color: "#fff", marginBottom: 6, fontSize: 13, fontWeight: "700" },
-  input: { backgroundColor: "rgba(245,247,255,0.95)", borderRadius: 16, paddingHorizontal: 14, height: 46, color: TutorPalette.background },
-  passwordInput: { backgroundColor: "rgba(245,247,255,0.95)", borderRadius: 16, height: 46, flexDirection: "row", alignItems: "center" },
-  passwordTextInput: { flex: 1, height: "100%", paddingLeft: 14, color: TutorPalette.background },
-  eyeButton: { minWidth: 48, height: "100%", alignItems: "center", justifyContent: "center" },
-  button: { width: "100%", backgroundColor: TutorPalette.primary, borderRadius: 16, paddingVertical: 13, shadowColor: TutorPalette.shadow, shadowOpacity: 0.25, shadowRadius: 12, shadowOffset: { width: 0, height: 6 } },
-  buttonText: { color: "#fff", textAlign: "center", fontSize: 16, fontWeight: "800" },
-  backButton: { marginTop: 18 },
-  backText: { color: "#DDEBFF", fontSize: 13, fontWeight: "700", textDecorationLine: "underline" },
+  page: { flex: 1 },
+  safeArea: { flex: 1 },
+  keyboard: { flex: 1 },
+  content: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 26, paddingVertical: 28 },
+  form: { width: "100%", maxWidth: 430, alignSelf: "center" },
+  field: {
+    height: 54,
+    marginBottom: 12,
+    paddingLeft: 17,
+    paddingRight: 8,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.23)",
+    backgroundColor: "rgba(255,255,255,0.055)",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  passwordField: { marginBottom: 0 },
+  input: { flex: 1, height: 54, marginLeft: 13, color: "#F6F8FC", fontSize: 16 },
+  eyeButton: { width: 46, height: 54, justifyContent: "center", alignItems: "center" },
+  confirmationSpacing: { marginTop: 13 },
+  primaryButton: { width: "100%", height: 62, marginTop: 25, borderRadius: 17, overflow: "hidden", shadowColor: "#0B5DDB", shadowOpacity: 0.38, shadowRadius: 13, shadowOffset: { width: 0, height: 8 }, elevation: 6 },
+  primaryGradient: { flex: 1, justifyContent: "center", alignItems: "center" },
+  primaryButtonText: { color: "#fff", fontSize: 20, fontWeight: "800" },
+  buttonPaw: { position: "absolute", right: 24 },
+  buttonDisabled: { opacity: 0.58 },
+  backButton: { flexDirection: "row", alignSelf: "center", alignItems: "center", gap: 7, marginTop: 23, padding: 6 },
+  backText: { color: "#287AF5", fontSize: 15, fontWeight: "700" },
 });

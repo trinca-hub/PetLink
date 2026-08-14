@@ -78,6 +78,9 @@ public class VeterinarioController : Controller
             return BadRequest(_response);
         }
 
+        if (!IsCrmvValido(veterinarioDTO.Crmv))
+            return BadRequest(new { message = "O CRMV deve conter até 6 dígitos." });
+
         try
         {
             // Zeramos o id antes de cadastrar para que o banco gere automaticamente
@@ -223,6 +226,9 @@ public class VeterinarioController : Controller
             return BadRequest(_response);
         }
 
+        if (!IsCrmvValido(veterinarioDTO.Crmv))
+            return BadRequest(new { message = "O CRMV deve conter até 6 dígitos." });
+
         try
         {
             var existingVeterinarioDTO = await _veterinarioService.GetById(id);
@@ -234,6 +240,9 @@ public class VeterinarioController : Controller
                 return NotFound(_response);
             }
 
+            // A edição de cadastro não altera senha. Mantemos o hash atual e
+            // evitamos persistir qualquer valor enviado pelo cliente.
+            veterinarioDTO.Senha = existingVeterinarioDTO.Senha;
             await _veterinarioService.Update(veterinarioDTO, id);
 
             _response.Code = ResponseEnum.SUCCESS;
@@ -288,6 +297,13 @@ public class VeterinarioController : Controller
             };
             return StatusCode(StatusCodes.Status500InternalServerError, _response);
         }
+    }
+
+    private static bool IsCrmvValido(string? crmv)
+    {
+        return !string.IsNullOrWhiteSpace(crmv)
+            && crmv.Length <= 6
+            && crmv.All(char.IsDigit);
     }
 
     private static string GenerateSha256Hash(string input)

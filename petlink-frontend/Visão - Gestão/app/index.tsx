@@ -41,17 +41,6 @@ export default function HomeGestao() {
           <Text style={styles.brandSubtitle}>
             Portal interno para administrar loja, clínica e marketplace com segurança.
           </Text>
-
-          <View style={styles.signalRow}>
-            <View style={styles.signalPill}>
-              <View style={styles.signalDot} />
-              <Text style={styles.signalText}>Ambiente local</Text>
-            </View>
-            <View style={styles.signalPill}>
-              <Ionicons name="lock-closed-outline" size={13} color={managementTheme.colors.textMuted} />
-              <Text style={styles.signalText}>Acesso restrito</Text>
-            </View>
-          </View>
         </View>
 
         <View style={styles.accessPanel}>
@@ -140,33 +129,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     marginTop: 12,
     maxWidth: 380,
-  },
-  signalRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
-    marginTop: 22,
-  },
-  signalPill: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 7,
-    borderWidth: 1,
-    borderColor: managementTheme.colors.border,
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 7,
-  },
-  signalDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 99,
-    backgroundColor: managementTheme.colors.success,
-  },
-  signalText: {
-    color: managementTheme.colors.textMuted,
-    fontSize: 12,
-    fontWeight: "800",
   },
   accessPanel: {
     flex: 1,

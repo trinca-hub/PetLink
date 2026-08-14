@@ -17,7 +17,6 @@ import {
 type LoginFormProps = {
   title: string;
   subtitle?: string;
-  profileLabel?: string;
   loading?: boolean;
   error?: string;
   onSubmit: (email: string, senha: string) => Promise<void>;
@@ -27,7 +26,6 @@ type LoginFormProps = {
 export default function LoginForm({
   title,
   subtitle = "Entre com suas credenciais para acessar o painel.",
-  profileLabel = "Acesso restrito ao time de gestão.",
   loading = false,
   error,
   onSubmit,
@@ -58,19 +56,6 @@ export default function LoginForm({
                 <Text style={styles.contextText}>
                   A área de gestão separa permissões por perfil e mantém os módulos críticos atrás de autenticação.
                 </Text>
-              </View>
-
-              <View style={styles.contextStack}>
-                {[
-                  "Sessão protegida por token",
-                  "Rotas filtradas por perfil",
-                  "Operação integrada ao backend local",
-                ].map((item) => (
-                  <View key={item} style={styles.contextItem}>
-                    <Ionicons name="checkmark-circle-outline" size={16} color={managementTheme.colors.success} />
-                    <Text style={styles.contextItemText}>{item}</Text>
-                  </View>
-                ))}
               </View>
             </View>
           )}
@@ -131,10 +116,6 @@ export default function LoginForm({
               </TouchableOpacity>
             </View>
 
-            <View style={styles.footer}>
-              <Ionicons name="shield-checkmark-outline" size={14} color={managementTheme.colors.textSubtle} />
-              <Text style={styles.footerHint}>{profileLabel}</Text>
-            </View>
           </View>
         </View>
       </LinearGradient>
@@ -204,19 +185,6 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     marginTop: 12,
     maxWidth: 390,
-  },
-  contextStack: {
-    gap: 10,
-  },
-  contextItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  contextItemText: {
-    color: managementTheme.colors.textMuted,
-    fontSize: 13,
-    fontWeight: "700",
   },
   formPanel: {
     flex: 1,
@@ -311,20 +279,5 @@ const styles = StyleSheet.create({
     textAlign: "center",
     fontSize: 15,
     fontWeight: "900",
-  },
-  footer: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 6,
-    borderTopWidth: 1,
-    borderTopColor: managementTheme.colors.border,
-    paddingTop: 14,
-  },
-  footerHint: {
-    color: managementTheme.colors.textSubtle,
-    textAlign: "center",
-    fontSize: 12,
-    fontWeight: "700",
   },
 });

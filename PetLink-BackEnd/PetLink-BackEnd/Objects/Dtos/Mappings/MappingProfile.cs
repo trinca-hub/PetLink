@@ -23,16 +23,14 @@ namespace PetLink_BackEnd.Objects.Dtos.Mappings
                 .ForMember(dest => dest.Senha, opt => opt.Ignore())
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
-            CreateMap<VeterinarioDTO, Veterinario>()
-                .ForMember(dest => dest.Senha, opt => opt.Ignore())
-                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+            CreateMap<Veterinario, VeterinarioDTO>();
+            CreateMap<VeterinarioDTO, Veterinario>();
 
             CreateMap<AdministradorDTO, Administrador>()
                 .ForMember(dest => dest.Senha, opt => opt.Ignore())
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<Administrador, AdministradorDTO>().ReverseMap();
-            CreateMap<Veterinario, VeterinarioDTO>().ReverseMap();
             CreateMap<Pedido, PedidoDTO>().ReverseMap();
             CreateMap<ItemPedido, ItemPedidoDTO>().ReverseMap();
             CreateMap<Pet, PetDTO>().ReverseMap();

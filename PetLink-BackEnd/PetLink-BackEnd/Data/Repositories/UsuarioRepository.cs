@@ -18,14 +18,18 @@ namespace PetLink_BackEnd.Data.Repositories
 
         public async Task<Usuario> Login(Login login)
         {
-            var usuario = await _context.Usuarios.FirstOrDefaultAsync(item => item.Email == login.Email);
+            var email = login.Email.Trim().ToLowerInvariant();
+            var usuario = await _context.Usuarios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(item => item.Email.ToLower() == email);
             return usuario is not null && PasswordSecurity.Verify(login.Password, usuario.Senha) ? usuario : null;
         }
 
         public async Task<Usuario> GetByEmail(string email)
         {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
             return await _context.Usuarios
-                .FirstOrDefaultAsync(u => u.Email == email);
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
         }
 
     }

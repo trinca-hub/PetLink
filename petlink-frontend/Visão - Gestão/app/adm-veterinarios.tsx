@@ -47,6 +47,13 @@ const INITIAL_FORM: FormState = {
   senha: "",
 };
 
+function normalizeVeterinarioStatus(status: Veterinario["status"] | null | undefined): number {
+  if (status === "ATIVO") return 1;
+  if (status === "DESATIVO") return 2;
+
+  return Number(status) === 1 ? 1 : 2;
+}
+
 export default function ListaVeterinarios() {
   const router = useRouter();
   const { token } = useContext(AuthContext);
@@ -143,7 +150,12 @@ export default function ListaVeterinarios() {
     const result = await getVeterinarios(token);
 
     if (result.ok && Array.isArray(result?.data?.data)) {
-      setVeterinarios(result.data.data);
+      setVeterinarios(
+        result.data.data.map((item: Veterinario) => ({
+          ...item,
+          status: normalizeVeterinarioStatus(item.status),
+        }))
+      );
     } else {
       Alert.alert("Erro", getApiErrorMessage(result?.data, "Não foi possível carregar veterinários."));
     }
@@ -173,7 +185,7 @@ export default function ListaVeterinarios() {
       email: item.email || "",
       crmv: item.crmv || "",
       salario: String(item.salario ?? ""),
-      status: String(item.status ?? 1),
+      status: String(normalizeVeterinarioStatus(item.status)),
       senha: "",
     });
     setOpenModal(true);
@@ -191,6 +203,11 @@ export default function ListaVeterinarios() {
 
     if (!form.nome.trim() || !form.email.trim() || !form.crmv.trim() || !form.salario.trim()) {
       setFormError("Preencha nome, e-mail, CRMV e salário.");
+      return;
+    }
+
+    if (!/^\d{1,6}$/.test(form.crmv)) {
+      setFormError("O CRMV deve conter até 6 dígitos.");
       return;
     }
 
@@ -218,7 +235,7 @@ export default function ListaVeterinarios() {
       crmv: form.crmv.trim(),
       salario,
       status: Number(form.status || 1),
-      senha: isEdit ? "manter_senha" : form.senha,
+      ...(!isEdit ? { senha: form.senha } : {}),
     };
 
     const result = isEdit && editId
@@ -348,6 +365,16 @@ export default function ListaVeterinarios() {
               keyboardType="email-address"
               value={form.email}
               onChangeText={(value) => setForm((prev) => ({ ...prev, email: value }))}
+            />
+
+            <TextInput
+              style={styles.input}
+              placeholder="CRMV"
+              placeholderTextColor="#98abc9"
+              keyboardType="number-pad"
+              maxLength={6}
+              value={form.crmv}
+              onChangeText={(value) => setForm((prev) => ({ ...prev, crmv: value.replace(/\D/g, "") }))}
             />
 
             <TextInput

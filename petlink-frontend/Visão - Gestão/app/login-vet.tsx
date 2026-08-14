@@ -28,7 +28,6 @@ export default function LoginVet() {
     <LoginForm
       title="Login Veterinário"
       subtitle="Acesse agenda e serviços veterinários."
-      profileLabel="Acesso veterinário."
       onSubmit={handleLogin}
       loading={loading}
       error={error}

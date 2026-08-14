@@ -19,14 +19,16 @@ namespace PetLink_BackEnd.Data.Repositories
 
         public async Task<Veterinario> Login(Login login)
         {
-            var conta = await _context.Veterinarios.AsNoTracking().FirstOrDefaultAsync(p => p.Email == login.Email);
+            var email = login.Email.Trim().ToLowerInvariant();
+            var conta = await _context.Veterinarios.AsNoTracking().FirstOrDefaultAsync(p => p.Email.ToLower() == email);
             return conta is not null && PasswordSecurity.Verify(login.Password, conta.Senha) ? conta : null;
         }
 
         public async Task<Veterinario> GetByEmail(string email)
         {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
             return await _context.Veterinarios
-                .FirstOrDefaultAsync(u => u.Email == email);
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
         }
     }
 }

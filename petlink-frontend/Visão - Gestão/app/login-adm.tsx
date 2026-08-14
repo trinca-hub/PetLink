@@ -28,7 +28,6 @@ export default function LoginAdm() {
     <LoginForm
       title="Login Administrador"
       subtitle="Acesse a gestão administrativa."
-      profileLabel="Acesso administrativo."
       onSubmit={handleLogin}
       loading={loading}
       error={error}
