@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "petlink-gestao",
+    "slug": "petlink-gestao",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "petlinkgestao",
+    "userInterfaceStyle": "automatic",
+    "plugins": [
+      "expo-router"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

@@ -46,9 +46,13 @@ async function login(email: string, senha: string) {
   const result: any = await loginService(email, senha);
   console.log("🔐 Resultado login:", result);
 
-  if (result?.ok && result?.data?.code === 1) {
-    const tokenRecebido = result.data.data.token;
-    const usuarioRecebido = result.data.data.usuario;
+  if (result?.ok) {
+    const tokenRecebido = result?.data?.data?.token ?? result?.data?.token;
+    const usuarioRecebido = result?.data?.data?.usuario ?? result?.data?.usuario;
+
+    if (!tokenRecebido || !usuarioRecebido) {
+      return { code: 0, message: "Resposta de login inválida" };
+    }
 
     setToken(tokenRecebido);
     setUser(usuarioRecebido);
@@ -59,7 +63,13 @@ async function login(email: string, senha: string) {
     return { code: 1 };
   }
 
-  return { code: 0, message: result?.data?.message || "Erro ao fazer login" };
+  const attemptData = result?.data?.data;
+  return {
+    code: 0,
+    message: result?.data?.message || "Erro ao fazer login",
+    attemptsRemaining: attemptData?.tentativasRestantes,
+    lockedUntil: attemptData?.bloqueadoAte,
+  };
 }
 
 

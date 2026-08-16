@@ -21,18 +21,22 @@ public class Veterinario
     [Column("email")]
     public string Email { get; set; }
 
+    [Column("senha")]
+    public string Senha { get; set; }
+
     [Column("status")]
     public Status Status { get; set; }
 
     public Veterinario() { }
 
-    public Veterinario(int id, string nome, string crmv, float salario, string email, Status status)
+    public Veterinario(int id, string nome, string crmv, float salario, string email, string senha, Status status)
     {
         Id = id;
         Nome = nome;
         Crmv = crmv;
         Salario = salario;
         Email = email;
+        Senha = senha;
         Status = status;
     }
 }

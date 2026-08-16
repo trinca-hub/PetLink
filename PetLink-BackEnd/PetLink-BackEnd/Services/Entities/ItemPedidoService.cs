@@ -67,4 +67,24 @@ public class ItemPedidoService : GenericService<ItemPedido, ItemPedidoDTO>, IIte
 
         await tx.CommitAsync();
     }
+
+    public async Task RemoveWithRestock(int id)
+    {
+        var item = await _context.ItemPedidos.FirstOrDefaultAsync(i => i.Id == id);
+        if (item is null)
+            throw new ArgumentException("Item do pedido não encontrado.");
+
+        await using var tx = await _context.Database.BeginTransactionAsync();
+
+        var produto = await _context.Produtos.FirstOrDefaultAsync(p => p.Id == item.ProdutoId);
+        if (produto is not null)
+        {
+            produto.Quantidade += item.Quantidade;
+        }
+
+        _context.ItemPedidos.Remove(item);
+        await _context.SaveChangesAsync();
+
+        await tx.CommitAsync();
+    }
 }

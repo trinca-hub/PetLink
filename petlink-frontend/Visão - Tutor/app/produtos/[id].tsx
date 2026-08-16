@@ -7,7 +7,7 @@ import { Ionicons, Feather } from "@expo/vector-icons";
 import { AuthContext } from "@/src/context/AuthContext";
 import { getProdutoById } from "@/src/api/produtoService";
 import { addToCartProducts } from "@/src/storage/cartProducts";
-import { checkoutFromItems } from "@/src/services/checkoutService";
+import { TutorPalette } from "@/constants/theme";
 
 type ProdutoDTO = {
     id: number;
@@ -31,7 +31,6 @@ export default function ProdutoDetalhe() {
     const id = useMemo(() => Number(params.id), [params.id]);
 
     const [loading, setLoading] = useState(true);
-    const [posting, setPosting] = useState(false);
     const [data, setData] = useState<ProdutoDTO | null>(null);
     const [buyQty, setBuyQty] = useState(1);
 
@@ -69,13 +68,19 @@ export default function ProdutoDetalhe() {
         if (!user?.id || !data) return;
         if (semEstoque) return Alert.alert("Sem estoque", "Esse produto está esgotado.");
 
-        await addToCartProducts(user.id, {
-            produtoId: data.id,
-            nome: data.nome,
-            preco: data.preco,
-            foto: data.foto,
-            estoque: data.quantidade,
-        }, 1);
+        const quantidade = Math.min(Math.max(1, buyQty), Number(data.quantidade ?? 0));
+
+        await addToCartProducts(
+            user.id,
+            {
+                produtoId: data.id,
+                nome: data.nome,
+                preco: data.preco,
+                foto: data.foto,
+                estoque: data.quantidade,
+            },
+            quantidade
+        );
 
         Alert.alert("Pronto!", "Adicionado ao carrinho.");
     }
@@ -90,49 +95,6 @@ export default function ProdutoDetalhe() {
         setBuyQty((prev) => Math.min(estoque, prev + 1));
     }
 
-    // Compra imediata: compra apenas o produto atual
-    async function comprarAgora() {
-        if (!user?.id) return Alert.alert("Login", "Faça login para comprar.");
-        if (!token) return Alert.alert("Login", "Token não encontrado.");
-        if (!data) return;
-
-        const estoqueAtual = Number(data.quantidade ?? 0);
-        if (estoqueAtual <= 0) return Alert.alert("Sem estoque", "Esse produto está esgotado.");
-
-        const quantidade = Math.min(Math.max(1, buyQty), estoqueAtual);
-
-        setPosting(true);
-        try {
-            const result = await checkoutFromItems(
-                user.id,
-                token,
-                [
-                    {
-                        produtoId: data.id,
-                        nome: data.nome,
-                        preco: data.preco,
-                        foto: data.foto,
-                        quantidade,
-                    },
-                ]
-            );
-
-            if (!result.ok) {
-                const reason =
-                    result.failedItems[0]?.message ||
-                    result.generalError ||
-                    "Não foi possível concluir a compra.";
-                return Alert.alert("Erro", reason);
-            }
-
-            await load();
-
-            Alert.alert("Sucesso", "Compra realizada!");
-            router.back();
-        } finally {
-            setPosting(false);
-        }
-    }
 
     if (loading) {
         return (
@@ -155,10 +117,10 @@ export default function ProdutoDetalhe() {
     }
 
     return (
-        <LinearGradient colors={["#0B0B0F", "#0E2B5A"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
+        <LinearGradient colors={[TutorPalette.background, TutorPalette.backgroundSecondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
             {/* Header */}
             <View style={{ paddingTop: 14, paddingHorizontal: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                <Pressable onPress={() => router.back()} style={{ width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" }}>
+                <Pressable onPress={() => router.back()} style={{ width: 42, height: 42, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.10)" }}>
                     <Feather name="arrow-left" size={22} color="#fff" />
                 </Pressable>
                 <Text style={{ color: "#fff", fontSize: 18, fontWeight: "900" }}>Produto</Text>
@@ -195,20 +157,21 @@ export default function ProdutoDetalhe() {
                 <View
                     style={{
                         marginTop: 12,
-                        backgroundColor: "#fff",
+                        backgroundColor: "rgba(245,247,255,0.96)",
                         borderRadius: 18,
                         padding: 14,
                         borderWidth: 1,
                         borderColor: "rgba(0,0,0,0.06)",
-                        shadowOpacity: 0.10,
-                        shadowRadius: 10,
-                        shadowOffset: { width: 0, height: 6 },
+                        shadowColor: TutorPalette.shadow,
+                        shadowOpacity: 0.16,
+                        shadowRadius: 12,
+                        shadowOffset: { width: 0, height: 8 },
                         elevation: 3,
                     }}
                 >
                     <Text style={{ fontSize: 20, fontWeight: "900", color: "#111" }}>{data.nome}</Text>
 
-                    <Text style={{ marginTop: 8, fontSize: 18, fontWeight: "900", color: "#0B3B91" }}>
+                    <Text style={{ marginTop: 8, fontSize: 18, fontWeight: "900", color: TutorPalette.primary }}>
                         {formatMoneyBR(data.preco)}
                     </Text>
 
@@ -221,7 +184,7 @@ export default function ProdutoDetalhe() {
                     </Text>
 
                     <View style={{ marginTop: 16, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                        <Text style={{ color: "#111", fontWeight: "900" }}>Quantidade imediata</Text>
+                        <Text style={{ color: "#111", fontWeight: "900" }}>Quantidade</Text>
                         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
                             <Pressable
                                 onPress={decBuyQty}
@@ -234,7 +197,7 @@ export default function ProdutoDetalhe() {
                                     justifyContent: "center",
                                 }}
                             >
-                                <Ionicons name="remove" size={18} color="#0E2B5A" />
+                                <Ionicons name="remove" size={18} color={TutorPalette.primary} />
                             </Pressable>
 
                             <Text style={{ minWidth: 22, textAlign: "center", fontWeight: "900", color: "#111" }}>
@@ -262,17 +225,17 @@ export default function ProdutoDetalhe() {
                                     opacity: semEstoque || buyQty >= Number(data.quantidade ?? 0) ? 0.6 : 1,
                                 }}
                             >
-                                <Ionicons name="add" size={18} color="#0E2B5A" />
+                                <Ionicons name="add" size={18} color={TutorPalette.primary} />
                             </Pressable>
                         </View>
                     </View>
 
                     <Pressable
-                        disabled={posting || semEstoque}
+                        disabled={semEstoque}
                         onPress={addCarrinho}
                         style={{
                             marginTop: 16,
-                            backgroundColor: semEstoque ? "rgba(0,0,0,0.08)" : "#0B3B91",
+                            backgroundColor: semEstoque ? "rgba(0,0,0,0.08)" : TutorPalette.primary,
                             borderRadius: 999,
                             paddingVertical: 12,
                             alignItems: "center",
@@ -282,27 +245,6 @@ export default function ProdutoDetalhe() {
                         <Text style={{ color: semEstoque ? "#333" : "#fff", fontWeight: "900" }}>
                             Adicionar ao carrinho
                         </Text>
-                    </Pressable>
-
-                    <Pressable
-                        disabled={posting || semEstoque}
-                        onPress={comprarAgora}
-                        style={{
-                            marginTop: 10,
-                            backgroundColor: semEstoque ? "rgba(0,0,0,0.08)" : "#1C66FF",
-                            borderRadius: 999,
-                            paddingVertical: 12,
-                            alignItems: "center",
-                            justifyContent: "center",
-                        }}
-                    >
-                        {posting ? (
-                            <ActivityIndicator color="#fff" />
-                        ) : (
-                            <Text style={{ color: semEstoque ? "#333" : "#fff", fontWeight: "900" }}>
-                                Comprar agora
-                            </Text>
-                        )}
                     </Pressable>
                 </View>
             </View>

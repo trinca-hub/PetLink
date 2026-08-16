@@ -9,6 +9,10 @@ using Microsoft.IdentityModel.Tokens;
 using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
+using PetLink_BackEnd.Data;
+using PetLink_BackEnd.Objects.Models;
+using Microsoft.EntityFrameworkCore;
+using PetLink_BackEnd.Security;
 using System.Security.Claims;
 
 
@@ -22,12 +26,20 @@ public class UsuarioController : Controller
     private readonly IUsuarioService _usuarioService;
     private readonly IConfiguration _configuration;
     private readonly Response _response;
+    private readonly AppDbContext _context;
+    private readonly IEmailService _emailService;
 
-    public UsuarioController(IUsuarioService usuarioService, IConfiguration configuration)
+    public UsuarioController(
+        IUsuarioService usuarioService,
+        IConfiguration configuration,
+        AppDbContext context,
+        IEmailService emailService)
     {
         _usuarioService = usuarioService;
         _response = new Response();
         _configuration = configuration;
+        _context = context;
+        _emailService = emailService;
     }
 
     [HttpGet]
@@ -81,9 +93,22 @@ public class UsuarioController : Controller
             // Zeramos o id antes de cadastrar para que o banco gere automaticamente
             // e evite conflito com ids existentes
             usuarioDTO.Id = 0;
+            usuarioDTO.Telefone ??= string.Empty;
+            usuarioDTO.Cep ??= string.Empty;
+            usuarioDTO.Uf ??= string.Empty;
+            usuarioDTO.Cidade ??= string.Empty;
+            usuarioDTO.Bairro ??= string.Empty;
+            usuarioDTO.Rua ??= string.Empty;
 
-            // Cria o hash da senha para maior segurança
-            usuarioDTO.Senha = GenerateSha256Hash(usuarioDTO.Senha);
+            if (!PasswordSecurity.IsAcceptable(usuarioDTO.Senha))
+            {
+                _response.Code = ResponseEnum.INVALID;
+                _response.Data = null;
+                _response.Message = "A senha deve ter ao menos 8 caracteres e combinar 3 tipos: letra maiúscula, minúscula, número ou símbolo.";
+                return BadRequest(_response);
+            }
+
+            usuarioDTO.Senha = PasswordSecurity.HashPassword(usuarioDTO.Senha);
             await _usuarioService.Create(usuarioDTO);
 
             _response.Code = ResponseEnum.SUCCESS;
@@ -120,16 +145,59 @@ public class UsuarioController : Controller
 
         try
         {
-            login.Password = GenerateSha256Hash(login.Password);
+            var email = login.Email.Trim().ToLowerInvariant();
+            var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "desconhecido";
+            var agora = DateTime.UtcNow;
+            var tentativa = await _context.TentativasLogin
+                .FirstOrDefaultAsync(item => item.Email == email && item.Ip == ip);
+
+            if (tentativa?.BloqueadoAte > agora)
+            {
+                _response.Code = ResponseEnum.INVALID;
+                _response.Data = new { tentativasRestantes = 0, bloqueadoAte = tentativa.BloqueadoAte };
+                _response.Message = "Muitas tentativas. Tente novamente em 1 minuto.";
+                return StatusCode(StatusCodes.Status429TooManyRequests, _response);
+            }
+
+            if (tentativa?.BloqueadoAte is not null)
+            {
+                tentativa.Falhas = 0;
+                tentativa.BloqueadoAte = null;
+            }
+
+            login.Email = email;
             var usuarioDTO = await _usuarioService.Login(login);
 
             if (usuarioDTO is null)
             {
+                tentativa ??= new TentativaLogin { Email = email, Ip = ip };
+                tentativa.Falhas++;
+                tentativa.AtualizadoEm = agora;
+                var bloqueado = tentativa.Falhas >= 5;
+                if (bloqueado)
+                    tentativa.BloqueadoAte = agora.AddMinutes(1);
+
+                if (tentativa.Id == 0)
+                    _context.TentativasLogin.Add(tentativa);
+                await _context.SaveChangesAsync();
+
                 _response.Code = ResponseEnum.INVALID;
-                _response.Data = null;
-                _response.Message = "Email ou senha incorretos";
+                _response.Data = new
+                {
+                    tentativasRestantes = bloqueado ? 0 : 5 - tentativa.Falhas,
+                    bloqueadoAte = tentativa.BloqueadoAte,
+                };
+                _response.Message = bloqueado
+                    ? "Limite de tentativas atingido. Aguarde 1 minuto para tentar novamente."
+                    : $"E-mail ou senha incorretos. Tentativas restantes: {5 - tentativa.Falhas}.";
 
                 return BadRequest(_response);
+            }
+
+            if (tentativa is not null)
+            {
+                _context.TentativasLogin.Remove(tentativa);
+                await _context.SaveChangesAsync();
             }
 
             var token = GenerateJwtToken(usuarioDTO);
@@ -160,6 +228,104 @@ public class UsuarioController : Controller
             return StatusCode(StatusCodes.Status500InternalServerError, _response);
         }
     }
+
+    [HttpPost("recuperar-senha")]
+    [AllowAnonymous]
+    public async Task<IActionResult> SolicitarRedefinicaoSenha([FromBody] SolicitacaoRedefinicaoSenha solicitacao)
+    {
+        const string mensagem = "Se o e-mail estiver cadastrado, enviaremos um link para redefinir sua senha.";
+        var email = solicitacao.Email.Trim().ToLowerInvariant();
+
+        try
+        {
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(item => item.Email.ToLower() == email);
+            if (usuario is not null)
+            {
+                var agora = DateTime.UtcNow;
+                var tokensAnteriores = await _context.TokensRedefinicaoSenha
+                    .Where(token => token.UsuarioId == usuario.Id && token.UsadoEm == null)
+                    .ToListAsync();
+                foreach (var tokenAnterior in tokensAnteriores)
+                    tokenAnterior.UsadoEm = agora;
+
+                var token = Convert.ToHexString(RandomNumberGenerator.GetBytes(32));
+                _context.TokensRedefinicaoSenha.Add(new TokenRedefinicaoSenha
+                {
+                    UsuarioId = usuario.Id,
+                    TokenHash = GenerateSha256Hash(token),
+                    ExpiraEm = agora.AddMinutes(30),
+                });
+                await _context.SaveChangesAsync();
+
+                var link = $"petlinkfrontend://redefinir-senha?email={Uri.EscapeDataString(usuario.Email)}&token={token}";
+                await _emailService.EnviarRedefinicaoSenha(usuario.Email, link);
+            }
+
+            _response.Code = ResponseEnum.SUCCESS;
+            _response.Data = null;
+            _response.Message = mensagem;
+            return Ok(_response);
+        }
+        catch (Exception)
+        {
+            // A resposta não deve revelar se uma conta existe nem detalhes do provedor de e-mail.
+            _response.Code = ResponseEnum.ERROR;
+            _response.Data = null;
+            _response.Message = "Não foi possível processar a solicitação agora. Tente novamente mais tarde.";
+            return StatusCode(StatusCodes.Status503ServiceUnavailable, _response);
+        }
+    }
+
+    [HttpPost("redefinir-senha")]
+    [AllowAnonymous]
+    public async Task<IActionResult> RedefinirSenha([FromBody] RedefinicaoSenha redefinicao)
+    {
+        if (!PasswordSecurity.IsAcceptable(redefinicao.NovaSenha))
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "A senha deve ter ao menos 8 caracteres e combinar 3 tipos: letra maiúscula, minúscula, número ou símbolo.";
+            return BadRequest(_response);
+        }
+
+        var email = redefinicao.Email.Trim().ToLowerInvariant();
+        var tokenHash = GenerateSha256Hash(NormalizarToken(redefinicao.Token));
+        var agora = DateTime.UtcNow;
+
+        var token = await _context.TokensRedefinicaoSenha
+            .Include(item => item.Usuario)
+            .FirstOrDefaultAsync(item =>
+                item.TokenHash == tokenHash &&
+                item.UsadoEm == null &&
+                item.ExpiraEm > agora &&
+                item.Usuario.Email.ToLower() == email);
+
+        if (token is null)
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "O link de redefinição é inválido ou expirou.";
+            return BadRequest(_response);
+        }
+
+        if (PasswordSecurity.Verify(redefinicao.NovaSenha, token.Usuario.Senha))
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "A nova senha não pode ser igual à senha atual.";
+            return BadRequest(_response);
+        }
+
+        token.Usuario.Senha = PasswordSecurity.HashPassword(redefinicao.NovaSenha);
+        token.UsadoEm = agora;
+        await _context.SaveChangesAsync();
+
+        _response.Code = ResponseEnum.SUCCESS;
+        _response.Data = null;
+        _response.Message = "Senha redefinida com sucesso. Faça login com a nova senha.";
+        return Ok(_response);
+    }
+
     [HttpGet("me")]
     public async Task<IActionResult> Me()
     {
@@ -304,6 +470,8 @@ public class UsuarioController : Controller
         return builder.ToString();
     }
 
+    private static string NormalizarToken(string token) => string.Concat(token.Where(character => !char.IsWhiteSpace(character)));
+
     private string GenerateJwtToken(UsuarioDTO usuarioDTO)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
@@ -314,6 +482,7 @@ public class UsuarioController : Controller
             new Claim(JwtRegisteredClaimNames.Sub, usuarioDTO.Id.ToString()), // ✅ agora é o ID
             new Claim(ClaimTypes.NameIdentifier, usuarioDTO.Id.ToString()),   // ✅ padrão
             new Claim(JwtRegisteredClaimNames.Email, usuarioDTO.Email),
+            new Claim(ClaimTypes.Role, "Tutor"),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
         };
 

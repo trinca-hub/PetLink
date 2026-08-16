@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -14,9 +14,12 @@ import {
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, Feather, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { AuthContext } from "@/src/context/AuthContext";
 import { getFeedPaypet } from "@/src/api/anuncioService"; // se não existir, troca pro fallback com api
+import { useSideMenu } from "@/src/context/SideMenuContext";
+import { TutorPalette } from "@/constants/theme";
 
 type PaypetFeedDTO = {
   anuncioId: number;
@@ -88,6 +91,7 @@ function formatMoneyBR(valor?: number) {
 export default function PayPet() {
   const { token } = useContext(AuthContext);
   const { width } = useWindowDimensions();
+  const { openMenu } = useSideMenu();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -134,13 +138,19 @@ export default function PayPet() {
     setAnuncios(list);
   }
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      await load();
-      setLoading(false);
-    })();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      (async () => {
+        setLoading(true);
+        await load();
+        if (isActive) setLoading(false);
+      })();
+      return () => {
+        isActive = false;
+      };
+    }, [token])
+  );
 
   async function onRefresh() {
     setRefreshing(true);
@@ -293,9 +303,9 @@ export default function PayPet() {
       paddingVertical: 6,
       paddingHorizontal: 10,
       borderRadius: 999,
-      backgroundColor: "rgba(255,255,255,0.16)",
+      backgroundColor: "rgba(255,255,255,0.10)",
       borderWidth: 1,
-      borderColor: "rgba(255,255,255,0.18)",
+      borderColor: TutorPalette.border,
     };
   }
 
@@ -305,8 +315,8 @@ export default function PayPet() {
       paddingVertical: 10,
       borderRadius: 999,
       borderWidth: 1,
-      borderColor: selected ? "#0B3B91" : "#ddd",
-      backgroundColor: selected ? "rgba(11,59,145,0.10)" : "#fff",
+      borderColor: selected ? TutorPalette.primary : "#d7deea",
+      backgroundColor: selected ? "rgba(47,124,246,0.12)" : "#fff",
       alignItems: "center" as const,
       justifyContent: "center" as const,
     };
@@ -322,12 +332,7 @@ export default function PayPet() {
   }
 
   return (
-    <LinearGradient
-      colors={["#0B0B0F", "#0E2B5A"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <LinearGradient colors={[TutorPalette.background, TutorPalette.backgroundSecondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
       {/* Header */}
       <View
         style={{
@@ -339,8 +344,8 @@ export default function PayPet() {
         }}
       >
         <Pressable
-          onPress={() => { }}
-          style={{ width: 40, height: 40, borderRadius: 12, alignItems: "center", justifyContent: "center" }}
+          onPress={openMenu}
+          style={{ width: 42, height: 42, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.10)" }}
         >
           <Feather name="menu" size={22} color="#fff" />
         </Pressable>
@@ -350,8 +355,8 @@ export default function PayPet() {
         <Pressable
           onPress={() => router.push("/perfil")}
           style={{
-            width: 40,
-            height: 40,
+            width: 42,
+            height: 42,
             borderRadius: 999,
             backgroundColor: "rgba(255,255,255,0.12)",
             alignItems: "center",
@@ -363,26 +368,18 @@ export default function PayPet() {
       </View>
 
       {/* Title */}
-      <View style={{ paddingHorizontal: 16, marginTop: 6 }}>
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 18,
-            fontWeight: "900",
-            textAlign: "center",
-            textDecorationLine: "underline",
-            textDecorationColor: "#fff",
-          }}
-        >
-          PayPet
-        </Text>
+      <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
+        <View style={{ backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 20, padding: 14, borderWidth: 1, borderColor: TutorPalette.border }}>
+          <Text style={{ color: TutorPalette.text, fontSize: 18, fontWeight: "900" }}>PayPet</Text>
+          <Text style={{ color: TutorPalette.muted, fontSize: 13, marginTop: 4 }}>Adoção e venda com curadoria visual mais clara e profissional.</Text>
+        </View>
       </View>
 
       {/* Search + filtros */}
       <View style={{ paddingHorizontal: 16, marginTop: 12 }}>
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: "rgba(245,247,255,0.96)",
             borderRadius: 999,
             paddingHorizontal: 12,
             paddingVertical: 10,
@@ -391,13 +388,13 @@ export default function PayPet() {
             gap: 8,
           }}
         >
-          <Ionicons name="search" size={18} color="#0E2B5A" />
+          <Ionicons name="search" size={18} color={TutorPalette.primary} />
           <TextInput
             value={search}
             onChangeText={setSearch}
             placeholder="Pesquisar"
             placeholderTextColor="#8E8E93"
-            style={{ flex: 1, color: "#111", fontWeight: "700" }}
+            style={{ flex: 1, color: TutorPalette.background, fontWeight: "700" }}
           />
         </View>
 
@@ -464,14 +461,17 @@ export default function PayPet() {
               onPress={() => router.push(`/anuncios/${item.anuncioId}`)}
               style={{
                 width: CARD_W,
-                backgroundColor: "#fff",
+                backgroundColor: "rgba(15,29,58,0.92)",
+                borderWidth: 1,
+                borderColor: "rgba(255,255,255,0.10)",
                 borderRadius: 18,
                 padding: 10,
                 marginBottom: GAP,
-                shadowOpacity: 0.1,
-                shadowRadius: 10,
-                shadowOffset: { width: 0, height: 6 },
-                elevation: 3,
+                shadowColor: TutorPalette.shadow,
+                shadowOpacity: 0.16,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 8 },
+                elevation: 4,
               }}
             >
               {/* Foto */}
@@ -500,7 +500,7 @@ export default function PayPet() {
                   marginTop: 10,
                   fontWeight: "900",
                   fontSize: 16,
-                  color: "#111",
+                  color: "#fff",
                   textAlign: "center",
                 }}
               >
@@ -510,16 +510,16 @@ export default function PayPet() {
               {/* Infos */}
               <View style={{ marginTop: 8, gap: 6 }}>
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <MaterialCommunityIcons name={petIcon} size={16} color="#0E2B5A" />
-                  <Text numberOfLines={1} style={{ color: "#222", fontWeight: "800", flex: 1 }}>
+                  <MaterialCommunityIcons name={petIcon} size={16} color={TutorPalette.primary} />
+                  <Text numberOfLines={1} style={{ color: "#e6ecff", fontWeight: "800", flex: 1 }}>
                     {item.racaPet || "Não informado"}
                   </Text>
                 </View>
 
                 {!!item.idadePet && (
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <Ionicons name="calendar" size={16} color="#0E2B5A" />
-                    <Text numberOfLines={1} style={{ color: "#222", fontWeight: "800", flex: 1 }}>
+                    <Ionicons name="calendar" size={16} color={TutorPalette.primary} />
+                    <Text numberOfLines={1} style={{ color: "#e6ecff", fontWeight: "800", flex: 1 }}>
                       {item.idadePet}
                     </Text>
                   </View>
@@ -527,16 +527,16 @@ export default function PayPet() {
 
                 {!!item.sexoPet && (
                   <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                    <Ionicons name="male-female" size={16} color="#0E2B5A" />
-                    <Text numberOfLines={1} style={{ color: "#222", fontWeight: "800", flex: 1 }}>
+                    <Ionicons name="male-female" size={16} color={TutorPalette.primary} />
+                    <Text numberOfLines={1} style={{ color: "#e6ecff", fontWeight: "800", flex: 1 }}>
                       {item.sexoPet}
                     </Text>
                   </View>
                 )}
 
                 <View style={{ flexDirection: "row", alignItems: "center", gap: 8 }}>
-                  <Ionicons name="location" size={16} color="#0E2B5A" />
-                  <Text numberOfLines={2} ellipsizeMode="tail" style={{ color: "#222", fontWeight: "800", flex: 1 }}>
+                  <Ionicons name="location" size={16} color={TutorPalette.primary} />
+                  <Text numberOfLines={2} ellipsizeMode="tail" style={{ color: "#e6ecff", fontWeight: "800", flex: 1 }}>
                     {local}
                   </Text>
                 </View>
@@ -553,7 +553,7 @@ export default function PayPet() {
                       borderColor: item.tipoPayPet === 2 ? "rgba(11,59,145,0.28)" : "rgba(0,0,0,0.12)",
                     }}
                   >
-                    <Text style={{ fontWeight: "900", color: item.tipoPayPet === 2 ? "#0B3B91" : "#333" }}>
+                    <Text style={{ fontWeight: "900", color: item.tipoPayPet === 2 ? TutorPalette.primary : "#333" }}>
                       {tipoPayPetLabel(item.tipoPayPet)}
                     </Text>
                   </View>
@@ -569,7 +569,7 @@ export default function PayPet() {
                         borderColor: "rgba(28,102,255,0.35)",
                       }}
                     >
-                      <Text style={{ fontWeight: "900", color: "#0B3B91", fontSize: 16 }}>
+                      <Text style={{ fontWeight: "900", color: TutorPalette.primary, fontSize: 16 }}>
                         {formatMoneyBR(item.valor)}
                       </Text>
                     </View>
@@ -584,7 +584,7 @@ export default function PayPet() {
                 onPress={() => router.push(`/anuncios/${item.anuncioId}`)}
                 style={{
                   marginTop: 10,
-                  backgroundColor: "#0B3B91",
+                  backgroundColor: TutorPalette.primary,
                   borderRadius: 999,
                   paddingVertical: 10,
                   alignItems: "center",
@@ -712,7 +712,7 @@ export default function PayPet() {
                 style={{
                   flex: 1,
                   borderWidth: 1,
-                  borderColor: "#ddd",
+                  borderColor: "#d7deea",
                   borderRadius: 12,
                   paddingVertical: 12,
                   alignItems: "center",
@@ -726,7 +726,7 @@ export default function PayPet() {
                 onPress={() => setFiltersOpen(false)}
                 style={{
                   flex: 1,
-                  backgroundColor: "#0B3B91",
+                  backgroundColor: TutorPalette.primary,
                   borderRadius: 12,
                   paddingVertical: 12,
                   alignItems: "center",
@@ -750,7 +750,7 @@ export default function PayPet() {
           width: 62,
           height: 62,
           borderRadius: 999,
-          backgroundColor: "#1C66FF",
+          backgroundColor: TutorPalette.primary,
           alignItems: "center",
           justifyContent: "center",
           shadowOpacity: 0.25,

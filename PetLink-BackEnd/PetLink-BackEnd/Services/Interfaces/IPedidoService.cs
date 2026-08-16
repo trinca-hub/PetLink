@@ -7,5 +7,6 @@ namespace PetLink_BackEnd.Services.Interfaces
     {
         Task<int> CreateAndReturnId(PedidoDTO pedidoDTO);
         Task<IEnumerable<PedidoDTO>> GetByUsuarioId(int usuarioId);
+        Task CancelAndRestock(int pedidoId);
     }
 }

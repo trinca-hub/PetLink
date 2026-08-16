@@ -21,9 +21,14 @@ public class UsuarioService : GenericService<Usuario, UsuarioDTO>, IUsuarioServi
     public async Task<UsuarioDTO> Login(Login login)
     {
         var usuario = await _usuarioRepository.Login(login);
+        var usuarioDTO = _mapper.Map<UsuarioDTO>(usuario);
 
-        if (usuario is not null) usuario.Senha = ""; // Oculta a senha
-        return _mapper.Map<UsuarioDTO>(usuario);
+        // A senha não deve aparecer na resposta, mas nunca pode ser alterada
+        // na entidade carregada durante o processo de login.
+        if (usuarioDTO is not null)
+            usuarioDTO.Senha = "";
+
+        return usuarioDTO;
     }
 
     public async Task<UsuarioDTO> GetByEmail(string email)
@@ -34,6 +39,24 @@ public class UsuarioService : GenericService<Usuario, UsuarioDTO>, IUsuarioServi
             return null;
 
         return _mapper.Map<UsuarioDTO>(usuario);
+    }
+
+    public override async Task Create(UsuarioDTO usuarioDTO)
+    {
+        var usuario = new Usuario
+        {
+            Nome = usuarioDTO.Nome,
+            Telefone = usuarioDTO.Telefone,
+            Cep = usuarioDTO.Cep,
+            Uf = usuarioDTO.Uf,
+            Cidade = usuarioDTO.Cidade,
+            Bairro = usuarioDTO.Bairro,
+            Rua = usuarioDTO.Rua,
+            Numero = usuarioDTO.Numero,
+            Email = usuarioDTO.Email,
+            Senha = usuarioDTO.Senha,
+        };
+        await _usuarioRepository.Add(usuario);
     }
 
 }

@@ -11,6 +11,14 @@ export function registerService(data: any) {
   return api("Usuario", "POST", data);
 }
 
+export function requestPasswordResetService(email: string) {
+  return api("Usuario/recuperar-senha", "POST", { email });
+}
+
+export function resetPasswordService(email: string, token: string, novaSenha: string) {
+  return api("Usuario/redefinir-senha", "POST", { email, token, novaSenha });
+}
+
 export async function getMyPetsService(token: string) {
   return api("Pet/meus", "GET", null, token);
 }

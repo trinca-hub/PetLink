@@ -38,6 +38,17 @@ public class PedidoService : GenericService<Pedido, PedidoDTO>, IPedidoService
         if (!exists)
             throw new ArgumentException("Usuário não encontrado.");
 
+        if (pedidoDTO.EnderecoUsuarioId.HasValue)
+        {
+            var enderecoValido = await _context.EnderecosUsuarios.AnyAsync(e =>
+                e.Id == pedidoDTO.EnderecoUsuarioId.Value &&
+                e.UsuarioId == pedidoDTO.UsuarioId &&
+                e.Ativo);
+
+            if (!enderecoValido)
+                throw new ArgumentException("Endereço de entrega não encontrado para este usuário.");
+        }
+
         var entity = _mapper.Map<Pedido>(pedidoDTO);
 
         // garante que o banco gere o ID
@@ -59,5 +70,37 @@ public class PedidoService : GenericService<Pedido, PedidoDTO>, IPedidoService
     {
         var pedidos = await _pedidoRepo.GetByUsuarioId(usuarioId);
         return _mapper.Map<IEnumerable<PedidoDTO>>(pedidos);
+    }
+
+    public async Task CancelAndRestock(int pedidoId)
+    {
+        var pedido = await _context.Pedidos.FindAsync(pedidoId);
+        if (pedido is null)
+            throw new ArgumentException("Pedido não encontrado.");
+
+        await using var tx = await _context.Database.BeginTransactionAsync();
+
+        var itens = await _context.ItemPedidos
+            .Where(i => i.PedidoId == pedidoId)
+            .ToListAsync();
+
+        foreach (var item in itens)
+        {
+            var produto = await _context.Produtos.FindAsync(item.ProdutoId);
+            if (produto is not null)
+            {
+                produto.Quantidade += item.Quantidade;
+            }
+        }
+
+        if (itens.Count > 0)
+        {
+            _context.ItemPedidos.RemoveRange(itens);
+        }
+
+        _context.Pedidos.Remove(pedido);
+        await _context.SaveChangesAsync();
+
+        await tx.CommitAsync();
     }
 }

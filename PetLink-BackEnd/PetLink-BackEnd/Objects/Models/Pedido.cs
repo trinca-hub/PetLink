@@ -13,6 +13,10 @@ namespace PetLink_BackEnd.Objects.Models
         public int UsuarioId { get; set; }
         public Usuario Usuario { get; set; } = null!;
 
+        [Column("enderecousuarioid")]
+        public int? EnderecoUsuarioId { get; set; }
+        public EnderecoUsuario? EnderecoUsuario { get; set; }
+
         [Column("datapedido")]
         public DateTime DataPedido { get; set; }
 

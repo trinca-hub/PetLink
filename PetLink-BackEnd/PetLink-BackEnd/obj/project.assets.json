@@ -3505,23 +3505,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Usuario\\.nuget\\packages\\": {},
+    "C:\\Users\\enzos\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Usuario\\Documents\\Repositórios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
+      "projectUniqueName": "C:\\Users\\enzos\\Projetos\\PetLink\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
       "projectName": "PetLink-BackEnd",
-      "projectPath": "C:\\Users\\Usuario\\Documents\\Repositórios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
-      "packagesPath": "C:\\Users\\Usuario\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Usuario\\Documents\\Repositórios do GitHub\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\obj\\",
+      "projectPath": "C:\\Users\\enzos\\Projetos\\PetLink\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\PetLink-BackEnd.csproj",
+      "packagesPath": "C:\\Users\\enzos\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\enzos\\Projetos\\PetLink\\PetLink-Enzo\\PetLink-BackEnd\\PetLink-BackEnd\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\Usuario\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\enzos\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -3549,7 +3549,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.200"
+      "SdkAnalysisLevel": "10.0.200"
     },
     "frameworks": {
       "net8.0": {
@@ -3607,7 +3607,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.203/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json"
       }
     }
   },

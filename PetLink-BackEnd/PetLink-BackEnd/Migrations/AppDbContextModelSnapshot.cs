@@ -63,7 +63,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 1,
                             Email = "miguelsilva@gmail.com",
                             Nome = "Miguel Silva",
-                            Senha = "123456",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 1
                         },
                         new
@@ -71,7 +71,7 @@ namespace PetLink_BackEnd.Migrations
                             Id = 2,
                             Email = "gabrieloliveira@gmail.com",
                             Nome = "Gabriel Oliveira",
-                            Senha = "abcdefg",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 1
                         },
                         new
@@ -79,8 +79,216 @@ namespace PetLink_BackEnd.Migrations
                             Id = 3,
                             Email = "marcobrito@gmail.com",
                             Nome = "Marco Brito",
-                            Senha = "aaaaaaa",
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 2
+                        });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendaSlotBloqueado", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datacriacao");
+
+                    b.Property<DateTime>("DataHoraInicio")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datahorainicio");
+
+                    b.Property<string>("Motivo")
+                        .HasMaxLength(300)
+                        .HasColumnType("character varying(300)")
+                        .HasColumnName("motivo");
+
+                    b.Property<int>("VeterinarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("veterinarioid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VeterinarioId", "DataHoraInicio")
+                        .IsUnique();
+
+                    b.ToTable("agendaslotbloqueado");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendaVeterinario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datacriacao");
+
+                    b.Property<int>("DiasSemanaAtivos")
+                        .HasColumnType("integer")
+                        .HasColumnName("diassemanaativos");
+
+                    b.Property<int>("DuracaoMinutos")
+                        .HasColumnType("integer")
+                        .HasColumnName("duracaominutos");
+
+                    b.Property<TimeSpan>("HoraFimManha")
+                        .HasColumnType("interval")
+                        .HasColumnName("horafimmanha");
+
+                    b.Property<TimeSpan>("HoraFimTarde")
+                        .HasColumnType("interval")
+                        .HasColumnName("horafimtarde");
+
+                    b.Property<TimeSpan>("HoraInicioManha")
+                        .HasColumnType("interval")
+                        .HasColumnName("horainiciomanha");
+
+                    b.Property<TimeSpan>("HoraInicioTarde")
+                        .HasColumnType("interval")
+                        .HasColumnName("horainiciotarde");
+
+                    b.Property<int>("VeterinarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("veterinarioid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VeterinarioId")
+                        .IsUnique();
+
+                    b.ToTable("agendaveterinario", t =>
+                        {
+                            t.HasCheckConstraint("CK_agendaveterinario_dias", "diassemanaativos > 0");
+
+                            t.HasCheckConstraint("CK_agendaveterinario_duracao", "duracaominutos = 60");
+
+                            t.HasCheckConstraint("CK_agendaveterinario_horarios", "horainiciomanha = INTERVAL '08:00:00' AND horafimmanha = INTERVAL '11:00:00' AND horainiciotarde = INTERVAL '13:00:00' AND horafimtarde = INTERVAL '17:00:00'");
+                        });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendamentoConsulta", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime?>("DataCancelamento")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datacancelamento");
+
+                    b.Property<DateTime?>("DataConfirmacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("dataconfirmacao");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datacriacao");
+
+                    b.Property<DateTime?>("DataHoraFim")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datahorafim");
+
+                    b.Property<DateTime?>("DataHoraInicio")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datahorainicio");
+
+                    b.Property<DateTime?>("DataRecusa")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("datarecusa");
+
+                    b.Property<DateTime?>("DataUltimaRemarcacao")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("dataultimaremarcacao");
+
+                    b.Property<string>("MotivoCancelamento")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("motivocancelamento");
+
+                    b.Property<string>("MotivoRecusa")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("motivorecusa");
+
+                    b.Property<string>("MotivoRemarcacao")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("motivoremarcacao");
+
+                    b.Property<string>("Observacao")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("observacao");
+
+                    b.Property<int>("OrigemSolicitacao")
+                        .HasColumnType("integer")
+                        .HasColumnName("origemsolicitacao");
+
+                    b.Property<int>("PetId")
+                        .HasColumnType("integer")
+                        .HasColumnName("petid");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .HasColumnType("bytea")
+                        .HasColumnName("rowversion");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.Property<int>("TipoServico")
+                        .HasColumnType("integer")
+                        .HasColumnName("tiposervico");
+
+                    b.Property<int?>("UltimoResponsavelRemarcacao")
+                        .HasColumnType("integer")
+                        .HasColumnName("ultimoresponsavelremarcacao");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuarioid");
+
+                    b.Property<int>("VeterinarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("veterinarioid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PetId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.HasIndex("VeterinarioId", "DataHoraInicio")
+                        .HasDatabaseName("IX_agendamentoconsulta_vet_inicio");
+
+                    b.HasIndex("VeterinarioId", "DataHoraInicio", "DataHoraFim")
+                        .HasDatabaseName("IX_agendamentoconsulta_vet_horario");
+
+                    b.HasIndex("VeterinarioId", "PetId", "UsuarioId", "Status")
+                        .HasDatabaseName("IX_agendamentoconsulta_pendente");
+
+                    b.ToTable("agendamentoconsulta", t =>
+                        {
+                            t.HasCheckConstraint("CK_agendamentoconsulta_horario", "(datahorainicio IS NULL AND datahorafim IS NULL) OR (datahorainicio < datahorafim)");
+
+                            t.HasCheckConstraint("CK_agendamentoconsulta_origem", "origemsolicitacao IN (1, 2)");
+
+                            t.HasCheckConstraint("CK_agendamentoconsulta_status_datas", "(status <> 2 OR dataconfirmacao IS NOT NULL) AND (status <> 3 OR datacancelamento IS NOT NULL)");
+
+                            t.HasCheckConstraint("CK_agendamentoconsulta_ultimo_responsavel", "ultimoresponsavelremarcacao IS NULL OR ultimoresponsavelremarcacao IN (1, 2)");
                         });
                 });
 
@@ -199,6 +407,167 @@ namespace PetLink_BackEnd.Migrations
                     b.ToTable("anuncio_petfinder");
                 });
 
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.EnderecoUsuario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Apelido")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("character varying(60)")
+                        .HasColumnName("apelido");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("boolean")
+                        .HasColumnName("ativo");
+
+                    b.Property<string>("Bairro")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("bairro");
+
+                    b.Property<string>("Cep")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("character varying(8)")
+                        .HasColumnName("cep");
+
+                    b.Property<string>("Cidade")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("cidade");
+
+                    b.Property<string>("Complemento")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("character varying(80)")
+                        .HasColumnName("complemento");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("criadoem");
+
+                    b.Property<string>("Destinatario")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("destinatario");
+
+                    b.Property<int>("Numero")
+                        .HasColumnType("integer")
+                        .HasColumnName("numero");
+
+                    b.Property<bool>("Principal")
+                        .HasColumnType("boolean")
+                        .HasColumnName("principal");
+
+                    b.Property<string>("Referencia")
+                        .IsRequired()
+                        .HasMaxLength(140)
+                        .HasColumnType("character varying(140)")
+                        .HasColumnName("referencia");
+
+                    b.Property<string>("Rua")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)")
+                        .HasColumnName("rua");
+
+                    b.Property<string>("Telefone")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)")
+                        .HasColumnName("telefone");
+
+                    b.Property<string>("Uf")
+                        .IsRequired()
+                        .HasMaxLength(2)
+                        .HasColumnType("character varying(2)")
+                        .HasColumnName("uf");
+
+                    b.Property<int>("UsuarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("usuarioid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UsuarioId", "Principal");
+
+                    b.ToTable("enderecousuario");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Funcionario", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasColumnName("id");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("email");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("nome");
+
+                    b.Property<decimal>("Salario")
+                        .HasColumnType("numeric")
+                        .HasColumnName("salario");
+
+                    b.Property<string>("Senha")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("senha");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Email")
+                        .IsUnique();
+
+                    b.ToTable("funcionario");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Email = "funcionario1@petlink.com",
+                            Nome = "Funcionario 1",
+                            Salario = 2500.00m,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Email = "funcionario2@petlink.com",
+                            Nome = "Funcionario 2",
+                            Salario = 3200.00m,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+                        },
+                        new
+                        {
+                            Id = 3,
+                            Email = "funcionario3@petlink.com",
+                            Nome = "Funcionario 3",
+                            Salario = 4100.00m,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"
+                        });
+                });
+
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.ItemPedido", b =>
                 {
                     b.Property<int>("Id")
@@ -258,11 +627,17 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("datapedido");
 
+                    b.Property<int?>("EnderecoUsuarioId")
+                        .HasColumnType("integer")
+                        .HasColumnName("enderecousuarioid");
+
                     b.Property<int>("UsuarioId")
                         .HasColumnType("integer")
                         .HasColumnName("usuarioid");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("EnderecoUsuarioId");
 
                     b.HasIndex("UsuarioId");
 
@@ -452,7 +827,8 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnName("descricao");
 
                     b.Property<string>("Foto")
-                        .HasColumnType("text")
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)")
                         .HasColumnName("foto");
 
                     b.Property<string>("Nome")
@@ -559,6 +935,48 @@ namespace PetLink_BackEnd.Migrations
                             Tipo = 3,
                             Valor = 80f
                         });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.TentativaLogin", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("AtualizadoEm").HasColumnType("timestamp with time zone").HasColumnName("atualizado_em");
+                    b.Property<DateTime?>("BloqueadoAte").HasColumnType("timestamp with time zone").HasColumnName("bloqueado_ate");
+                    b.Property<string>("Email").IsRequired().HasMaxLength(100).HasColumnType("character varying(100)").HasColumnName("email");
+                    b.Property<int>("Falhas").HasColumnType("integer").HasColumnName("falhas");
+                    b.Property<string>("Ip").IsRequired().HasMaxLength(64).HasColumnType("character varying(64)").HasColumnName("ip");
+                    b.HasKey("Id");
+                    b.HasIndex("Email", "Ip").IsUnique();
+                    b.ToTable("tentativa_login", (string)null);
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.TokenRedefinicaoSenha", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<DateTime>("ExpiraEm").HasColumnType("timestamp with time zone").HasColumnName("expira_em");
+                    b.Property<string>("TokenHash").IsRequired().HasMaxLength(64).HasColumnType("character varying(64)").HasColumnName("token_hash");
+                    b.Property<DateTime?>("UsadoEm").HasColumnType("timestamp with time zone").HasColumnName("usado_em");
+                    b.Property<int>("UsuarioId").HasColumnType("integer").HasColumnName("usuario_id");
+                    b.HasKey("Id");
+                    b.HasIndex("TokenHash").IsUnique();
+                    b.HasIndex("UsuarioId");
+                    b.ToTable("token_redefinicao_senha", (string)null);
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.TokenRedefinicaoSenhaGestao", b =>
+                {
+                    b.Property<int>("Id").ValueGeneratedOnAdd().HasColumnType("integer").HasColumnName("id");
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    b.Property<string>("Email").IsRequired().HasColumnType("text").HasColumnName("email");
+                    b.Property<DateTime>("ExpiraEm").HasColumnType("timestamp with time zone").HasColumnName("expira_em");
+                    b.Property<string>("Perfil").IsRequired().HasColumnType("text").HasColumnName("perfil");
+                    b.Property<string>("TokenHash").IsRequired().HasColumnType("text").HasColumnName("token_hash");
+                    b.Property<DateTime?>("UsadoEm").HasColumnType("timestamp with time zone").HasColumnName("usado_em");
+                    b.HasKey("Id");
+                    b.HasIndex("Perfil", "Email", "TokenHash").IsUnique();
+                    b.ToTable("token_redefinicao_senha_gestao", (string)null);
                 });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Usuario", b =>
@@ -704,6 +1122,12 @@ namespace PetLink_BackEnd.Migrations
                         .HasColumnType("real")
                         .HasColumnName("salario");
 
+                    b.Property<string>("Senha")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)")
+                        .HasColumnName("senha");
+
                     b.Property<int>("Status")
                         .HasColumnType("integer")
                         .HasColumnName("status");
@@ -720,6 +1144,7 @@ namespace PetLink_BackEnd.Migrations
                             Email = "gabriel@gmail.com",
                             Nome = "Gabriel",
                             Salario = 100000f,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 2
                         },
                         new
@@ -729,6 +1154,7 @@ namespace PetLink_BackEnd.Migrations
                             Email = "enzo@gmail.com",
                             Nome = "Enzo",
                             Salario = 100000f,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 1
                         },
                         new
@@ -738,8 +1164,68 @@ namespace PetLink_BackEnd.Migrations
                             Email = "yasmin@gmail.com",
                             Nome = "Yasmin",
                             Salario = 100000f,
+                            Senha = "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                             Status = 1
                         });
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendaSlotBloqueado", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Veterinario", "Veterinario")
+                        .WithMany()
+                        .HasForeignKey("VeterinarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Veterinario");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendaVeterinario", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Veterinario", "Veterinario")
+                        .WithMany()
+                        .HasForeignKey("VeterinarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Veterinario");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.TokenRedefinicaoSenha", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                    b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.AgendamentoConsulta", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Pet", "Pet")
+                        .WithMany()
+                        .HasForeignKey("PetId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Veterinario", "Veterinario")
+                        .WithMany()
+                        .HasForeignKey("VeterinarioId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Pet");
+
+                    b.Navigation("Usuario");
+
+                    b.Navigation("Veterinario");
                 });
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Anuncio", b =>
@@ -809,6 +1295,17 @@ namespace PetLink_BackEnd.Migrations
                     b.Navigation("Pet");
                 });
 
+            modelBuilder.Entity("PetLink_BackEnd.Objects.Models.EnderecoUsuario", b =>
+                {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
+                        .WithMany()
+                        .HasForeignKey("UsuarioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Usuario");
+                });
+
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.ItemPedido", b =>
                 {
                     b.HasOne("PetLink_BackEnd.Objects.Models.Pedido", "Pedido")
@@ -830,11 +1327,18 @@ namespace PetLink_BackEnd.Migrations
 
             modelBuilder.Entity("PetLink_BackEnd.Objects.Models.Pedido", b =>
                 {
+                    b.HasOne("PetLink_BackEnd.Objects.Models.EnderecoUsuario", "EnderecoUsuario")
+                        .WithMany()
+                        .HasForeignKey("EnderecoUsuarioId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("PetLink_BackEnd.Objects.Models.Usuario", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("EnderecoUsuario");
 
                     b.Navigation("Usuario");
                 });

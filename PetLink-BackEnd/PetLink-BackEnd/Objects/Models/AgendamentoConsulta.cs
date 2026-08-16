@@ -1,0 +1,94 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using PetLink_BackEnd.Objects.Enums;
+
+namespace PetLink_BackEnd.Objects.Models
+{
+    [Table("agendamentoconsulta")]
+    public class AgendamentoConsulta
+    {
+        [Column("id")]
+        public int Id { get; set; }
+
+        [Column("veterinarioid")]
+        public int VeterinarioId { get; set; }
+        public Veterinario Veterinario { get; set; } = null!;
+
+        [Column("petid")]
+        public int PetId { get; set; }
+        public Pet Pet { get; set; } = null!;
+
+        [Column("usuarioid")]
+        public int UsuarioId { get; set; }
+        public Usuario Usuario { get; set; } = null!;
+
+        [Column("origemsolicitacao")]
+        public OrigemSolicitacao OrigemSolicitacao { get; set; }
+
+        [Column("ultimoresponsavelremarcacao")]
+        public OrigemSolicitacao? UltimoResponsavelRemarcacao { get; set; }
+
+        [Column("datahorainicio")]
+        public DateTime? DataHoraInicio { get; set; }
+
+        [Column("datahorafim")]
+        public DateTime? DataHoraFim { get; set; }
+
+        [Column("status")]
+        public StatusAgendamento Status { get; set; }
+
+        [Column("tiposervico")]
+        public TipoServico TipoServico { get; set; }
+
+        [Column("observacao")]
+        public string? Observacao { get; set; }
+
+        [Column("motivocancelamento")]
+        public string? MotivoCancelamento { get; set; }
+
+        [Column("motivorecusa")]
+        public string? MotivoRecusa { get; set; }
+
+        [Column("motivoremarcacao")]
+        public string? MotivoRemarcacao { get; set; }
+
+        [Column("datacriacao")]
+        public DateTime DataCriacao { get; set; }
+
+        [Column("dataconfirmacao")]
+        public DateTime? DataConfirmacao { get; set; }
+
+        [Column("datacancelamento")]
+        public DateTime? DataCancelamento { get; set; }
+
+        [Column("datarecusa")]
+        public DateTime? DataRecusa { get; set; }
+
+        [Column("dataultimaremarcacao")]
+        public DateTime? DataUltimaRemarcacao { get; set; }
+
+        [Timestamp]
+        [Column("rowversion")]
+        public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+
+        public AgendamentoConsulta() { }
+
+        public AgendamentoConsulta(int id, int veterinarioId, int petId, int usuarioId, OrigemSolicitacao origemSolicitacao, DateTime dataHoraInicio, DateTime dataHoraFim, StatusAgendamento status, TipoServico tipoServico, string? observacao, string? motivoCancelamento, DateTime dataCriacao, DateTime? dataConfirmacao, DateTime? dataCancelamento)
+        {
+            Id = id;
+            VeterinarioId = veterinarioId;
+            PetId = petId;
+            UsuarioId = usuarioId;
+            OrigemSolicitacao = origemSolicitacao;
+            DataHoraInicio = dataHoraInicio;
+            DataHoraFim = dataHoraFim;
+            Status = status;
+            TipoServico = tipoServico;
+            Observacao = observacao;
+            MotivoCancelamento = motivoCancelamento;
+            DataCriacao = dataCriacao;
+            DataConfirmacao = dataConfirmacao;
+            DataCancelamento = dataCancelamento;
+        }
+    }
+}

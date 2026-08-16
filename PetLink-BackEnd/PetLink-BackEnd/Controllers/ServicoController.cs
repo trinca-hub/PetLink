@@ -1,22 +1,28 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
 
 namespace PetLink_BackEnd.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/v1/[controller]")]
     [ApiController]
+    [Authorize]
     public class ServicoController : ControllerBase
     {
 
         private readonly IServicoService _servicoService;
+        private readonly IAdministradorService _administradorService;
         private readonly Response _response;
 
-        public ServicoController(IServicoService servicoService)
+        public ServicoController(IServicoService servicoService, IAdministradorService administradorService)
         {
             _servicoService = servicoService;
+            _administradorService = administradorService;
             _response = new Response();
         }
 
@@ -168,6 +174,55 @@ namespace PetLink_BackEnd.Controllers
                 };
                 return StatusCode(StatusCodes.Status500InternalServerError, _response);
             }
+        }
+
+        [HttpGet("admin")]
+        public async Task<IActionResult> GetAllAdmin()
+        {
+            if (!await IsAdminAuthenticated())
+                return Forbid();
+
+            return await GetAll();
+        }
+
+        [HttpPost("admin")]
+        public async Task<IActionResult> PostAdmin(ServicoDTO servicoDTO)
+        {
+            if (!await IsAdminAuthenticated())
+                return Forbid();
+
+            return await Post(servicoDTO);
+        }
+
+        [HttpPut("admin/{id}")]
+        public async Task<IActionResult> PutAdmin(int id, ServicoDTO servicoDTO)
+        {
+            if (!await IsAdminAuthenticated())
+                return Forbid();
+
+            return await Put(id, servicoDTO);
+        }
+
+        [HttpDelete("admin/{id}")]
+        public async Task<IActionResult> DeleteAdmin(int id)
+        {
+            if (!await IsAdminAuthenticated())
+                return Forbid();
+
+            return await Delete(id);
+        }
+
+        private async Task<bool> IsAdminAuthenticated()
+        {
+            var email = User.Claims
+                .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
+                ?.Value;
+
+            if (string.IsNullOrEmpty(email))
+                return false;
+
+            var admin = await _administradorService.GetByEmail(email);
+            return admin is not null;
         }
     }
 }

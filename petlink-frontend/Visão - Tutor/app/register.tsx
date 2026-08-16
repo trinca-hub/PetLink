@@ -1,191 +1,186 @@
 import { useState } from "react";
 import {
-  View,
-  Text,
-  TextInput,
-  ImageBackground,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { registerService } from "../src/api/authService";
 import { useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons } from "@expo/vector-icons";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-
+import { PasswordStrengthIndicator } from "@/components/PasswordStrengthIndicator";
+import { PetLinkAuthBackdrop, PetLinkAuthHeader } from "@/components/PetLinkAuthVisual";
+import { isPasswordAccepted } from "../src/utils/passwordStrength";
 
 export default function Register() {
   const router = useRouter();
+  const [form, setForm] = useState({ nome: "", email: "", senha: "" });
+  const [loading, setLoading] = useState(false);
+  const [mostrarSenha, setMostrarSenha] = useState(false);
 
-  const [form, setForm] = useState({
-    nome: "",
-    telefone: "",
-    cep: "",
-    uf: "",
-    cidade: "",
-    bairro: "",
-    rua: "",
-    numero: "",
-    email: "",
-    senha: "",
-  });
-
-  function handleChange(key: string, value: string) {
+  function handleChange(key: keyof typeof form, value: string) {
     setForm((prev) => ({ ...prev, [key]: value }));
   }
 
   async function handleRegister() {
-    const payload = {
-      nome: form.nome,
-      telefone: form.telefone,
-      cep: form.cep,
-      uf: form.uf,
-      cidade: form.cidade,
-      bairro: form.bairro,
-      rua: form.rua,
-      numero: Number(form.numero),
-      email: form.email,
-      senha: form.senha,
-    };
+    if (!form.nome.trim() || !form.email.trim() || !form.senha.trim()) {
+      alert("Preencha nome, e-mail e senha.");
+      return;
+    }
 
-    console.log("➡️ Payload enviado:", payload);
+    if (!isPasswordAccepted(form.senha)) {
+      alert("Crie uma senha de pelo menos 8 caracteres com 3 tipos: maiúscula, minúscula, número ou símbolo.");
+      return;
+    }
 
-    const result = await registerService(payload);
+    setLoading(true);
 
-    console.log("➡️ Resposta da API:", result);
+    try {
+      const result = await registerService({
+        nome: form.nome.trim(),
+        telefone: "",
+        cep: "",
+        uf: "",
+        cidade: "",
+        bairro: "",
+        rua: "",
+        numero: 0,
+        email: form.email.trim().toLowerCase(),
+        senha: form.senha,
+      });
 
-    if (result.code === 1) {
-      alert("Conta criada!");
-      router.replace("/login");
-    } else {
-      alert(result.message || "Erro ao cadastrar!");
+      if (result.ok) {
+        alert("Conta criada!");
+        router.replace("/login");
+      } else {
+        alert(result?.data?.message || "Erro ao cadastrar.");
+      }
+    } finally {
+      setLoading(false);
     }
   }
 
   return (
-    <ImageBackground
-      source={require("../assets/images/background.jpg")}
-      style={styles.background}
-      resizeMode="cover"
-    >
-      <KeyboardAvoidingView
-        behavior={Platform.OS === "ios" ? "padding" : undefined}
-        style={{ flex: 1 }}
-      >
-        <LinearGradient
-          colors={["rgba(0,0,0,0.6)", "#0a58ca"]}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
-          style={styles.card}
-        >
-     <KeyboardAwareScrollView
-  extraScrollHeight={200}
-  keyboardOpeningTime={0}
-  enableOnAndroid={true}
-  showsVerticalScrollIndicator={false}
->
+    <LinearGradient colors={["#030508", "#090C12", "#020305"]} style={styles.page}>
+      <PetLinkAuthBackdrop />
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.keyboard}>
+          <KeyboardAwareScrollView
+            contentContainerStyle={styles.content}
+            extraScrollHeight={110}
+            keyboardOpeningTime={0}
+            enableOnAndroid
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <View style={styles.form}>
+              <PetLinkAuthHeader title="Criar conta" subtitle="Seu cuidado começa por aqui." />
 
-
-            <Text style={styles.title}>Cadastro</Text>
-
-            <Ionicons
-              name="person-add-outline"
-              size={80}
-              color="#fff"
-              style={{ alignSelf: "center", marginBottom: 20 }}
-            />
-
-            {Object.keys(form).map((key) => (
-              <View key={key} style={styles.inputGroup}>
-                <Text style={styles.label}>{key.toUpperCase()}</Text>
+              <View style={styles.field}>
+                <Ionicons name="person-outline" size={23} color="#287AF5" />
                 <TextInput
-                  value={form[key as keyof typeof form]}
-                  onChangeText={(v) => handleChange(key, v)}
+                  value={form.nome}
+                  onChangeText={(value) => handleChange("nome", value)}
                   style={styles.input}
-                  placeholder={`Digite ${key}`}
-                  placeholderTextColor="#ccc"
+                  placeholder="Nome"
+                  placeholderTextColor="#8B909A"
+                  autoComplete="name"
                 />
               </View>
-            ))}
 
-            <TouchableOpacity style={styles.button} onPress={handleRegister}>
-              <Text style={styles.buttonText}>Cadastrar</Text>
-            </TouchableOpacity>
+              <View style={styles.field}>
+                <Ionicons name="mail-outline" size={23} color="#287AF5" />
+                <TextInput
+                  value={form.email}
+                  onChangeText={(value) => handleChange("email", value)}
+                  style={styles.input}
+                  placeholder="E-mail"
+                  placeholderTextColor="#8B909A"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  autoComplete="email"
+                />
+              </View>
 
-            <Text style={styles.footerText}>
-              Já tem conta?{" "}
-              <Text
-                style={styles.link}
-                onPress={() => router.push("/login")}
-              >
-                Entrar
-              </Text>
-            </Text>
+              <View style={[styles.field, styles.passwordField]}>
+                <Ionicons name="lock-closed-outline" size={23} color="#287AF5" />
+                <TextInput
+                  value={form.senha}
+                  onChangeText={(value) => handleChange("senha", value)}
+                  style={styles.input}
+                  placeholder="Crie uma senha"
+                  placeholderTextColor="#8B909A"
+                  secureTextEntry={!mostrarSenha}
+                  autoComplete="new-password"
+                />
+                <TouchableOpacity
+                  accessibilityRole="button"
+                  accessibilityLabel={mostrarSenha ? "Ocultar senha" : "Mostrar senha"}
+                  onPress={() => setMostrarSenha((value) => !value)}
+                  style={styles.eyeButton}
+                >
+                  <Ionicons name={mostrarSenha ? "eye-off-outline" : "eye-outline"} size={24} color="#9AA0AA" />
+                </TouchableOpacity>
+              </View>
+
+              <PasswordStrengthIndicator password={form.senha} />
+
+              <TouchableOpacity accessibilityRole="button" style={[styles.primaryButton, loading && styles.buttonDisabled]} onPress={handleRegister} disabled={loading}>
+                <LinearGradient colors={["#1764D9", "#0E51C7"]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.primaryGradient}>
+                  {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.primaryButtonText}>Criar conta</Text>}
+                  {!loading && <Ionicons name="paw" size={29} color="rgba(255,255,255,0.28)" style={styles.buttonPaw} />}
+                </LinearGradient>
+              </TouchableOpacity>
+
+              <View style={styles.loginPrompt}>
+                <Text style={styles.loginPromptText}>Já tem uma conta?</Text>
+                <TouchableOpacity accessibilityRole="button" onPress={() => router.push("/login")}>
+                  <Text style={styles.loginLink}>Entrar</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
           </KeyboardAwareScrollView>
-        </LinearGradient>
-      </KeyboardAvoidingView>
-    </ImageBackground>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </LinearGradient>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    paddingHorizontal: 25,
-    justifyContent: "center",
-  },
-  card: {
-    flex: 1,
-    borderRadius: 20,
-    padding: 25,
-    marginVertical: 40,
-  },
-  title: {
-    fontSize: 32,
-    color: "#fff",
-    fontWeight: "bold",
-    alignSelf: "center",
-    marginBottom: 10,
-  },
-  inputGroup: {
-    width: "100%",
+  page: { flex: 1 },
+  safeArea: { flex: 1 },
+  keyboard: { flex: 1 },
+  content: { flexGrow: 1, justifyContent: "center", paddingHorizontal: 26, paddingVertical: 28 },
+  form: { width: "100%", maxWidth: 430, alignSelf: "center" },
+  field: {
+    height: 54,
     marginBottom: 12,
+    paddingLeft: 17,
+    paddingRight: 8,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.23)",
+    backgroundColor: "rgba(255,255,255,0.055)",
+    flexDirection: "row",
+    alignItems: "center",
   },
-  label: {
-    color: "#fff",
-    marginBottom: 4,
-    fontSize: 14,
-  },
-  input: {
-    backgroundColor: "#fff",
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    height: 40,
-  },
-  button: {
-    width: "100%",
-    backgroundColor: "#0d6efd",
-    borderRadius: 20,
-    paddingVertical: 12,
-    marginTop: 15,
-  },
-  buttonText: {
-    color: "#fff",
-    textAlign: "center",
-    fontSize: 18,
-    fontWeight: "bold",
-  },
-  footerText: {
-    color: "#fff",
-    marginTop: 18,
-    alignSelf: "center",
-  },
-  link: {
-    color: "#dceaff",
-    fontWeight: "bold",
-    textDecorationLine: "underline",
-  },
+  passwordField: { marginBottom: 0 },
+  input: { flex: 1, height: 54, marginLeft: 13, color: "#F6F8FC", fontSize: 16 },
+  eyeButton: { width: 46, height: 54, justifyContent: "center", alignItems: "center" },
+  primaryButton: { width: "100%", height: 64, marginTop: 26, borderRadius: 17, overflow: "hidden", shadowColor: "#0B5DDB", shadowOpacity: 0.38, shadowRadius: 13, shadowOffset: { width: 0, height: 8 }, elevation: 6 },
+  primaryGradient: { flex: 1, justifyContent: "center", alignItems: "center" },
+  primaryButtonText: { color: "#fff", fontSize: 22, fontWeight: "800" },
+  buttonPaw: { position: "absolute", right: 24 },
+  buttonDisabled: { opacity: 0.58 },
+  loginPrompt: { flexDirection: "row", justifyContent: "center", alignItems: "center", gap: 7, marginTop: 22 },
+  loginPromptText: { color: "rgba(255,255,255,0.72)", fontSize: 15 },
+  loginLink: { color: "#287AF5", fontSize: 15, fontWeight: "800" },
 });

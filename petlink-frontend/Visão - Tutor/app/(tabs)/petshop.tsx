@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useContext, useMemo, useState } from "react";
 import {
   View,
   Text,
@@ -15,10 +15,13 @@ import {
 import { router } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
 import { Ionicons, Feather } from "@expo/vector-icons";
+import { useFocusEffect } from "@react-navigation/native";
 
 import { AuthContext } from "@/src/context/AuthContext";
 import { getProdutoById, getProdutos } from "@/src/api/produtoService";
 import { getFavoriteProductIds, toggleFavoriteProduct } from "@/src/storage/favoritesProducts";
+import { useSideMenu } from "@/src/context/SideMenuContext";
+import { TutorPalette } from "@/constants/theme";
 
 import { getCartProducts, setCartProducts, CartProductItem, removeCartProduct } from "@/src/storage/cartProducts";
 import { checkoutFromItems } from "@/src/services/checkoutService";
@@ -41,6 +44,7 @@ function formatMoneyBR(valor?: number) {
 export default function Produtos() {
   const { token, user } = useContext(AuthContext);
   const { width } = useWindowDimensions();
+  const { openMenu } = useSideMenu();
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -96,13 +100,19 @@ export default function Produtos() {
     }
   }
 
-  useEffect(() => {
-    (async () => {
-      setLoading(true);
-      await load();
-      setLoading(false);
-    })();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      let isActive = true;
+      (async () => {
+        setLoading(true);
+        await load();
+        if (isActive) setLoading(false);
+      })();
+      return () => {
+        isActive = false;
+      };
+    }, [token, user?.id])
+  );
 
   async function onRefresh() {
     setRefreshing(true);
@@ -162,6 +172,11 @@ export default function Produtos() {
     setCartItems(withStock);
     setSelectedIds(withStock.filter((x) => !isUnavailable(x)).map((x) => x.produtoId));
     setCartOpen(true);
+  }
+
+  function goToCartScreen() {
+    setCartOpen(false);
+    router.push("/carrinho");
   }
 
   // ✅ − e + no carrinho (com trava no estoque)
@@ -395,12 +410,7 @@ export default function Produtos() {
   }
 
   return (
-    <LinearGradient
-      colors={["#0B0B0F", "#0E2B5A"]}
-      start={{ x: 0, y: 0 }}
-      end={{ x: 1, y: 1 }}
-      style={{ flex: 1 }}
-    >
+    <LinearGradient colors={[TutorPalette.background, TutorPalette.backgroundSecondary]} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={{ flex: 1 }}>
       {/* Header */}
       <View
         style={{
@@ -412,13 +422,14 @@ export default function Produtos() {
         }}
       >
         <Pressable
-          onPress={() => { }}
+          onPress={openMenu}
           style={{
-            width: 40,
-            height: 40,
-            borderRadius: 12,
+            width: 42,
+            height: 42,
+            borderRadius: 14,
             alignItems: "center",
             justifyContent: "center",
+            backgroundColor: "rgba(255,255,255,0.10)",
           }}
         >
           <Feather name="menu" size={22} color="#fff" />
@@ -429,8 +440,8 @@ export default function Produtos() {
         <Pressable
           onPress={() => router.push("/perfil")}
           style={{
-            width: 40,
-            height: 40,
+            width: 42,
+            height: 42,
             borderRadius: 999,
             backgroundColor: "rgba(255,255,255,0.12)",
             alignItems: "center",
@@ -442,26 +453,18 @@ export default function Produtos() {
       </View>
 
       {/* Title */}
-      <View style={{ paddingHorizontal: 16, marginTop: 6 }}>
-        <Text
-          style={{
-            color: "#fff",
-            fontSize: 18,
-            fontWeight: "900",
-            textAlign: "center",
-            textDecorationLine: "underline",
-            textDecorationColor: "#fff",
-          }}
-        >
-          PetShop
-        </Text>
+      <View style={{ paddingHorizontal: 16, marginTop: 8 }}>
+        <View style={{ backgroundColor: "rgba(255,255,255,0.08)", borderRadius: 20, padding: 14, borderWidth: 1, borderColor: TutorPalette.border }}>
+          <Text style={{ color: TutorPalette.text, fontSize: 18, fontWeight: "900" }}>PetShop</Text>
+          <Text style={{ color: TutorPalette.muted, fontSize: 13, marginTop: 4 }}>Catálogo mais premium para compra rápida e confiável.</Text>
+        </View>
       </View>
 
       {/* Search + filtros + carrinho */}
       <View style={{ paddingHorizontal: 16, marginTop: 12 }}>
         <View
           style={{
-            backgroundColor: "#fff",
+            backgroundColor: "rgba(245,247,255,0.96)",
             borderRadius: 999,
             paddingHorizontal: 12,
             paddingVertical: 10,
@@ -470,13 +473,13 @@ export default function Produtos() {
             gap: 8,
           }}
         >
-          <Ionicons name="search" size={18} color="#0E2B5A" />
+          <Ionicons name="search" size={18} color={TutorPalette.primary} />
           <TextInput
             value={search}
             onChangeText={setSearch}
             placeholder="Pesquisar"
             placeholderTextColor="#8E8E93"
-            style={{ flex: 1, color: "#111", fontWeight: "700" }}
+            style={{ flex: 1, color: TutorPalette.background, fontWeight: "700" }}
           />
         </View>
 
@@ -503,17 +506,17 @@ export default function Produtos() {
           <Pressable
             onPress={openCart}
             style={{
-              width: 38,
-              height: 38,
+              width: 40,
+              height: 40,
               borderRadius: 999,
-              backgroundColor: "#fff",
+              backgroundColor: "rgba(245,247,255,0.96)",
               alignItems: "center",
               justifyContent: "center",
               borderWidth: 1,
-              borderColor: "rgba(0,0,0,0.06)",
+              borderColor: "rgba(255,255,255,0.25)",
             }}
           >
-            <Ionicons name="cart-outline" size={18} color="#0E2B5A" />
+            <Ionicons name="cart-outline" size={18} color={TutorPalette.primary} />
           </Pressable>
         </View>
 
@@ -530,9 +533,9 @@ export default function Produtos() {
                   paddingVertical: 6,
                   paddingHorizontal: 10,
                   borderRadius: 999,
-                  backgroundColor: "rgba(255,255,255,0.16)",
+                  backgroundColor: "rgba(255,255,255,0.10)",
                   borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.18)",
+                  borderColor: TutorPalette.border,
                 }}
               >
                 <Text style={{ color: "#fff", fontWeight: "800" }}>{chip.label}</Text>
@@ -575,14 +578,15 @@ export default function Produtos() {
               onPress={() => router.push(`/produtos/${item.id}`)}
               style={{
                 width: CARD_W,
-                backgroundColor: "#fff",
+                backgroundColor: "rgba(245,247,255,0.96)",
                 borderRadius: 18,
                 padding: 10,
                 marginBottom: GAP,
-                shadowOpacity: 0.10,
-                shadowRadius: 10,
-                shadowOffset: { width: 0, height: 6 },
-                elevation: 3,
+                shadowColor: TutorPalette.shadow,
+                shadowOpacity: 0.16,
+                shadowRadius: 12,
+                shadowOffset: { width: 0, height: 8 },
+                elevation: 4,
                 opacity: semEstoque ? 0.75 : 1,
               }}
             >
@@ -638,7 +642,7 @@ export default function Produtos() {
 
               {/* Preço */}
               <View style={{ marginTop: 6, flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
-                <Text style={{ fontWeight: "900", fontSize: 16, color: "#0B3B91" }}>
+                <Text style={{ fontWeight: "900", fontSize: 16, color: TutorPalette.primary }}>
                   {formatMoneyBR(item.preco)}
                 </Text>
 
@@ -933,18 +937,18 @@ export default function Produtos() {
               </View>
 
               <Pressable
-                disabled={buying || selectedIds.length === 0}
-                onPress={finalizarCompraSelecionados}
+                disabled={cartItems.length === 0}
+                onPress={goToCartScreen}
                 style={{
                   marginTop: 10,
-                  backgroundColor: buying || selectedIds.length === 0 ? "rgba(11,59,145,0.35)" : "#0B3B91",
+                  backgroundColor: cartItems.length === 0 ? "rgba(11,59,145,0.35)" : "#0B3B91",
                   borderRadius: 999,
                   paddingVertical: 12,
                   alignItems: "center",
                   justifyContent: "center",
                 }}
               >
-                {buying ? <ActivityIndicator color="#fff" /> : <Text style={{ color: "#fff", fontWeight: "900" }}>Finalizar compra</Text>}
+                <Text style={{ color: "#fff", fontWeight: "900" }}>Ir para o carrinho</Text>
               </Pressable>
             </View>
           </Pressable>

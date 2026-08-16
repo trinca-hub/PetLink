@@ -22,6 +22,7 @@ public class ProdutoController : Controller
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public async Task<IActionResult> GetAll()
     {
         var produtosDTO = await _produtoService.GetAll();
@@ -34,6 +35,7 @@ public class ProdutoController : Controller
     }
 
     [HttpGet("{id}")]
+    [AllowAnonymous]
     public async Task<IActionResult> GetById(int id)
     {
         var produtoDTO = await _produtoService.GetById(id);

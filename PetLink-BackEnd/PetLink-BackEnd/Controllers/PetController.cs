@@ -5,6 +5,8 @@ using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using Microsoft.EntityFrameworkCore;
+using PetLink_BackEnd.Data;
 
 namespace PetLink_BackEnd.Controllers;
 
@@ -15,12 +17,23 @@ public class PetController : Controller
 {
     private readonly IPetService _petService;
     private readonly IUsuarioService _usuarioService;
+    private readonly IAdministradorService _administradorService;
+    private readonly IFuncionarioService _funcionarioService;
+    private readonly AppDbContext _context;
     private readonly Response _response;
 
-    public PetController(IPetService petService, IUsuarioService usuarioService)
+    public PetController(
+        IPetService petService,
+        IUsuarioService usuarioService,
+        IAdministradorService administradorService,
+        IFuncionarioService funcionarioService,
+        AppDbContext context)
     {
         _petService = petService;
         _usuarioService = usuarioService;
+        _administradorService = administradorService;
+        _funcionarioService = funcionarioService;
+        _context = context;
         _response = new Response();
     }
 
@@ -224,5 +237,92 @@ public class PetController : Controller
         _response.Message = "Pets do usuário listados com sucesso";
 
         return Ok(_response);
+    }
+
+    [HttpGet("admin")]
+    public async Task<IActionResult> GetAllAdmin()
+    {
+        if (!await IsGestaoAuthenticated())
+            return Forbid();
+
+        return await GetAll();
+    }
+
+    [HttpPost("admin")]
+    public async Task<IActionResult> PostAdmin(PetDTO petDTO)
+    {
+        if (!await IsGestaoAuthenticated())
+            return Forbid();
+
+        if (petDTO is null)
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "Dados inválidos";
+            return BadRequest(_response);
+        }
+
+        var userExists = await _context.Usuarios.AnyAsync(u => u.Id == petDTO.UsuarioId);
+        if (!userExists)
+        {
+            _response.Code = ResponseEnum.NOT_FOUND;
+            _response.Data = null;
+            _response.Message = "Usuário informado não existe.";
+            return NotFound(_response);
+        }
+
+        return await Post(petDTO);
+    }
+
+    [HttpPut("admin/{id}")]
+    public async Task<IActionResult> PutAdmin(int id, PetDTO petDTO)
+    {
+        if (!await IsGestaoAuthenticated())
+            return Forbid();
+
+        if (petDTO is null)
+        {
+            _response.Code = ResponseEnum.INVALID;
+            _response.Data = null;
+            _response.Message = "Dados inválidos";
+            return BadRequest(_response);
+        }
+
+        var userExists = await _context.Usuarios.AnyAsync(u => u.Id == petDTO.UsuarioId);
+        if (!userExists)
+        {
+            _response.Code = ResponseEnum.NOT_FOUND;
+            _response.Data = null;
+            _response.Message = "Usuário informado não existe.";
+            return NotFound(_response);
+        }
+
+        return await Put(id, petDTO);
+    }
+
+    [HttpDelete("admin/{id}")]
+    public async Task<IActionResult> DeleteAdmin(int id)
+    {
+        if (!await IsGestaoAuthenticated())
+            return Forbid();
+
+        return await Delete(id);
+    }
+
+    private async Task<bool> IsGestaoAuthenticated()
+    {
+        var email = User.Claims
+            .FirstOrDefault(c => c.Type == ClaimTypes.Email || c.Type == JwtRegisteredClaimNames.Email)
+            ?.Value;
+
+        if (string.IsNullOrEmpty(email))
+            return false;
+
+        var admin = await _administradorService.GetByEmail(email);
+        if (admin is not null)
+            return true;
+
+        var funcionario = await _funcionarioService.GetByEmail(email);
+        return funcionario is not null;
     }
 }

@@ -1,5 +1,4 @@
-const BASE_URL = "http://192.168.18.74:5078/api/v1";
-
+const BASE_URL = "http://192.168.101.42:5078/api/v1";
 
 export async function api(
   endpoint: string,
@@ -18,9 +17,7 @@ export async function api(
       method,
       headers,
       body: body ? JSON.stringify(body) : undefined,
-      
     });
-console.log(`[API] Chamando: ${BASE_URL}/${endpoint}`);
 
     const contentType = response.headers.get("content-type") || "";
     const data = contentType.includes("application/json")
@@ -29,8 +26,11 @@ console.log(`[API] Chamando: ${BASE_URL}/${endpoint}`);
 
     return { ok: response.ok, status: response.status, data };
   } catch (error) {
-    console.error("❌ Erro na requisição:", error);
-    console.error("[API] Erro de conexão:", error);
-    return { ok: false, status: 0, data: { message: "Erro de conexão com o servidor" } };
+    console.error("Erro na requisição:", error);
+    return {
+      ok: false,
+      status: 0,
+      data: { message: "Erro de conexão com o servidor" },
+    };
   }
 }
