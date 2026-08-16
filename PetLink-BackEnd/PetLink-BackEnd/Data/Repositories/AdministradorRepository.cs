@@ -2,6 +2,7 @@
 using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Models;
 using Microsoft.EntityFrameworkCore;
+using PetLink_BackEnd.Security;
 
 namespace PetLink_BackEnd.Data.Repositories
 {
@@ -16,13 +17,16 @@ namespace PetLink_BackEnd.Data.Repositories
 
         public async Task<Administrador> Login(Login login)
         {
-            return await _context.Administradores.AsNoTracking().FirstOrDefaultAsync(p => p.Email == login.Email && p.Senha == login.Password);
+            var email = login.Email.Trim().ToLowerInvariant();
+            var conta = await _context.Administradores.AsNoTracking().FirstOrDefaultAsync(p => p.Email.ToLower() == email);
+            return conta is not null && PasswordSecurity.Verify(login.Password, conta.Senha) ? conta : null;
         }
 
         public async Task<Administrador> GetByEmail(string email)
         {
+            var normalizedEmail = email.Trim().ToLowerInvariant();
             return await _context.Administradores
-                .FirstOrDefaultAsync(u => u.Email == email);
+                .FirstOrDefaultAsync(u => u.Email.ToLower() == normalizedEmail);
         }
     }
 }

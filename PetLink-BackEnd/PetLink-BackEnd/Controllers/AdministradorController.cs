@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
+using PetLink_BackEnd.Security;
+using PetLink_BackEnd.Data;
 
 namespace PetLink_BackEnd.Controllers
 {
@@ -20,12 +22,14 @@ namespace PetLink_BackEnd.Controllers
         private readonly IAdministradorService _administradorService;
         private readonly IConfiguration _configuration;
         private readonly Response _response;
+        private readonly AppDbContext _context;
 
-        public AdministradorController(IAdministradorService administradorService, IConfiguration configuration)
+        public AdministradorController(IAdministradorService administradorService, IConfiguration configuration, AppDbContext context)
         {
             _administradorService = administradorService;
             _response = new Response();
             _configuration = configuration;
+            _context = context;
         }
 
         [HttpGet]
@@ -77,7 +81,8 @@ namespace PetLink_BackEnd.Controllers
             try
             {
                 administradorDTO.Id = 0;
-                administradorDTO.Senha = GenerateSha256Hash(administradorDTO.Senha);
+                if (!PasswordSecurity.IsAcceptable(administradorDTO.Senha)) return BadRequest(new { message = "Senha fraca. Use 8 caracteres e 3 tipos: maiúscula, minúscula, número ou símbolo." });
+                administradorDTO.Senha = PasswordSecurity.HashPassword(administradorDTO.Senha);
                 await _administradorService.Create(administradorDTO);
 
                 _response.Code = ResponseEnum.SUCCESS;
@@ -112,19 +117,25 @@ namespace PetLink_BackEnd.Controllers
                 return BadRequest(_response);
             }
 
-            try
-            {
-                login.Password = GenerateSha256Hash(login.Password);
+        try
+        {
+                var email = login.Email.Trim().ToLowerInvariant();
+                var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "desconhecido";
+                var bloqueio = await LoginAttemptSecurity.GetBlocked(_context, "adm", email, ip);
+                if (bloqueio is not null) return StatusCode(429, new { message = "Muitas tentativas. Aguarde 1 minuto.", data = new { tentativasRestantes = 0, bloqueadoAte = bloqueio.BloqueadoAte } });
+                login.Email = email;
                 var administradorDTO = await _administradorService.Login(login);
 
                 if (administradorDTO is null)
                 {
+                    var restantes = await LoginAttemptSecurity.RegisterFailure(_context, "adm", email, ip);
                     _response.Code = ResponseEnum.INVALID;
-                    _response.Data = null;
-                    _response.Message = "Email ou senha incorretos";
+                    _response.Data = new { tentativasRestantes = restantes };
+                    _response.Message = restantes == 0 ? "Limite de tentativas atingido. Aguarde 1 minuto." : $"Email ou senha incorretos. Tentativas restantes: {restantes}.";
 
                     return BadRequest(_response);
                 }
+                await LoginAttemptSecurity.Clear(_context, "adm", email, ip);
 
                 var token = GenerateJwtToken(administradorDTO);
 

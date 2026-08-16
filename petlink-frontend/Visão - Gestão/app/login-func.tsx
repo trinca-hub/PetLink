@@ -28,10 +28,10 @@ export default function LoginFunc() {
     <LoginForm
       title="Login Funcionário"
       subtitle="Acesse as rotinas operacionais."
-      profileLabel="Acesso operacional."
       onSubmit={handleLogin}
       loading={loading}
       error={error}
+      onForgotPassword={() => router.push("/redefinir-senha?perfil=func")}
     />
   );
 }

@@ -6,7 +6,9 @@ export type Veterinario = {
   email: string;
   crmv: string;
   salario: number;
-  status: number;
+  // A API serializa enums como texto ("ATIVO"/"DESATIVO"), mas versões
+  // anteriores podem retornar o valor numérico.
+  status: number | "ATIVO" | "DESATIVO";
   senha?: string;
 };
 
@@ -17,7 +19,7 @@ type VeterinarioPayload = {
   crmv: string;
   salario: number;
   status: number;
-  senha: string;
+  senha?: string;
 };
 
 export function getVeterinarios(token: string) {

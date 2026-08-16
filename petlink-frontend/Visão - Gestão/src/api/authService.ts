@@ -25,3 +25,11 @@ export function getMeGestaoService(perfil: PerfilGestao, token: string) {
 
   return api(endpointByPerfil[perfil], "GET", null, token);
 }
+
+export function requestManagementPasswordReset(perfil: PerfilGestao, email: string) {
+  return api("GestaoSeguranca/recuperar-senha", "POST", { perfil, email });
+}
+
+export function resetManagementPassword(perfil: PerfilGestao, email: string, token: string, novaSenha: string) {
+  return api("GestaoSeguranca/redefinir-senha", "POST", { perfil, email, token, novaSenha });
+}

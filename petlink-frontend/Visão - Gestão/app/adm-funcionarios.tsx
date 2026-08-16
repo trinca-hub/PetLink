@@ -10,6 +10,8 @@ import { EmptyState } from "@/components/ManagementScreen";
 import { managementTheme } from "@/constants/managementTheme";
 import { AuthContext } from "@/src/context/AuthContext";
 import { parseDecimalInput } from "@/src/utils/numberUtils";
+import PasswordStrength from "@/components/PasswordStrength";
+import { isPasswordAccepted } from "@/src/utils/passwordStrength";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -195,6 +197,10 @@ export default function ListaFuncionarios() {
       setFormError("Informe uma senha para o novo funcionário.");
       return;
     }
+    if (!isEdit && !isPasswordAccepted(form.senha)) {
+      setFormError("Use uma senha de 8+ caracteres e 3 tipos: maiúscula, minúscula, número ou símbolo.");
+      return;
+    }
 
     setSaving(true);
 
@@ -351,7 +357,7 @@ export default function ListaFuncionarios() {
               onChangeText={(value) => setForm((prev) => ({ ...prev, salario: value }))}
             />
 
-            {!isEdit && (
+            {!isEdit && (<>
               <TextInput
                 style={styles.input}
                 placeholder="Senha"
@@ -360,7 +366,8 @@ export default function ListaFuncionarios() {
                 value={form.senha}
                 onChangeText={(value) => setForm((prev) => ({ ...prev, senha: value }))}
               />
-            )}
+              <PasswordStrength password={form.senha} />
+            </>)}
 
             {!!formError && <Text style={styles.errorText}>{formError}</Text>}
 

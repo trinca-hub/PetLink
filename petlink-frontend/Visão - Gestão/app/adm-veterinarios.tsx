@@ -12,6 +12,8 @@ import SearchableSelectModal, { SelectOption } from "@/components/SearchableSele
 import { getApiErrorMessage } from "@/src/api/errorUtils";
 import { AuthContext } from "@/src/context/AuthContext";
 import { parseDecimalInput } from "@/src/utils/numberUtils";
+import PasswordStrength from "@/components/PasswordStrength";
+import { isPasswordAccepted } from "@/src/utils/passwordStrength";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
@@ -44,6 +46,13 @@ const INITIAL_FORM: FormState = {
   status: "1",
   senha: "",
 };
+
+function normalizeVeterinarioStatus(status: Veterinario["status"] | null | undefined): number {
+  if (status === "ATIVO") return 1;
+  if (status === "DESATIVO") return 2;
+
+  return Number(status) === 1 ? 1 : 2;
+}
 
 export default function ListaVeterinarios() {
   const router = useRouter();
@@ -141,7 +150,12 @@ export default function ListaVeterinarios() {
     const result = await getVeterinarios(token);
 
     if (result.ok && Array.isArray(result?.data?.data)) {
-      setVeterinarios(result.data.data);
+      setVeterinarios(
+        result.data.data.map((item: Veterinario) => ({
+          ...item,
+          status: normalizeVeterinarioStatus(item.status),
+        }))
+      );
     } else {
       Alert.alert("Erro", getApiErrorMessage(result?.data, "Não foi possível carregar veterinários."));
     }
@@ -171,7 +185,7 @@ export default function ListaVeterinarios() {
       email: item.email || "",
       crmv: item.crmv || "",
       salario: String(item.salario ?? ""),
-      status: String(item.status ?? 1),
+      status: String(normalizeVeterinarioStatus(item.status)),
       senha: "",
     });
     setOpenModal(true);
@@ -192,6 +206,11 @@ export default function ListaVeterinarios() {
       return;
     }
 
+    if (!/^\d{1,6}$/.test(form.crmv)) {
+      setFormError("O CRMV deve conter até 6 dígitos.");
+      return;
+    }
+
     const salario = parseDecimalInput(form.salario);
     if (Number.isNaN(salario) || salario <= 0) {
       setFormError("Salário inválido. Informe um valor maior que zero.");
@@ -200,6 +219,10 @@ export default function ListaVeterinarios() {
 
     if (!isEdit && !form.senha.trim()) {
       setFormError("Informe uma senha para o novo veterinário.");
+      return;
+    }
+    if (!isEdit && !isPasswordAccepted(form.senha)) {
+      setFormError("Use uma senha de 8+ caracteres e 3 tipos: maiúscula, minúscula, número ou símbolo.");
       return;
     }
 
@@ -212,7 +235,7 @@ export default function ListaVeterinarios() {
       crmv: form.crmv.trim(),
       salario,
       status: Number(form.status || 1),
-      senha: isEdit ? "manter_senha" : form.senha,
+      ...(!isEdit ? { senha: form.senha } : {}),
     };
 
     const result = isEdit && editId
@@ -346,6 +369,16 @@ export default function ListaVeterinarios() {
 
             <TextInput
               style={styles.input}
+              placeholder="CRMV"
+              placeholderTextColor="#98abc9"
+              keyboardType="number-pad"
+              maxLength={6}
+              value={form.crmv}
+              onChangeText={(value) => setForm((prev) => ({ ...prev, crmv: value.replace(/\D/g, "") }))}
+            />
+
+            <TextInput
+              style={styles.input}
               placeholder="Salário"
               placeholderTextColor="#98abc9"
               keyboardType="decimal-pad"
@@ -358,7 +391,7 @@ export default function ListaVeterinarios() {
               <Text style={styles.selectValue}>{selectedStatus?.label || "Selecionar status"}</Text>
             </TouchableOpacity>
 
-            {!isEdit && (
+            {!isEdit && (<>
               <TextInput
                 style={styles.input}
                 placeholder="Senha"
@@ -367,7 +400,8 @@ export default function ListaVeterinarios() {
                 value={form.senha}
                 onChangeText={(value) => setForm((prev) => ({ ...prev, senha: value }))}
               />
-            )}
+              <PasswordStrength password={form.senha} />
+            </>)}
 
             {!!formError && <Text style={styles.errorText}>{formError}</Text>}
 

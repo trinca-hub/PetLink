@@ -9,6 +9,8 @@ import { EmptyState, StatusPill } from "@/components/ManagementScreen";
 import { managementTheme } from "@/constants/managementTheme";
 import SearchableSelectModal, { SelectOption } from "@/components/SearchableSelectModal";
 import { getApiErrorMessage } from "@/src/api/errorUtils";
+import PasswordStrength from "@/components/PasswordStrength";
+import { isPasswordAccepted } from "@/src/utils/passwordStrength";
 import { AuthContext } from "@/src/context/AuthContext";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
@@ -156,6 +158,10 @@ export default function CadastroAdministrador() {
       setFormError("Preencha nome, e-mail e senha.");
       return;
     }
+    if (!isPasswordAccepted(form.senha)) {
+      setFormError("Use uma senha de 8+ caracteres e 3 tipos: maiúscula, minúscula, número ou símbolo.");
+      return;
+    }
 
     setSaving(true);
 
@@ -240,6 +246,7 @@ export default function CadastroAdministrador() {
             value={form.senha}
             onChangeText={(value) => setForm((prev) => ({ ...prev, senha: value }))}
           />
+          <PasswordStrength password={form.senha} />
 
           <TouchableOpacity style={styles.selectButton} onPress={() => setOpenStatusSelect(true)}>
             <Text style={styles.selectLabel}>Status</Text>

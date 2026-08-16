@@ -2,7 +2,7 @@ import { managementStyles, managementTheme } from "@/constants/managementTheme";
 import { Ionicons } from "@expo/vector-icons";
 import { LinearGradient } from "expo-linear-gradient";
 import { ReactNode } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 type HeaderAction = {
   label: string;
@@ -31,11 +31,6 @@ export function ManagementScreen({ eyebrow, title, subtitle, action, children }:
               <Text style={managementStyles.brandTitle}>PetLink Gestão</Text>
               <Text style={managementStyles.brandSubtitle}>Operação, clínica e marketplace</Text>
             </View>
-          </View>
-
-          <View style={styles.statusWrap}>
-            <View style={styles.liveDot} />
-            <Text style={styles.statusText}>Ambiente local</Text>
           </View>
         </View>
 
@@ -97,27 +92,3 @@ export function StatusPill({ label, tone = "success" }: StatusPillProps) {
   return <Text style={[managementStyles.statusPill, toneStyle]}>{label}</Text>;
 }
 
-const styles = StyleSheet.create({
-  statusWrap: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    borderWidth: 1,
-    borderColor: managementTheme.colors.border,
-    backgroundColor: "rgba(15, 23, 42, 0.82)",
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-  },
-  liveDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 99,
-    backgroundColor: managementTheme.colors.success,
-  },
-  statusText: {
-    color: managementTheme.colors.textMuted,
-    fontSize: 12,
-    fontWeight: "800",
-  },
-});

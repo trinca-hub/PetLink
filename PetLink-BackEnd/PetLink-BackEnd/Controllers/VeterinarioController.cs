@@ -9,6 +9,8 @@ using Microsoft.IdentityModel.Tokens;
 using PetLink_BackEnd.Objects.Contracts;
 using PetLink_BackEnd.Objects.Dtos.Entities;
 using PetLink_BackEnd.Services.Interfaces;
+using PetLink_BackEnd.Security;
+using PetLink_BackEnd.Data;
 
 namespace PetLink_BackEnd.Controllers;
 
@@ -20,12 +22,14 @@ public class VeterinarioController : Controller
     private readonly IVeterinarioService _veterinarioService;
     private readonly IConfiguration _configuration;
     private readonly Response _response;
+    private readonly AppDbContext _context;
 
-    public VeterinarioController(IVeterinarioService veterinarioService, IConfiguration configuration)
+    public VeterinarioController(IVeterinarioService veterinarioService, IConfiguration configuration, AppDbContext context)
     {
         _veterinarioService = veterinarioService;
         _response = new Response();
         _configuration = configuration;
+        _context = context;
     }
 
     [HttpGet]
@@ -74,12 +78,16 @@ public class VeterinarioController : Controller
             return BadRequest(_response);
         }
 
+        if (!IsCrmvValido(veterinarioDTO.Crmv))
+            return BadRequest(new { message = "O CRMV deve conter até 6 dígitos." });
+
         try
         {
             // Zeramos o id antes de cadastrar para que o banco gere automaticamente
             // e evite conflito com ids existentes
             veterinarioDTO.Id = 0;
-            veterinarioDTO.Senha = GenerateSha256Hash(veterinarioDTO.Senha);
+            if (!PasswordSecurity.IsAcceptable(veterinarioDTO.Senha)) return BadRequest(new { message = "Senha fraca. Use 8 caracteres e 3 tipos: maiúscula, minúscula, número ou símbolo." });
+            veterinarioDTO.Senha = PasswordSecurity.HashPassword(veterinarioDTO.Senha);
             await _veterinarioService.Create(veterinarioDTO);
 
             _response.Code = ResponseEnum.SUCCESS;
@@ -116,17 +124,22 @@ public class VeterinarioController : Controller
 
         try
         {
-            login.Password = GenerateSha256Hash(login.Password);
+            var email = login.Email.Trim().ToLowerInvariant(); var ip = HttpContext.Connection.RemoteIpAddress?.ToString() ?? "desconhecido";
+            var bloqueio = await LoginAttemptSecurity.GetBlocked(_context, "vet", email, ip);
+            if (bloqueio is not null) return StatusCode(429, new { message = "Muitas tentativas. Aguarde 1 minuto.", data = new { tentativasRestantes = 0, bloqueadoAte = bloqueio.BloqueadoAte } });
+            login.Email = email;
             var veterinarioDTO = await _veterinarioService.Login(login);
 
             if (veterinarioDTO is null)
             {
+                var restantes = await LoginAttemptSecurity.RegisterFailure(_context, "vet", email, ip);
                 _response.Code = ResponseEnum.INVALID;
-                _response.Data = null;
-                _response.Message = "Email ou senha incorretos";
+                _response.Data = new { tentativasRestantes = restantes };
+                _response.Message = restantes == 0 ? "Limite de tentativas atingido. Aguarde 1 minuto." : $"Email ou senha incorretos. Tentativas restantes: {restantes}.";
 
                 return BadRequest(_response);
             }
+            await LoginAttemptSecurity.Clear(_context, "vet", email, ip);
 
             var token = GenerateJwtToken(veterinarioDTO);
 
@@ -213,6 +226,9 @@ public class VeterinarioController : Controller
             return BadRequest(_response);
         }
 
+        if (!IsCrmvValido(veterinarioDTO.Crmv))
+            return BadRequest(new { message = "O CRMV deve conter até 6 dígitos." });
+
         try
         {
             var existingVeterinarioDTO = await _veterinarioService.GetById(id);
@@ -224,6 +240,9 @@ public class VeterinarioController : Controller
                 return NotFound(_response);
             }
 
+            // A edição de cadastro não altera senha. Mantemos o hash atual e
+            // evitamos persistir qualquer valor enviado pelo cliente.
+            veterinarioDTO.Senha = existingVeterinarioDTO.Senha;
             await _veterinarioService.Update(veterinarioDTO, id);
 
             _response.Code = ResponseEnum.SUCCESS;
@@ -278,6 +297,13 @@ public class VeterinarioController : Controller
             };
             return StatusCode(StatusCodes.Status500InternalServerError, _response);
         }
+    }
+
+    private static bool IsCrmvValido(string? crmv)
+    {
+        return !string.IsNullOrWhiteSpace(crmv)
+            && crmv.Length <= 6
+            && crmv.All(char.IsDigit);
     }
 
     private static string GenerateSha256Hash(string input)

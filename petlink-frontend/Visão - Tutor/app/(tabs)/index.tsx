@@ -162,9 +162,9 @@ export default function Home() {
                     </View>
                   </View>
 
-                  <Pressable onPress={() => item.anuncioId && router.push(`/anuncios/${item.anuncioId}`)} style={{ alignSelf: "center", marginTop: 12, backgroundColor: TutorPalette.primary, paddingVertical: 10, paddingHorizontal: 28, borderRadius: 999, alignItems: "center", justifyContent: "center", minWidth: 160 }}>
+                  <Pressable onPress={() => router.push(`/pets/${item.id}`)} style={{ alignSelf: "center", marginTop: 12, backgroundColor: TutorPalette.primary, paddingVertical: 10, paddingHorizontal: 28, borderRadius: 999, alignItems: "center", justifyContent: "center", minWidth: 160 }}>
                     <Text style={{ color: "#fff", fontWeight: "900", fontSize: 14, textAlign: "center", includeFontPadding: false }}>
-                      Editar Foto
+                      Mais informações
                     </Text>
                   </Pressable>
                 </View>

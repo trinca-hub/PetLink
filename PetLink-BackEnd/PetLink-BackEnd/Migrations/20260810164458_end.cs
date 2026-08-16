@@ -9,7 +9,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace PetLink_BackEnd.Migrations
 {
     /// <inheritdoc />
-    public partial class initial : Migration
+    public partial class end : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -129,19 +129,32 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "pedido",
+                name: "enderecousuario",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     usuarioid = table.Column<int>(type: "integer", nullable: false),
-                    datapedido = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                    apelido = table.Column<string>(type: "character varying(60)", maxLength: 60, nullable: false),
+                    destinatario = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    telefone = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: false),
+                    cep = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
+                    uf = table.Column<string>(type: "character varying(2)", maxLength: 2, nullable: false),
+                    cidade = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
+                    bairro = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
+                    rua = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: false),
+                    numero = table.Column<int>(type: "integer", nullable: false),
+                    complemento = table.Column<string>(type: "character varying(80)", maxLength: 80, nullable: false),
+                    referencia = table.Column<string>(type: "character varying(140)", maxLength: 140, nullable: false),
+                    principal = table.Column<bool>(type: "boolean", nullable: false),
+                    ativo = table.Column<bool>(type: "boolean", nullable: false),
+                    criadoem = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_pedido", x => x.id);
+                    table.PrimaryKey("PK_enderecousuario", x => x.id);
                     table.ForeignKey(
-                        name: "FK_pedido_usuario_usuarioid",
+                        name: "FK_enderecousuario_usuario_usuarioid",
                         column: x => x.usuarioid,
                         principalTable: "usuario",
                         principalColumn: "id",
@@ -177,6 +190,28 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "agendaslotbloqueado",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    veterinarioid = table.Column<int>(type: "integer", nullable: false),
+                    datahorainicio = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
+                    motivo = table.Column<string>(type: "character varying(300)", maxLength: 300, nullable: true),
+                    datacriacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_agendaslotbloqueado", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_agendaslotbloqueado_veterinario_veterinarioid",
+                        column: x => x.veterinarioid,
+                        principalTable: "veterinario",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "agendaveterinario",
                 columns: table => new
                 {
@@ -196,7 +231,7 @@ namespace PetLink_BackEnd.Migrations
                     table.PrimaryKey("PK_agendaveterinario", x => x.id);
                     table.CheckConstraint("CK_agendaveterinario_dias", "diassemanaativos > 0");
                     table.CheckConstraint("CK_agendaveterinario_duracao", "duracaominutos = 60");
-                    table.CheckConstraint("CK_agendaveterinario_horarios", "horainiciomanha < horafimmanha AND horainiciotarde < horafimtarde");
+                    table.CheckConstraint("CK_agendaveterinario_horarios", "horainiciomanha = INTERVAL '08:00:00' AND horafimmanha = INTERVAL '11:00:00' AND horainiciotarde = INTERVAL '13:00:00' AND horafimtarde = INTERVAL '17:00:00'");
                     table.ForeignKey(
                         name: "FK_agendaveterinario_veterinario_veterinarioid",
                         column: x => x.veterinarioid,
@@ -206,28 +241,28 @@ namespace PetLink_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "itempedido",
+                name: "pedido",
                 columns: table => new
                 {
                     id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    pedidoid = table.Column<int>(type: "integer", nullable: false),
-                    produtoid = table.Column<int>(type: "integer", nullable: false),
-                    quantidade = table.Column<int>(type: "integer", nullable: false)
+                    usuarioid = table.Column<int>(type: "integer", nullable: false),
+                    enderecousuarioid = table.Column<int>(type: "integer", nullable: true),
+                    datapedido = table.Column<DateTime>(type: "timestamp with time zone", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_itempedido", x => x.id);
+                    table.PrimaryKey("PK_pedido", x => x.id);
                     table.ForeignKey(
-                        name: "FK_itempedido_pedido_pedidoid",
-                        column: x => x.pedidoid,
-                        principalTable: "pedido",
+                        name: "FK_pedido_enderecousuario_enderecousuarioid",
+                        column: x => x.enderecousuarioid,
+                        principalTable: "enderecousuario",
                         principalColumn: "id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.SetNull);
                     table.ForeignKey(
-                        name: "FK_itempedido_produto_produtoid",
-                        column: x => x.produtoid,
-                        principalTable: "produto",
+                        name: "FK_pedido_usuario_usuarioid",
+                        column: x => x.usuarioid,
+                        principalTable: "usuario",
                         principalColumn: "id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -241,23 +276,30 @@ namespace PetLink_BackEnd.Migrations
                     veterinarioid = table.Column<int>(type: "integer", nullable: false),
                     petid = table.Column<int>(type: "integer", nullable: false),
                     usuarioid = table.Column<int>(type: "integer", nullable: false),
+                    origemsolicitacao = table.Column<int>(type: "integer", nullable: false),
+                    ultimoresponsavelremarcacao = table.Column<int>(type: "integer", nullable: true),
                     datahorainicio = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     datahorafim = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     status = table.Column<int>(type: "integer", nullable: false),
                     tiposervico = table.Column<int>(type: "integer", nullable: false),
                     observacao = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     motivocancelamento = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    motivorecusa = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
+                    motivoremarcacao = table.Column<string>(type: "character varying(500)", maxLength: 500, nullable: true),
                     datacriacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: false),
                     dataconfirmacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     datacancelamento = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    datarecusa = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
+                    dataultimaremarcacao = table.Column<DateTime>(type: "timestamp with time zone", nullable: true),
                     rowversion = table.Column<byte[]>(type: "bytea", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_agendamentoconsulta", x => x.id);
                     table.CheckConstraint("CK_agendamentoconsulta_horario", "(datahorainicio IS NULL AND datahorafim IS NULL) OR (datahorainicio < datahorafim)");
+                    table.CheckConstraint("CK_agendamentoconsulta_origem", "origemsolicitacao IN (1, 2)");
                     table.CheckConstraint("CK_agendamentoconsulta_status_datas", "(status <> 2 OR dataconfirmacao IS NOT NULL) AND (status <> 3 OR datacancelamento IS NOT NULL)");
-                    table.CheckConstraint("CK_agendamentoconsulta_status_pendente", "(status <> 1 OR (datahorainicio IS NULL AND datahorafim IS NULL))");
+                    table.CheckConstraint("CK_agendamentoconsulta_ultimo_responsavel", "ultimoresponsavelremarcacao IS NULL OR ultimoresponsavelremarcacao IN (1, 2)");
                     table.ForeignKey(
                         name: "FK_agendamentoconsulta_pet_petid",
                         column: x => x.petid,
@@ -377,6 +419,33 @@ namespace PetLink_BackEnd.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "itempedido",
+                columns: table => new
+                {
+                    id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    pedidoid = table.Column<int>(type: "integer", nullable: false),
+                    produtoid = table.Column<int>(type: "integer", nullable: false),
+                    quantidade = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_itempedido", x => x.id);
+                    table.ForeignKey(
+                        name: "FK_itempedido_pedido_pedidoid",
+                        column: x => x.pedidoid,
+                        principalTable: "pedido",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_itempedido_produto_produtoid",
+                        column: x => x.produtoid,
+                        principalTable: "produto",
+                        principalColumn: "id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.InsertData(
                 table: "administrador",
                 columns: new[] { "id", "email", "nome", "senha", "status" },
@@ -428,11 +497,11 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.InsertData(
                 table: "pedido",
-                columns: new[] { "id", "datapedido", "usuarioid" },
+                columns: new[] { "id", "datapedido", "enderecousuarioid", "usuarioid" },
                 values: new object[,]
                 {
-                    { 1, new DateTime(2025, 9, 18, 10, 20, 32, 0, DateTimeKind.Utc), 1 },
-                    { 2, new DateTime(2025, 9, 18, 10, 20, 32, 0, DateTimeKind.Utc), 2 }
+                    { 1, new DateTime(2025, 9, 18, 10, 20, 32, 0, DateTimeKind.Utc), null, 1 },
+                    { 2, new DateTime(2025, 9, 18, 10, 20, 32, 0, DateTimeKind.Utc), null, 2 }
                 });
 
             migrationBuilder.InsertData(
@@ -493,6 +562,12 @@ namespace PetLink_BackEnd.Migrations
                 columns: new[] { "veterinarioid", "datahorainicio" });
 
             migrationBuilder.CreateIndex(
+                name: "IX_agendaslotbloqueado_veterinarioid_datahorainicio",
+                table: "agendaslotbloqueado",
+                columns: new[] { "veterinarioid", "datahorainicio" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_agendaveterinario_veterinarioid",
                 table: "agendaveterinario",
                 column: "veterinarioid",
@@ -519,6 +594,11 @@ namespace PetLink_BackEnd.Migrations
                 column: "petid");
 
             migrationBuilder.CreateIndex(
+                name: "IX_enderecousuario_usuarioid_principal",
+                table: "enderecousuario",
+                columns: new[] { "usuarioid", "principal" });
+
+            migrationBuilder.CreateIndex(
                 name: "IX_funcionario_email",
                 table: "funcionario",
                 column: "email",
@@ -533,6 +613,11 @@ namespace PetLink_BackEnd.Migrations
                 name: "IX_itempedido_produtoid",
                 table: "itempedido",
                 column: "produtoid");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_pedido_enderecousuarioid",
+                table: "pedido",
+                column: "enderecousuarioid");
 
             migrationBuilder.CreateIndex(
                 name: "IX_pedido_usuarioid",
@@ -558,6 +643,9 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.DropTable(
                 name: "agendamentoconsulta");
+
+            migrationBuilder.DropTable(
+                name: "agendaslotbloqueado");
 
             migrationBuilder.DropTable(
                 name: "agendaveterinario");
@@ -594,6 +682,9 @@ namespace PetLink_BackEnd.Migrations
 
             migrationBuilder.DropTable(
                 name: "pet");
+
+            migrationBuilder.DropTable(
+                name: "enderecousuario");
 
             migrationBuilder.DropTable(
                 name: "usuario");
